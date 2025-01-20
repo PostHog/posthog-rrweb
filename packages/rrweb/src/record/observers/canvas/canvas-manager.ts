@@ -162,11 +162,19 @@ export class CanvasManager {
 
     const getCanvas = (): HTMLCanvasElement[] => {
       const matchedCanvas: HTMLCanvasElement[] = [];
-      win.document.querySelectorAll('canvas').forEach((canvas) => {
-        if (!isBlocked(canvas, blockClass, blockSelector, true)) {
-          matchedCanvas.push(canvas);
-        }
-      });
+      const searchCanvas = (haystack: ParentNode) => {
+        haystack.querySelectorAll('canvas').forEach((canvas) => {
+          if (!isBlocked(canvas, blockClass, blockSelector, true)) {
+            matchedCanvas.push(canvas);
+          }
+        });
+        haystack.querySelectorAll('*').forEach((elem) => {
+          if (elem.shadowRoot) {
+            searchCanvas(elem.shadowRoot);
+          }
+        });
+      };
+      searchCanvas(win.document);
       return matchedCanvas;
     };
 
