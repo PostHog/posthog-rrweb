@@ -9,6 +9,6 @@ export default {
       escapeString: true,
       printBasicPrototype: true,
     },
-    retry: process.env.CI ? 2 : 0
+    retry: process.env.CI ? 2 : 0,
   },
 };
