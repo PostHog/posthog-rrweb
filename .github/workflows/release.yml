@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - not-yet #TODO should be changes to main... but not till we're ready
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -13,12 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js lts/*
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'yarn'
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
