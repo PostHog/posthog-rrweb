@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - not-yet #TODO should be changes to main... but not till we're ready
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
