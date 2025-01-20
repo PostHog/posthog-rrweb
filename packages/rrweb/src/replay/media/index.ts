@@ -208,8 +208,8 @@ export class MediaManager {
   }
 
   public addMediaElements(node: Node, timeOffset: number, mirror: Mirror) {
-    if (!['AUDIO', 'VIDEO'].includes(node.nodeName)) return;
-    const target = node as HTMLMediaElement;
+    if (!this.isSupportedMediaElement(node)) return;
+    const target = node;
     const serializedNode = mirror.getMeta(target);
     if (!serializedNode || !('attributes' in serializedNode)) return;
     const playerIsPaused = this.service.state.matches('paused');
