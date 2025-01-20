@@ -16,14 +16,14 @@ The upstream rrweb is here https://github.com/rrweb-io/rrweb
 
 We build this and publish it to NPM so that we can use it in posthog-js
 
-If you want to contribute a change  back to upstream rrweb
-then you need to open a person fork and contribute from there 
+If you want to contribute a change back to upstream rrweb
+then you need to open a person fork and contribute from there
 
 # FAQ
 
-* does this mean you're planning on stopping using RRWEB?
-  * no
-* can I use this repo?
-  * unless you are contributing changes for posthog, no
-* should I sponsor rrweb?
-  * absolutely, yes. we do, you should too, it's great
+- does this mean you're planning on stopping using RRWEB?
+  - no
+- can I use this repo?
+  - unless you are contributing changes for posthog, no
+- should I sponsor rrweb?
+  - absolutely, yes. we do, you should too, it's great
