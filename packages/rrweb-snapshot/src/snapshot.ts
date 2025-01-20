@@ -66,6 +66,7 @@ let canvasCtx: CanvasRenderingContext2D | null;
 const SRCSET_NOT_SPACES = /^[^ \t\n\r\u000c]+/; // Don't use \s, to avoid matching non-breaking space
 // eslint-disable-next-line no-control-regex
 const SRCSET_COMMAS_OR_SPACES = /^[, \t\n\r\u000c]+/;
+
 function getAbsoluteSrcsetString(doc: Document, attributeValue: string) {
   /*
     run absoluteToDoc over every url in the srcset
@@ -652,9 +653,17 @@ function serializeElementNode(
     // register what type of dialog is this
     // `modal` or `non-modal`
     // this is used to trigger `showModal()` or `show()` on replay (outside of rrweb-snapshot, in rrweb)
-    (attributes as DialogAttributes).rr_open_mode = n.matches('dialog:modal')
-      ? 'modal'
-      : 'non-modal';
+    try {
+      (attributes as DialogAttributes).rr_open_mode = n.matches('dialog:modal')
+        ? 'modal'
+        : 'non-modal';
+    } catch {
+      // likely this is safari not able to deal with the `:modal` selector
+      // we can't detect whether the dialog is modal or non-modal open, so have to guess
+      // hopefully this is only safari 15.4 and 15.5
+      attributes.rr_open_mode = 'modal';
+      attributes.ph_rr_could_not_detect_modal = true;
+    }
   }
 
   // canvas image data
