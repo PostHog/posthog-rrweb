@@ -214,13 +214,20 @@ export class CanvasManager {
               context.clear(context.COLOR_BUFFER_BIT);
             }
           }
-          const bitmap = await createImageBitmap(canvas);
+          // createImageBitmap throws if resizing to 0
+          // Fallback to intrinsic size if canvas has not yet rendered
+          const width = canvas.clientWidth || canvas.width;
+          const height = canvas.clientHeight || canvas.height;
+          const bitmap = await createImageBitmap(canvas, {
+            resizeWidth: width,
+            resizeHeight: height,
+          });
           worker.postMessage(
             {
               id,
               bitmap,
-              width: canvas.width,
-              height: canvas.height,
+              width: width,
+              height: height,
               dataURLOptions: options.dataURLOptions,
             },
             [bitmap],
