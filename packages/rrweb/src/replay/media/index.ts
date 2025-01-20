@@ -5,7 +5,7 @@ import type { createPlayerService, createSpeedService } from '../machine';
 import type { Mirror } from 'rrweb-snapshot';
 import type { mediaInteractionData, mediaAttributes } from '@rrweb/types';
 
-const SUPPORTED_MEDIA_ELEMENT_NAMES = ['AUDIO', 'VIDEO']
+const SUPPORTED_MEDIA_ELEMENT_NAMES = ['AUDIO', 'VIDEO'];
 
 type MediaState = {
   isPlaying: boolean;
@@ -276,7 +276,7 @@ export class MediaManager {
     mutation: mediaInteractionData;
   }) {
     if (!SUPPORTED_MEDIA_ELEMENT_NAMES.includes(target.nodeName)) {
-      return
+      return;
     }
 
     this.mediaMap.set(

@@ -21,11 +21,11 @@ then you need to open a person fork and contribute from there
 
 ### How to use it...
 
-1) `yarn install` to, erm, install
-2) `yarn build:all` to get a stable base built 
-3) `yarn dev` to get auto building of changed things while making changes
-4) `yarn test` to run the tests
-5) `yarn test:update` to update snapshots if necessary
+1. `yarn install` to, erm, install
+2. `yarn build:all` to get a stable base built
+3. `yarn dev` to get auto building of changed things while making changes
+4. `yarn test` to run the tests
+5. `yarn test:update` to update snapshots if necessary
 
 # FAQ
 
