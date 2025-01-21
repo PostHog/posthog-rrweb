@@ -1,5 +1,5 @@
 {
-  "name": "@rrweb/snapshot",
+  "name": "@posthog-internal/rrweb-snapshot",
   "version": "2.0.0-alpha.14",
   "exports": "./src/index.ts"
 }

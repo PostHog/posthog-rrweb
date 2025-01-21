@@ -1,13 +1,6 @@
 {
-  "name": "@rrweb/replay",
+  "name": "@posthog-internal/rrweb-replay",
   "version": "0.0.0",
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "rrweb",
-    "@rrweb/replay"
-  ],
   "scripts": {
     "dev": "vite build --watch",
     "build": "yarn turbo run prepublish",
@@ -17,29 +10,25 @@
     "prepublish": "tsc -noEmit && vite build",
     "lint": "yarn eslint src/**/*.ts"
   },
-  "homepage": "https://github.com/rrweb-io/rrweb/tree/main/packages/@rrweb/replay#readme",
-  "bugs": {
-    "url": "https://github.com/rrweb-io/rrweb/issues"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rrweb-io/rrweb.git"
+    "url": "git+https://github.com/PostHog/posthog-rrweb.git"
   },
   "license": "MIT",
   "type": "module",
-  "main": "./dist/replay.cjs",
-  "module": "./dist/replay.js",
-  "unpkg": "./dist/replay.umd.cjs",
+  "main": "./dist/rrweb-replay.cjs",
+  "module": "./dist/rrweb-replay.js",
+  "unpkg": "./dist/rrweb-replay.umd.cjs",
   "typings": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/replay.js"
+        "default": "./dist/rrweb-replay.js"
       },
       "require": {
         "types": "./dist/index.d.cts",
-        "default": "./dist/replay.cjs"
+        "default": "./dist/rrweb-replay.cjs"
       }
     },
     "./dist/style.css": "./dist/style.css"
@@ -56,8 +45,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@rrweb/types": "^2.0.0-alpha.18",
-    "rrweb": "^2.0.0-alpha.18"
+    "@posthog-internal/rrweb-types": "*",
+    "@posthog-internal/rrweb": "*"
   },
   "browserslist": [
     "supports es6-class"

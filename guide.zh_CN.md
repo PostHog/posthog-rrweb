@@ -330,8 +330,8 @@ npm install --save rrweb-player
 ```
 
 ```js
-import rrwebPlayer from 'rrweb-player';
-import 'rrweb-player/dist/style.css';
+import rrwebPlayer from '@posthog-internal/rrweb-player';
+import '@posthog-internal/rrweb-player/dist/style.css';
 ```
 
 ##### 使用

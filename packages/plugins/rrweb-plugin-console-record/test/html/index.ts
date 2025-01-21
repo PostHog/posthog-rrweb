@@ -1,5 +1,5 @@
-import type { eventWithTime } from '@rrweb/types';
-import { record } from 'rrweb';
+import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import { record } from '@posthog-internal/rrweb';
 import { getRecordConsolePlugin } from '../../src/index';
 
 window.Date.now = () => new Date(Date.UTC(2018, 10, 15, 8)).valueOf();

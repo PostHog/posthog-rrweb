@@ -1,6 +1,6 @@
-import type { eventWithTime } from '@rrweb/types';
-import type { Replayer, playerConfig } from '@rrweb/replay';
-import type { Mirror } from 'rrweb-snapshot';
+import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import type { Replayer, playerConfig } from '@posthog-internal/rrweb-replay';
+import type { Mirror } from '@posthog-internal/rrweb-snapshot';
 
 export type RRwebPlayerOptions = {
   target: HTMLElement;

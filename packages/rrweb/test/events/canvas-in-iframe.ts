@@ -1,5 +1,5 @@
-import { EventType, IncrementalSource } from '@rrweb/types';
-import type { eventWithTime } from '@rrweb/types';
+import { EventType, IncrementalSource } from '@posthog-internal/rrweb-types';
+import type { eventWithTime } from '@posthog-internal/rrweb-types';
 
 const now = Date.now();
 

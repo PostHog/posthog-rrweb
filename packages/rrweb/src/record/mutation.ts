@@ -10,7 +10,7 @@ import {
   isNativeShadowDom,
   getInputType,
   toLowerCase,
-} from 'rrweb-snapshot';
+} from '@posthog-internal/rrweb-snapshot';
 import type { observerParam, MutationBufferParam } from '../types';
 import type {
   mutationRecord,
@@ -19,7 +19,7 @@ import type {
   removedNodeMutation,
   addedNodeMutation,
   Optional,
-} from '@rrweb/types';
+} from '@posthog-internal/rrweb-types';
 import {
   isBlocked,
   isAncestorRemoved,
@@ -32,7 +32,7 @@ import {
   getShadowHost,
   closestElementOfNode,
 } from '../utils';
-import dom from '@rrweb/utils';
+import dom from '@posthog-internal/rrweb-utils';
 
 type DoubleLinkedListNode = {
   previous: DoubleLinkedListNode | null;
