@@ -2,7 +2,11 @@ import type { Mirror } from '@posthog-internal/rrweb-snapshot';
 import { genId } from '@posthog-internal/rrweb-snapshot';
 import type { CrossOriginIframeMessageEvent } from '../types';
 import CrossOriginIframeMirror from './cross-origin-iframe-mirror';
-import { EventType, NodeType, IncrementalSource } from '@posthog-internal/rrweb-types';
+import {
+  EventType,
+  NodeType,
+  IncrementalSource,
+} from '@posthog-internal/rrweb-types';
 import type {
   eventWithTime,
   eventWithoutTime,

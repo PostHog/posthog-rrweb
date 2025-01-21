@@ -4,7 +4,7 @@ import zip from 'vite-plugin-zip-pack';
 import * as path from 'path';
 import type { PackageJson } from 'type-fest';
 import react from '@vitejs/plugin-react';
-import {parse} from 'semver';
+import { parse } from 'semver';
 
 const emptyOutDir = !process.argv.includes('--watch');
 
@@ -44,7 +44,7 @@ function useSpecialFormat(
  * Get the extension version based on the rrweb version.
  */
 function getExtensionVersion(rrwebVersion: string): string {
-  const parsedVersion = parse(rrwebVersion.replace('^', '')) || parse("0.0.0");
+  const parsedVersion = parse(rrwebVersion.replace('^', '')) || parse('0.0.0');
 
   if (!parsedVersion) {
     throw new Error('Invalid version format');
@@ -97,7 +97,9 @@ export default defineConfig({
         const BrowserName =
           process.env.TARGET_BROWSER === 'chrome' ? 'chrome' : 'firefox';
         const commonManifest = originalManifest.common;
-        const rrwebVersion = packageJson.dependencies!['@posthog-internal/rrweb']!.replace('^', '');
+        const rrwebVersion = packageJson.dependencies![
+          '@posthog-internal/rrweb'
+        ]!.replace('^', '');
         const manifest = {
           version: getExtensionVersion(rrwebVersion),
           author: packageJson.author,

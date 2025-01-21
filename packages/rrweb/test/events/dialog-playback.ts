@@ -1,4 +1,7 @@
-import { eventWithTime, IncrementalSource } from '@posthog-internal/rrweb-types';
+import {
+  eventWithTime,
+  IncrementalSource,
+} from '@posthog-internal/rrweb-types';
 
 const startTime = 1900000000;
 export const closedFullSnapshotTime = 132;

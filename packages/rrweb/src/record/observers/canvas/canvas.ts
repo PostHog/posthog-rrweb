@@ -1,5 +1,9 @@
 import type { ICanvas } from '@posthog-internal/rrweb-snapshot';
-import type { blockClass, IWindow, listenerHandler } from '@posthog-internal/rrweb-types';
+import type {
+  blockClass,
+  IWindow,
+  listenerHandler,
+} from '@posthog-internal/rrweb-types';
 import { isBlocked } from '../../../utils';
 import { patch } from '@posthog-internal/rrweb-utils';
 

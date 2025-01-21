@@ -9,7 +9,10 @@ import {
   isNodeMetaEqual,
 } from '../src/utils';
 import { NodeType } from '@posthog-internal/rrweb-types';
-import type { serializedNode, serializedNodeWithId } from '@posthog-internal/rrweb-types';
+import type {
+  serializedNode,
+  serializedNodeWithId,
+} from '@posthog-internal/rrweb-types';
 
 describe('utils', () => {
   describe('isNodeMetaEqual()', () => {

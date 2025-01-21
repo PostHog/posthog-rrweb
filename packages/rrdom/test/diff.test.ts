@@ -5,7 +5,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
 import { vi, MockInstance } from 'vitest';
-import { createMirror, Mirror as NodeMirror } from '@posthog-internal/rrweb-snapshot';
+import {
+  createMirror,
+  Mirror as NodeMirror,
+} from '@posthog-internal/rrweb-snapshot';
 import {
   buildFromDom,
   getDefaultSN,
