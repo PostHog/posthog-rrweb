@@ -33,7 +33,8 @@ export default function Player() {
         const manifest = chrome.runtime.getManifest();
         const rrwebPlayerVersion = manifest.version_name || manifest.version;
         const linkEl = document.createElement('link');
-        linkEl.href = `https://cdn.jsdelivr.net/npm/rrweb-player@${rrwebPlayerVersion}/dist/style.min.css`;
+        // TODO will this work? do we even want this package?
+        linkEl.href = `https://cdn.jsdelivr.net/npm/@posthog-internal/rrweb-player@${rrwebPlayerVersion}/dist/style.min.css`;
         linkEl.rel = 'stylesheet';
         document.head.appendChild(linkEl);
         playerRef.current = new Replayer({
