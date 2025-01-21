@@ -5,7 +5,7 @@ import { EventType, eventWithTime } from '@posthog-internal/rrweb-types';
 import type Player from '@posthog-internal/rrweb-player';
 
 const rrwebScriptPath = path.resolve(
-  require.resolve('rrweb-player'),
+  require.resolve('@posthog-internal/rrweb-player'),
   '../../dist/rrweb-player.umd.cjs',
 );
 const rrwebStylePath = path.resolve(rrwebScriptPath, '../style.css');
