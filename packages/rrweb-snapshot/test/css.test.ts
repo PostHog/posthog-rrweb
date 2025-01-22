@@ -228,7 +228,10 @@ describe('css splitter', () => {
     expect(splitCssText(cssText, style)).toEqual(sections);
   });
 
-  it('the second time is faster', () => {
+  it('the second time is faster',{
+    // because we're timing every so often this might flap because computers
+    retry: 3
+  }, () => {
     const cssText = fs.readFileSync(
       path.resolve(__dirname, './css/benchmark.css'),
       'utf8',
@@ -262,20 +265,30 @@ describe('css splitter', () => {
 
   expect(firstResult).toEqual(sections);
 
-  // Measure the time for the second execution
+  const cachedExecutionTimes = [];
+  for (let i = 0; i < 100; i++) {
+    // Measure the time for the second execution
   const startSecond = performance.now();
   const secondResult = splitCssText(cssText, style);
   const endSecond = performance.now();
-  const secondExecutionTime = endSecond - startSecond;
 
-  expect(secondResult).toEqual(sections);
+    expect(secondResult).toEqual(firstResult);
+    const secondExecutionTime = endSecond - startSecond;
+    cachedExecutionTimes.push(secondExecutionTime);
+  }
 
   // Assert that the second execution is faster
-  expect(secondExecutionTime).toBeLessThan(firstExecutionTime);
+  expect(
+    cachedExecutionTimes.every((time) => time < firstExecutionTime),
+  ).toBe(true);
 
   // Optional: Log the execution times for debugging
   console.log(`First execution time: ${firstExecutionTime}ms`);
-  console.log(`Second execution time: ${secondExecutionTime}ms`);
+  console.log(
+    `Average execution time for the second execution: ${
+      cachedExecutionTimes.reduce((a, b) => a + b) / cachedExecutionTimes.length
+    }ms`,
+  );
   });
 });
 
