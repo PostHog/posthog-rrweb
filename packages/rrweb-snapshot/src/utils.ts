@@ -446,12 +446,22 @@ export function absolutifyURLs(cssText: string | null, href: string): string {
   );
 }
 
+const normalizationCache = new Map<string, string>();
+const splitCache = new Map<string, string[]>();
+
 /**
  * Intention is to normalize by remove spaces, semicolons and CSS comments
  * so that we can compare css as authored vs. output of stringifyStylesheet
  */
 export function normalizeCssString(cssText: string): string {
-  return cssText.replace(/(\/\*[^*]*\*\/)|[\s;]/g, '');
+  if (!normalizationCache.has(cssText)) {
+    const normalized = cssText.replace(/(\/\*[^*]*\*\/)|[\s;]/g, '');
+    normalizationCache.set(cssText, normalized);
+  }
+
+  // we know that the value is in the cache now
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return normalizationCache.get(cssText)!;
 }
 
 /**
@@ -464,6 +474,11 @@ export function splitCssText(
   cssText: string,
   style: HTMLStyleElement,
 ): string[] {
+  if (splitCache.has(cssText)) {
+    // we know there's a result
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return splitCache.get(cssText)!;
+  }
   const childNodes = Array.from(style.childNodes);
   const splits: string[] = [];
   let iterLimit = 0;
@@ -538,6 +553,7 @@ export function splitCssText(
     }
   }
   splits.push(cssText); // either the full thing if no splits were found, or the last split
+  splitCache.set(cssText, splits);
   return splits;
 }
 
