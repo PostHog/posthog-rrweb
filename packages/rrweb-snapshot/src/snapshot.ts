@@ -32,7 +32,6 @@ import {
   markCssSplits,
 } from './utils';
 import dom from '@posthog-internal/rrweb-utils';
-import { isStringObject } from 'node:util/types';
 
 let _id = 1;
 const tagNameRegex = new RegExp('[^a-z0-9-_:]');
