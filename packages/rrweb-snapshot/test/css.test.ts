@@ -227,6 +227,56 @@ describe('css splitter', () => {
     }
     expect(splitCssText(cssText, style)).toEqual(sections);
   });
+
+  it('the second time is faster', () => {
+    const cssText = fs.readFileSync(
+      path.resolve(__dirname, './css/benchmark.css'),
+      'utf8',
+    );
+
+    const parts = cssText.split('}');
+    const sections = [];
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (i % 100 === 0) {
+        sections.push(parts[i] + '}');
+      } else {
+        sections[sections.length - 1] += parts[i] + '}';
+      }
+    }
+    sections[sections.length - 1] += parts[parts.length - 1];
+
+    expect(cssText.length).toEqual(sections.join('').length);
+
+    const style = JSDOM.fragment(`<style></style>`).querySelector('style');
+    if (style) {
+      sections.forEach((section) => {
+        style.appendChild(JSDOM.fragment(section));
+      });
+    }
+
+    // Measure the time for the first execution
+  const startFirst = performance.now();
+  const firstResult = splitCssText(cssText, style);
+  const endFirst = performance.now();
+  const firstExecutionTime = endFirst - startFirst;
+
+  expect(firstResult).toEqual(sections);
+
+  // Measure the time for the second execution
+  const startSecond = performance.now();
+  const secondResult = splitCssText(cssText, style);
+  const endSecond = performance.now();
+  const secondExecutionTime = endSecond - startSecond;
+
+  expect(secondResult).toEqual(sections);
+
+  // Assert that the second execution is faster
+  expect(secondExecutionTime).toBeLessThan(firstExecutionTime);
+
+  // Optional: Log the execution times for debugging
+  console.log(`First execution time: ${firstExecutionTime}ms`);
+  console.log(`Second execution time: ${secondExecutionTime}ms`);
+  });
 });
 
 describe('applyCssSplits css rejoiner', function () {
