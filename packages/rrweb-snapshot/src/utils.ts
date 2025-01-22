@@ -477,7 +477,7 @@ export function splitCssText(
   if (splitCache.has(cssText)) {
     // we know there's a result
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return splitCache.get(cssText)!
+    return splitCache.get(cssText)!;
   }
   const childNodes = Array.from(style.childNodes);
   const splits: string[] = [];

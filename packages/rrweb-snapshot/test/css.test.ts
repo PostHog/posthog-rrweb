@@ -228,68 +228,73 @@ describe('css splitter', () => {
     expect(splitCssText(cssText, style)).toEqual(sections);
   });
 
-  it('the second time is faster',{
-    // because we're timing every so often this might flap because computers
-    retry: 3
-  }, () => {
-    const cssText = fs.readFileSync(
-      path.resolve(__dirname, './css/benchmark.css'),
-      'utf8',
-    );
+  it(
+    'the second time is faster',
+    {
+      // because we're timing every so often this might flap because computers
+      retry: 3,
+    },
+    () => {
+      const cssText = fs.readFileSync(
+        path.resolve(__dirname, './css/benchmark.css'),
+        'utf8',
+      );
 
-    const parts = cssText.split('}');
-    const sections = [];
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (i % 100 === 0) {
-        sections.push(parts[i] + '}');
-      } else {
-        sections[sections.length - 1] += parts[i] + '}';
+      const parts = cssText.split('}');
+      const sections = [];
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (i % 100 === 0) {
+          sections.push(parts[i] + '}');
+        } else {
+          sections[sections.length - 1] += parts[i] + '}';
+        }
       }
-    }
-    sections[sections.length - 1] += parts[parts.length - 1];
+      sections[sections.length - 1] += parts[parts.length - 1];
 
-    expect(cssText.length).toEqual(sections.join('').length);
+      expect(cssText.length).toEqual(sections.join('').length);
 
-    const style = JSDOM.fragment(`<style></style>`).querySelector('style');
-    if (style) {
-      sections.forEach((section) => {
-        style.appendChild(JSDOM.fragment(section));
-      });
-    }
+      const style = JSDOM.fragment(`<style></style>`).querySelector('style');
+      if (style) {
+        sections.forEach((section) => {
+          style.appendChild(JSDOM.fragment(section));
+        });
+      }
 
-    // Measure the time for the first execution
-  const startFirst = performance.now();
-  const firstResult = splitCssText(cssText, style);
-  const endFirst = performance.now();
-  const firstExecutionTime = endFirst - startFirst;
+      // Measure the time for the first execution
+      const startFirst = performance.now();
+      const firstResult = splitCssText(cssText, style);
+      const endFirst = performance.now();
+      const firstExecutionTime = endFirst - startFirst;
 
-  expect(firstResult).toEqual(sections);
+      expect(firstResult).toEqual(sections);
 
-  const cachedExecutionTimes = [];
-  for (let i = 0; i < 100; i++) {
-    // Measure the time for the second execution
-  const startSecond = performance.now();
-  const secondResult = splitCssText(cssText, style);
-  const endSecond = performance.now();
+      const cachedExecutionTimes = [];
+      for (let i = 0; i < 100; i++) {
+        // Measure the time for the second execution
+        const startSecond = performance.now();
+        const secondResult = splitCssText(cssText, style);
+        const endSecond = performance.now();
 
-    expect(secondResult).toEqual(firstResult);
-    const secondExecutionTime = endSecond - startSecond;
-    cachedExecutionTimes.push(secondExecutionTime);
-  }
+        expect(secondResult).toEqual(firstResult);
+        const secondExecutionTime = endSecond - startSecond;
+        cachedExecutionTimes.push(secondExecutionTime);
+      }
 
-  // Assert that the second execution is faster
-  expect(
-    cachedExecutionTimes.every((time) => time < firstExecutionTime),
-  ).toBe(true);
+      // Assert that the second execution is faster
+      expect(
+        cachedExecutionTimes.every((time) => time < firstExecutionTime),
+      ).toBe(true);
 
-  // Optional: Log the execution times for debugging
-  console.log(`First execution time: ${firstExecutionTime}ms`);
-  console.log(
-    `Average execution time for the second execution: ${
-      cachedExecutionTimes.reduce((a, b) => a + b) / cachedExecutionTimes.length
-    }ms`,
+      // Optional: Log the execution times for debugging
+      console.log(`First execution time: ${firstExecutionTime}ms`);
+      console.log(
+        `Average execution time for the second execution: ${
+          cachedExecutionTimes.reduce((a, b) => a + b) /
+          cachedExecutionTimes.length
+        }ms`,
+      );
+    },
   );
-  });
 });
 
 describe('applyCssSplits css rejoiner', function () {
