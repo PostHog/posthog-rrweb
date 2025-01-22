@@ -7,7 +7,7 @@ on:
 jobs:
     label-version-bump:
         name: Bump version based on PR label
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         if: |
             github.event.pull_request.merged
             && (
@@ -23,9 +23,11 @@ jobs:
                   token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
                   fetch-depth: 0
 
-            - uses: pnpm/action-setup@v4
+            - name: Setup Node.js lts/*
+              uses: actions/setup-node@v4
               with:
-                version: 8.x.x
+                node-version: lts/*
+                cache: 'yarn'
 
             - name: Detect version bump type
               id: bump-type
@@ -55,6 +57,7 @@ jobs:
                   echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
                   echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
+
             - name: Update version in package.json for packages we import in posthog
               if: steps.bump-type.outputs.bump-type != 'null'
               run: |
@@ -81,6 +84,7 @@ jobs:
                     fi
                   done
 
+
             - name: Update CHANGELOG.md
               run: |
                   CHANGELOG_HEADING='## ${{ steps.versions.outputs.new-version }} - '$(date --iso-8601)
@@ -89,8 +93,8 @@ jobs:
                   echo -e "$CHANGELOG_HEADING\n\n$CHANGELOG_POINTS\n\n$(cat CHANGELOG.old.md)" > CHANGELOG.md
                   rm CHANGELOG.old.md
 
-            - name: Update lockfile
-              run: pnpm i
+            - name: Update the lockfile
+              run: yarn install
 
             - name: Commit bump
               if: steps.bump-type.outputs.bump-type != 'null'
