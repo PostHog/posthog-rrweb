@@ -1,11 +1,11 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { chromium } from 'playwright';
-import { EventType, eventWithTime } from '@rrweb/types';
-import type Player from 'rrweb-player';
+import { EventType, eventWithTime } from '@posthog-internal/rrweb-types';
+import type Player from '@posthog-internal/rrweb-player';
 
 const rrwebScriptPath = path.resolve(
-  require.resolve('rrweb-player'),
+  require.resolve('@posthog-internal/rrweb-player'),
   '../../dist/rrweb-player.umd.cjs',
 );
 const rrwebStylePath = path.resolve(rrwebScriptPath, '../style.css');

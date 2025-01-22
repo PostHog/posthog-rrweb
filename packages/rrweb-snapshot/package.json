@@ -1,6 +1,6 @@
 {
-  "name": "rrweb-snapshot",
-  "version": "2.0.0-alpha.18",
+  "name": "@posthog-internal/rrweb-snapshot",
+  "version": "0.0.0",
   "description": "rrweb's component to take a snapshot of DOM, aka DOM serializer",
   "scripts": {
     "prepare": "npm run prepack",
@@ -12,7 +12,7 @@
     "test:update": "yarn build && vitest run --update",
     "bench": "vite build && vitest bench",
     "dev": "vite build --watch",
-    "build": "yarn turbo prepublish -F rrweb-snapshot",
+    "build": "yarn turbo prepublish",
     "check-types": "tsc --noEmit",
     "prepublish": "yarn check-types && vite build",
     "lint": "yarn eslint src"
@@ -20,13 +20,8 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rrweb-io/rrweb.git"
+    "url": "git+https://github.com/PostHog/posthog-rrweb.git"
   },
-  "keywords": [
-    "rrweb",
-    "snapshot",
-    "DOM"
-  ],
   "main": "./dist/rrweb-snapshot.umd.cjs",
   "module": "./dist/rrweb-snapshot.js",
   "unpkg": "./dist/rrweb-snapshot.umd.cjs",
@@ -49,13 +44,9 @@
   ],
   "author": "yanzhen@smartx.com",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/rrweb-io/rrweb/issues"
-  },
-  "homepage": "https://github.com/rrweb-io/rrweb/tree/master/packages/rrweb-snapshot#readme",
   "devDependencies": {
-    "@rrweb/types": "^2.0.0-alpha.18",
-    "@rrweb/utils": "^2.0.0-alpha.18",
+    "@posthog-internal/rrweb-types": "*",
+    "@posthog-internal/rrweb-utils": "*",
     "@types/jsdom": "^20.0.0",
     "@types/node": "^18.15.11",
     "@types/puppeteer": "^5.4.4",

@@ -1,6 +1,6 @@
-import type { SequentialIdOptions } from '@rrweb/rrweb-plugin-sequential-id-record';
-import type { ReplayPlugin } from 'rrweb';
-import type { eventWithTime } from '@rrweb/types';
+import type { SequentialIdOptions } from '@posthog-internal/rrweb-plugin-sequential-id-record';
+import type { ReplayPlugin } from '@posthog-internal/rrweb';
+import type { eventWithTime } from '@posthog-internal/rrweb-types';
 
 type Options = SequentialIdOptions & {
   warnOnMissingId: boolean;

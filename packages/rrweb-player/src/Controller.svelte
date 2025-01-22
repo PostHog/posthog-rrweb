@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { EventType } from '@rrweb/types';
-  import type { playerMetaData } from '@rrweb/types';
+  import { EventType } from '@posthog-internal/rrweb-types';
+  import type { playerMetaData } from '@posthog-internal/rrweb-types';
   import type {
     Replayer,
     PlayerMachineState,
     SpeedMachineState,
-  } from '@rrweb/replay';
+  } from '@posthog-internal/rrweb-replay';
   import {
     onMount,
     onDestroy,

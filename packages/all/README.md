@@ -18,7 +18,7 @@ npm install @rrweb/all
 ## Usage
 
 ```js
-import { record, replay, pack, unpack } from '@rrweb/all';
+import { record, replay, pack, unpack } from '@posthog-internal/rrweb-all';
 
 // use record, replay, pack, unpack as you would with the individual packages.
 ```

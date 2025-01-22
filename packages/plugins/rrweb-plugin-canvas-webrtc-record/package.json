@@ -1,6 +1,6 @@
 {
-  "name": "@rrweb/rrweb-plugin-canvas-webrtc-record",
-  "version": "2.0.0-alpha.18",
+  "name": "@posthog-internal/rrweb-plugin-canvas-webrtc-record",
+  "version": "0.0.0",
   "description": "",
   "type": "module",
   "main": "./dist/rrweb-plugin-canvas-webrtc-record.umd.cjs",
@@ -31,24 +31,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rrweb-io/rrweb.git"
+    "url": "git+https://github.com/PostHog/posthog-rrweb.git"
   },
-  "keywords": [
-    "rrweb"
-  ],
   "author": "justin@recordonce.com",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/rrweb-io/rrweb/issues"
-  },
-  "homepage": "https://github.com/rrweb-io/rrweb#readme",
   "devDependencies": {
-    "rrweb": "^2.0.0-alpha.18",
+    "@posthog-internal/rrweb": "*",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
     "vite-plugin-dts": "^3.9.1"
   },
   "peerDependencies": {
-    "rrweb": "^2.0.0-alpha.18"
+    "@posthog-internal/rrweb": "*"
   }
 }

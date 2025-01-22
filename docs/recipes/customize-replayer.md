@@ -14,7 +14,7 @@ There are several ways to do this:
 When using rrweb-player, you can hide its controller UI:
 
 ```js
-import rrwebPlayer from 'rrweb-player';
+import rrwebPlayer from '@posthog-internal/rrweb-player';
 
 new rrwebPlayer({
   target: document.body,

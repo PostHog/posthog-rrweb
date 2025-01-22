@@ -1,4 +1,4 @@
-import type { ICanvas, Mirror } from 'rrweb-snapshot';
+import type { ICanvas, Mirror } from '@posthog-internal/rrweb-snapshot';
 import type {
   blockClass,
   canvasManagerMutationCallback,
@@ -9,9 +9,9 @@ import type {
   listenerHandler,
   CanvasArg,
   DataURLOptions,
-} from '@rrweb/types';
+} from '@posthog-internal/rrweb-types';
 import { isBlocked } from '../../../utils';
-import { CanvasContext } from '@rrweb/types';
+import { CanvasContext } from '@posthog-internal/rrweb-types';
 import initCanvas2DMutationObserver from './2d';
 import initCanvasContextObserver from './canvas';
 import initCanvasWebGLMutationObserver from './webgl';

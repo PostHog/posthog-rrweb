@@ -4,9 +4,9 @@ import {
   type canvasManagerMutationCallback,
   type IWindow,
   type listenerHandler,
-} from '@rrweb/types';
+} from '@posthog-internal/rrweb-types';
 import { hookSetter, isBlocked } from '../../../utils';
-import { patch } from '@rrweb/utils';
+import { patch } from '@posthog-internal/rrweb-utils';
 import { serializeArgs } from './serialize-args';
 
 export default function initCanvas2DMutationObserver(

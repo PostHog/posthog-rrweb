@@ -12,7 +12,7 @@ npm install @rrweb/record
 ## Usage
 
 ```js
-import { record } from '@rrweb/record';
+import { record } from '@posthog-internal/rrweb-record';
 
 record({
   emit(event) {

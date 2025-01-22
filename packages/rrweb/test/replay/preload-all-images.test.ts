@@ -11,7 +11,7 @@ import {
   IncrementalSource,
   EventType,
   eventWithTime,
-} from '@rrweb/types';
+} from '@posthog-internal/rrweb-types';
 
 let replayer: Replayer;
 

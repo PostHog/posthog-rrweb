@@ -1,6 +1,10 @@
 name: Code Style Check
 
-on: [push, pull_request_target]
+on:
+    pull_request:
+    push:
+        branches:
+            - main
 
 jobs:
   eslint_check_upload:
@@ -50,14 +54,10 @@ jobs:
           report-json: 'eslint_report.json'
 
   prettier_check:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     name: Format Check
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.head_ref }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -67,29 +67,3 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Prettier Check
         run: yarn prettier --check '**/*.{ts,md}'
-
-  prettier:
-    # Skip the format code action in forked PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == 'rrweb-io/rrweb'
-    runs-on: ubuntu-latest
-    name: Format Code
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.head_ref }}
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'yarn'
-      - name: Install Dependencies
-        run: yarn install --frozen-lockfile
-      - name: Prettify Code
-        run: yarn prettier --write '**/*.{ts,md}'
-      - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Apply formatting changes
-          branch: ${{ github.head_ref }}
-          file_pattern: ':!packages/rrweb-player/.svelte-kit/ambient.d.ts'

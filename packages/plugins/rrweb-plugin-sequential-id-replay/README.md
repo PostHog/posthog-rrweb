@@ -12,8 +12,8 @@ npm install @rrweb/rrweb-plugin-sequential-id-replay
 ## Usage
 
 ```js
-import rrweb from 'rrweb';
-import { getReplaySequentialIdPlugin } from '@rrweb/rrweb-plugin-sequential-id-replay';
+import rrweb from '@posthog-internal/rrweb';
+import { getReplaySequentialIdPlugin } from '@posthog-internal/rrweb-plugin-sequential-id-replay';
 
 const replayer = new rrweb.Replayer(events, {
   plugins: [

@@ -1,4 +1,4 @@
-import type { RecordPlugin } from '@rrweb/types';
+import type { RecordPlugin } from '@posthog-internal/rrweb-types';
 
 export type SequentialIdOptions = {
   key: string;
