@@ -544,6 +544,18 @@ function findStylesheet(doc: Document, href: string) {
   return Array.from(doc.styleSheets).find((s) => s.href === href);
 }
 
+/**
+ * in production, we've seen elements like
+ * `<link type="text/css" rel="stylesheet" id="dark-mode-custom-link"></link>`
+ * while HTMLLinkElement suggests an href is always present
+ * the w3c spec is less specific
+ * and regardless we've seen at least one instance of this in the wild
+ * let's be defensive and make sure this is typed as possibly undefined
+ */
+function hrefFrom(n: unknown): string | undefined {
+  return (n as HTMLLinkElement).href;
+}
+
 function serializeElementNode(
   n: HTMLElement,
   options: {
@@ -596,22 +608,24 @@ function serializeElementNode(
   // remote css
   if (tagName === 'link' && inlineStylesheet) {
     //TODO: maybe replace this `.styleSheets` with original one
-    const href = (n as HTMLLinkElement).href;
-    let stylesheet = findStylesheet(doc, href);
-    if (!stylesheet && href.includes('.css')) {
-      const rootDomain = window.location.origin;
-      const stylesheetPath = href.replace(window.location.href, '');
-      const potentialStylesheetHref = rootDomain + '/' + stylesheetPath;
-      stylesheet = findStylesheet(doc, potentialStylesheetHref);
-    }
-    let cssText: string | null = null;
-    if (stylesheet) {
-      cssText = stringifyStylesheet(stylesheet);
-    }
-    if (cssText) {
-      delete attributes.rel;
-      delete attributes.href;
-      attributes._cssText = cssText;
+    const href: string | undefined = hrefFrom(n);
+    if (href) {
+      let stylesheet = findStylesheet(doc, href);
+      if (!stylesheet && href.includes('.css')) {
+        const rootDomain = window.location.origin;
+        const stylesheetPath = href.replace(window.location.href, '');
+        const potentialStylesheetHref = rootDomain + '/' + stylesheetPath;
+        stylesheet = findStylesheet(doc, potentialStylesheetHref);
+      }
+      let cssText: string | null = null;
+      if (stylesheet) {
+        cssText = stringifyStylesheet(stylesheet);
+      }
+      if (cssText) {
+        delete attributes.rel;
+        delete attributes.href;
+        attributes._cssText = cssText;
+      }
     }
   }
   if (tagName === 'style' && (n as HTMLStyleElement).sheet) {
