@@ -479,6 +479,7 @@ export function splitCssText(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return splitCache.get(cssText)!;
   }
+  const og = cssText;
   const childNodes = Array.from(style.childNodes);
   const splits: string[] = [];
   let iterLimit = 0;
@@ -553,7 +554,7 @@ export function splitCssText(
     }
   }
   splits.push(cssText); // either the full thing if no splits were found, or the last split
-  splitCache.set(cssText, splits);
+  splitCache.set(og, splits);
   return splits;
 }
 
