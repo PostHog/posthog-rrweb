@@ -479,7 +479,7 @@ export function splitCssText(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return splitCache.get(cssText)!;
   }
-  const og = cssText
+  const og = cssText;
   const childNodes = Array.from(style.childNodes);
   const splits: string[] = [];
   let iterLimit = 0;
