@@ -44,7 +44,7 @@ jobs:
           pattern: "**/dist/*.{js,cjs,mjs,css}"
 
       - name: Upload diff images to GitHub
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: image-diff
