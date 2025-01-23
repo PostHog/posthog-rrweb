@@ -42,6 +42,7 @@ Angular zone patches many things and can pass the untainted checks below, causin
 Angular zone, puts the unpatched originals on the window, and the names for hose on the zone object.
 So, we get the unpatched versions from the window object if they exist.
 You can rename Zone, but this is a good enough proxy to avoid going to an iframe to get the untainted versions.
+see: https://github.com/angular/angular/issues/26948
 */
 function angularZoneUnpatchedAlternative(key: keyof BasePrototypeCache) {
   const angularUnpatchedVersionSymbol = (
