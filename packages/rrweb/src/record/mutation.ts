@@ -9,8 +9,9 @@ import {
   Mirror,
   isNativeShadowDom,
   getInputType,
-  toLowerCase, type MaskAttributeFn,
-} from "@posthog-internal/rrweb-snapshot";
+  toLowerCase,
+  type MaskAttributeFn,
+} from '@posthog-internal/rrweb-snapshot';
 import type { observerParam, MutationBufferParam } from '../types';
 import type {
   mutationRecord,
@@ -573,8 +574,13 @@ export default class MutationBuffer {
       case 'attributes': {
         const target = m.target as HTMLElement;
         let attributeName = m.attributeName as string;
-        const maskAttrFn: MaskAttributeFn = this.maskAttributeFn || ((_n, v, _el) => v)
-        let value = maskAttrFn(attributeName, (m.target as HTMLElement).getAttribute(attributeName), target);
+        const maskAttrFn: MaskAttributeFn =
+          this.maskAttributeFn || ((_n, v, _el) => v);
+        let value = maskAttrFn(
+          attributeName,
+          (m.target as HTMLElement).getAttribute(attributeName),
+          target,
+        );
 
         if (attributeName === 'value') {
           const type = getInputType(target);

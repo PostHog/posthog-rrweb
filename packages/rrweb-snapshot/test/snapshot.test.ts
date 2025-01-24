@@ -8,10 +8,16 @@ import snapshot, {
   _isBlockedElement,
   serializeNodeWithId,
 } from '../src/snapshot';
-import { elementNode, serializedNodeWithId } from '@posthog-internal/rrweb-types';
+import {
+  elementNode,
+  serializedNodeWithId,
+} from '@posthog-internal/rrweb-types';
 import { Mirror, absolutifyURLs } from '../src/utils';
 
-const serializeNode = (node: Node, options: Partial<Parameters<typeof serializeNodeWithId>[1]> = {}): serializedNodeWithId | null => {
+const serializeNode = (
+  node: Node,
+  options: Partial<Parameters<typeof serializeNodeWithId>[1]> = {},
+): serializedNodeWithId | null => {
   return serializeNodeWithId(node, {
     doc: document,
     mirror: new Mirror(),
@@ -83,7 +89,7 @@ describe('snapshot', () => {
         ),
       ).toEqual(
         `background-image: url(http://localhost/css/images/b.jpg);` +
-        `background: #aabbcc url(http://localhost/css/images/a.jpg) 50% 50% repeat;`,
+          `background: #aabbcc url(http://localhost/css/images/a.jpg) 50% 50% repeat;`,
       );
     });
 
@@ -257,31 +263,37 @@ describe('snapshot', () => {
     });
   });
 
-
   describe('masking', () => {
     const render = (html: string): Document => {
       document.write(html);
       return document;
     };
-    ;[{
-      name: 'mask based on attribute name',
-      el: `<div data-attr-pii="my address">content</div>`,
-      expected: { 'data-attr-pii': '**********' },
-    },
-    {
-      name: 'mask by using the attribute value argument',
-      el: `<img src="data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==" alt="mask1" />`,
-      expected: { "src": "REDACTED DATA URL" },
-    },{
-      name: 'mask by using the element argument',
-      el: `<div data-attr-wat="something">should hide me</div>`,
-      expected: { 'data-attr-wat': 'REDACTED' },
-    }].forEach(({ el, expected }) => {
+    [
+      {
+        name: 'mask based on attribute name',
+        el: `<div data-attr-pii="my address">content</div>`,
+        expected: { 'data-attr-pii': '**********' },
+      },
+      {
+        name: 'mask by using the attribute value argument',
+        el: `<img src="data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==" alt="mask1" />`,
+        expected: { src: 'REDACTED DATA URL' },
+      },
+      {
+        name: 'mask by using the element argument',
+        el: `<div data-attr-wat="something">should hide me</div>`,
+        expected: { 'data-attr-wat': 'REDACTED' },
+      },
+    ].forEach(({ el, expected }) => {
       it('attribute masking: %s', () => {
         const rendered = render(el);
 
         const sel = serializeNode(rendered, {
-          maskAttributeFn: (n: string, v: string | null, el: HTMLElement): string | null => {
+          maskAttributeFn: (
+            n: string,
+            v: string | null,
+            el: HTMLElement,
+          ): string | null => {
             // a function that will mask
             // any data url
             if (v && v.startsWith('data:')) {
@@ -289,15 +301,15 @@ describe('snapshot', () => {
             }
             // any attribute that contains pii in the name
             if (n && n.includes('pii')) {
-              return "*".repeat(v?.length || 0).substring(0, 100);
+              return '*'.repeat(v?.length || 0).substring(0, 100);
             }
             // any element that has hide me in its content
             if (el.innerHTML?.includes('hide me')) {
               return 'REDACTED';
             }
             // if no match, return the original value
-            return v
-          }
+            return v;
+          },
         }) as elementNode;
 
         let html = sel.childNodes[0] as elementNode;
@@ -305,8 +317,7 @@ describe('snapshot', () => {
         expect(body.childNodes[0]).toMatchObject({
           attributes: expected,
         });
-      })
-    })
-  })
-})
-
+      });
+    });
+  });
+});

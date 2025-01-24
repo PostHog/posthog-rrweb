@@ -68,7 +68,11 @@ export type SlimDOMOptions = Partial<{
 
 export type MaskTextFn = (text: string, element: HTMLElement | null) => string;
 export type MaskInputFn = (text: string, element: HTMLElement) => string;
-export type MaskAttributeFn = (name: string, value: string | null, element: HTMLElement) => string | null;
+export type MaskAttributeFn = (
+  name: string,
+  value: string | null,
+  element: HTMLElement,
+) => string | null;
 
 export type KeepIframeSrcFn = (src: string) => boolean;
 

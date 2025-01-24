@@ -5,8 +5,9 @@ import type {
   MaskInputFn,
   KeepIframeSrcFn,
   ICanvas,
-  DialogAttributes, MaskAttributeFn,
-} from "./types";
+  DialogAttributes,
+  MaskAttributeFn,
+} from './types';
 import { NodeType } from '@posthog-internal/rrweb-types';
 import type {
   serializedNode,
@@ -594,7 +595,7 @@ function serializeElementNode(
     newlyAddedElement = false,
     rootId,
     // by default, we can just pass the attribute through
-    maskAttributeFn = (_name, value, _element) => value
+    maskAttributeFn = (_name, value, _element) => value,
   } = options;
   const needBlock = _isBlockedElement(n, blockClass, blockSelector);
   const tagName = getValidTagName(n);
@@ -603,12 +604,11 @@ function serializeElementNode(
   for (let i = 0; i < len; i++) {
     const attr = n.attributes[i];
     if (!ignoreAttribute(tagName, attr.name, attr.value)) {
-      attributes[attr.name] = maskAttributeFn(attr.name, transformAttribute(
-        doc,
-        tagName,
-        toLowerCase(attr.name),
-        attr.value,
-      ), n);
+      attributes[attr.name] = maskAttributeFn(
+        attr.name,
+        transformAttribute(doc, tagName, toLowerCase(attr.name), attr.value),
+        n,
+      );
     }
   }
   // remote css

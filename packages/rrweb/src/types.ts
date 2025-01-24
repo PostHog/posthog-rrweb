@@ -3,8 +3,9 @@ import type {
   MaskInputOptions,
   SlimDOMOptions,
   MaskInputFn,
-  MaskTextFn, MaskAttributeFn,
-} from "@posthog-internal/rrweb-snapshot";
+  MaskTextFn,
+  MaskAttributeFn,
+} from '@posthog-internal/rrweb-snapshot';
 import type { IframeManager } from './record/iframe-manager';
 import type { ShadowDomManager } from './record/shadow-dom-manager';
 import type { Replayer } from './replay';

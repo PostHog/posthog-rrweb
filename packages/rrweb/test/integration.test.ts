@@ -1563,7 +1563,7 @@ describe('record integration tests', function (this: ISuite) {
           }
           // any attribute that contains pii in the name
           if (n && n.includes('pii')) {
-            return "*".repeat(v?.length || 0).substring(0, 100);
+            return '*'.repeat(v?.length || 0).substring(0, 100);
           }
           // any element that has hide me in its content
           if (el.innerText.includes('hide me')) {
@@ -1577,5 +1577,5 @@ describe('record integration tests', function (this: ISuite) {
       'window.snapshots',
     )) as eventWithTime[];
     await assertSnapshot(snapshots);
-  })
+  });
 });
