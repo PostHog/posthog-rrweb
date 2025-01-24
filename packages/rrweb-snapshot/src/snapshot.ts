@@ -1266,6 +1266,7 @@ function snapshot(
     maskAllInputs?: boolean | MaskInputOptions;
     maskTextFn?: MaskTextFn;
     maskInputFn?: MaskInputFn;
+    maskAttributeFn?: MaskAttributeFn;
     slimDOM?: 'all' | boolean | SlimDOMOptions;
     dataURLOptions?: DataURLOptions;
     inlineImages?: boolean;
@@ -1297,6 +1298,7 @@ function snapshot(
     maskAllInputs = false,
     maskTextFn,
     maskInputFn,
+    maskAttributeFn,
     slimDOM = false,
     dataURLOptions,
     preserveWhiteSpace,
@@ -1362,6 +1364,7 @@ function snapshot(
     maskInputOptions,
     maskTextFn,
     maskInputFn,
+    maskAttributeFn,
     slimDOMOptions,
     dataURLOptions,
     inlineImages,
