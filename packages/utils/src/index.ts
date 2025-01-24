@@ -66,7 +66,9 @@ export function getUntaintedPrototype<T extends keyof BasePrototypeCache>(
   if (untaintedBasePrototype[key])
     return untaintedBasePrototype[key] as BasePrototypeCache[T];
 
-  const candidate = angularZoneUnpatchedAlternative(key) || globalThis[key] as TypeofPrototypeOwner;
+  const candidate =
+    angularZoneUnpatchedAlternative(key) ||
+    (globalThis[key] as TypeofPrototypeOwner);
   const defaultPrototype = candidate.prototype as BasePrototypeCache[T];
 
   // use list of testable accessors to check if the prototype is tainted
