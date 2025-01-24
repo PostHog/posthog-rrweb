@@ -5,8 +5,8 @@ import type {
   MaskInputFn,
   KeepIframeSrcFn,
   ICanvas,
-  DialogAttributes,
-} from './types';
+  DialogAttributes, MaskAttributeFn,
+} from "./types";
 import { NodeType } from '@posthog-internal/rrweb-types';
 import type {
   serializedNode,
@@ -399,6 +399,7 @@ function serializeNode(
     maskInputOptions: MaskInputOptions;
     maskTextFn: MaskTextFn | undefined;
     maskInputFn: MaskInputFn | undefined;
+    maskAttributeFn: MaskAttributeFn | undefined;
     dataURLOptions?: DataURLOptions;
     inlineImages: boolean;
     recordCanvas: boolean;
@@ -420,6 +421,7 @@ function serializeNode(
     maskInputOptions = {},
     maskTextFn,
     maskInputFn,
+    maskAttributeFn,
     dataURLOptions = {},
     inlineImages,
     recordCanvas,
@@ -465,6 +467,7 @@ function serializeNode(
         keepIframeSrcFn,
         newlyAddedElement,
         rootId,
+        maskAttributeFn,
       });
     case n.TEXT_NODE:
       return serializeTextNode(n as Text, {
@@ -574,6 +577,7 @@ function serializeElementNode(
      */
     newlyAddedElement?: boolean;
     rootId: number | undefined;
+    maskAttributeFn: MaskAttributeFn | undefined;
   },
 ): serializedNode | false {
   const {
@@ -589,6 +593,8 @@ function serializeElementNode(
     keepIframeSrcFn,
     newlyAddedElement = false,
     rootId,
+    // by default, we can just pass the attribute through
+    maskAttributeFn = (_name, value, _element) => value
   } = options;
   const needBlock = _isBlockedElement(n, blockClass, blockSelector);
   const tagName = getValidTagName(n);
@@ -597,12 +603,12 @@ function serializeElementNode(
   for (let i = 0; i < len; i++) {
     const attr = n.attributes[i];
     if (!ignoreAttribute(tagName, attr.name, attr.value)) {
-      attributes[attr.name] = transformAttribute(
+      attributes[attr.name] = maskAttributeFn(attr.name, transformAttribute(
         doc,
         tagName,
         toLowerCase(attr.name),
         attr.value,
-      );
+      ), n);
     }
   }
   // remote css
@@ -963,6 +969,7 @@ export function serializeNodeWithId(
     ) => unknown;
     stylesheetLoadTimeout?: number;
     cssCaptured?: boolean;
+    maskAttributeFn?: MaskAttributeFn;
   },
 ): serializedNodeWithId | null {
   const {
@@ -989,6 +996,7 @@ export function serializeNodeWithId(
     keepIframeSrcFn = () => false,
     newlyAddedElement = false,
     cssCaptured = false,
+    maskAttributeFn,
   } = options;
   let { needsMask } = options;
   let { preserveWhiteSpace = true } = options;
@@ -1020,6 +1028,7 @@ export function serializeNodeWithId(
     keepIframeSrcFn,
     newlyAddedElement,
     cssCaptured,
+    maskAttributeFn,
   });
   if (!_serializedNode) {
     // TODO: dev only
@@ -1100,6 +1109,7 @@ export function serializeNodeWithId(
       stylesheetLoadTimeout,
       keepIframeSrcFn,
       cssCaptured: false,
+      maskAttributeFn,
     };
 
     if (

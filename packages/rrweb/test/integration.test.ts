@@ -1549,4 +1549,33 @@ describe('record integration tests', function (this: ISuite) {
     expect(changedColors).toEqual([Color, Color]);
     await page.close();
   });
+
+  it('can mask attributes', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto('about:blank');
+    await page.setContent(
+      getHtml.call(this, 'mask-attribute.html', {
+        maskAttributeFn: (n: string, v: string | null, el: HTMLElement) => {
+          // a function that will mask
+          // any data url
+          if (v && v.startsWith('data:')) {
+            return 'REDACTED DATA URL';
+          }
+          // any attribute that contains pii in the name
+          if (n && n.includes('pii')) {
+            return "*".repeat(v?.length || 0).substring(0, 100);
+          }
+          // any element that has hide me in its content
+          if (el.innerText.includes('hide me')) {
+            return 'REDACTED';
+          }
+        },
+      }),
+    );
+
+    const snapshots = (await page.evaluate(
+      'window.snapshots',
+    )) as eventWithTime[];
+    await assertSnapshot(snapshots);
+  })
 });
