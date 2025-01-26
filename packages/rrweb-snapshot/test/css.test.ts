@@ -9,13 +9,13 @@ import { splitCssText, stringifyStylesheet } from './../src/utils';
 import { applyCssSplits } from './../src/rebuild';
 import * as fs from 'fs';
 import * as path from 'path';
-import type {
-  serializedElementNodeWithId,
-  BuildCache,
+import {
   textNode,
-} from '../src/types';
-import { NodeType } from '@posthog-internal/rrweb-types';
+  NodeType,
+  serializedElementNodeWithId,
+} from '@posthog-internal/rrweb-types';
 import { Window } from 'happy-dom';
+import { BuildCache } from '../src';
 
 describe('css parser', () => {
   function parse(plugin: AcceptedPlugin, input: string): string {

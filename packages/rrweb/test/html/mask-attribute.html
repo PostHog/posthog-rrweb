@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Mask text</title>
+  </head>
+  <body>
+    <!-- so we can mask by using the attribute name -->
+    <div data-attr-pii="my address">content</div>
+    <!-- so we can mask by using the attribute value argument -->
+    <img src="data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==" alt="mask1" />
+    <!-- so we can mask by using the element argument -->
+    <div>should hide me</div>
+  </body>
+</html>

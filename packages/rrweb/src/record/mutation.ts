@@ -10,6 +10,7 @@ import {
   isNativeShadowDom,
   getInputType,
   toLowerCase,
+  type MaskAttributeFn,
 } from '@posthog-internal/rrweb-snapshot';
 import type { observerParam, MutationBufferParam } from '../types';
 import type {
@@ -180,6 +181,7 @@ export default class MutationBuffer {
   private maskInputOptions: observerParam['maskInputOptions'];
   private maskTextFn: observerParam['maskTextFn'];
   private maskInputFn: observerParam['maskInputFn'];
+  private maskAttributeFn: observerParam['maskAttributeFn'];
   private keepIframeSrcFn: observerParam['keepIframeSrcFn'];
   private recordCanvas: observerParam['recordCanvas'];
   private inlineImages: observerParam['inlineImages'];
@@ -206,6 +208,7 @@ export default class MutationBuffer {
         'maskInputOptions',
         'maskTextFn',
         'maskInputFn',
+        'maskAttributeFn',
         'keepIframeSrcFn',
         'recordCanvas',
         'inlineImages',
@@ -571,7 +574,13 @@ export default class MutationBuffer {
       case 'attributes': {
         const target = m.target as HTMLElement;
         let attributeName = m.attributeName as string;
-        let value = (m.target as HTMLElement).getAttribute(attributeName);
+        const maskAttrFn: MaskAttributeFn =
+          this.maskAttributeFn || ((_n, v, _el) => v);
+        let value = maskAttrFn(
+          attributeName,
+          (m.target as HTMLElement).getAttribute(attributeName),
+          target,
+        );
 
         if (attributeName === 'value') {
           const type = getInputType(target);
