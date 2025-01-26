@@ -56,7 +56,7 @@ jobs:
               if: steps.bump-type.outputs.bump-type != 'null'
               run: |
                   OLD_VERSION=$(jq ".version" package.json -r)
-                  NEW_VERSION=$(yarn run semver $OLD_VERSION -i ${{ steps.bump-type.outputs.bump-type }})
+                  NEW_VERSION=$(semver $OLD_VERSION -i ${{ steps.bump-type.outputs.bump-type }})
                   echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
                   echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 

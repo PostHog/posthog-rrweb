@@ -474,12 +474,12 @@ export function splitCssText(
   cssText: string,
   style: HTMLStyleElement,
 ): string[] {
+  const og = cssText;
   if (splitCache.has(cssText)) {
     // we know there's a result
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return splitCache.get(cssText)!;
   }
-  const og = cssText;
   const childNodes = Array.from(style.childNodes);
   const splits: string[] = [];
   let iterLimit = 0;
@@ -554,7 +554,9 @@ export function splitCssText(
     }
   }
   splits.push(cssText); // either the full thing if no splits were found, or the last split
-  splitCache.set(og, splits);
+  if (og) {
+    splitCache.set(og, splits);
+  }
   return splits;
 }
 
