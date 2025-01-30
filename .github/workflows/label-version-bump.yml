@@ -9,10 +9,7 @@ jobs:
     label-version-bump:
         name: Bump version based on PR label
         runs-on: ubuntu-22.04
-        if: |
-#            github.event.pull_request.merged
-#            &&
-            (
+        if: | (
                 contains(github.event.pull_request.labels.*.name, 'bump patch')
                 || contains(github.event.pull_request.labels.*.name, 'bump minor')
                 || contains(github.event.pull_request.labels.*.name, 'bump major')
