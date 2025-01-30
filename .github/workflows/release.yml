@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    branches:
-      - not-yet #TODO should be changes to main... but not till we're ready
+#    branches:
+#      main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -23,6 +23,10 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
+
+      - name: npm release
+        run: |
+          $GITHUB_WORKSPACE/scripts/npm-release.sh
 #
 #      - name: Create Release Pull Request or Publish to npm
 #        id: changesets
@@ -34,10 +38,10 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Build Chrome Extension
-        if: steps.changesets.outputs.published == 'true'
-        run: NODE_OPTIONS='--max-old-space-size=4096' DISABLE_WORKER_INLINING=true yarn turbo run prepublish --filter=@rrweb/web-extension
-#
+#      - name: Build Chrome Extension
+#        if: steps.changesets.outputs.published == 'true'
+#        run: NODE_OPTIONS='--max-old-space-size=4096' DISABLE_WORKER_INLINING=true yarn turbo run prepublish --filter=@rrweb/web-extension
+##
 #      - name: Publish Chrome Extension
 #        uses: mnao305/chrome-extension-upload@v5.0.0
 #        if: steps.changesets.outputs.published == 'true'
