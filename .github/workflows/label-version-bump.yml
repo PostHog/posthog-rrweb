@@ -50,7 +50,7 @@ jobs:
               env:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               run: |
-                      ./scripts/update-version.sh
+                      ./scripts/version-packages.sh
 
 
             - name: Update CHANGELOG.md
