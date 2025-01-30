@@ -2,7 +2,8 @@ name: Autobump
 
 on:
     pull_request:
-        types: [closed]
+      # always run while testing
+#        types: [closed]
 
 jobs:
     label-version-bump:
@@ -52,11 +53,15 @@ jobs:
               id: versions
               if: steps.bump-type.outputs.bump-type != 'null'
               run: |
-                  npm add --global semver
-                  OLD_VERSION=$(jq ".version" package.json -r)
-                  NEW_VERSION=$(semver $OLD_VERSION -i ${{ steps.bump-type.outputs.bump-type }})
-                  echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
-                  echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+                npm add --global semver
+                which semver || echo "semver not found"
+                semver --version || echo "semver command failed"
+                OLD_VERSION=$(jq ".version" package.json -r)
+                echo "Old Version: $OLD_VERSION"
+                NEW_VERSION=$(npx semver "$OLD_VERSION" -i patch)
+                echo "New Version: $NEW_VERSION"
+                echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+                echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
 
             - name: Update version in package.json for packages we import in posthog
