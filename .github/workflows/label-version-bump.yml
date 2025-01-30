@@ -29,9 +29,6 @@ jobs:
                 node-version: lts/*
                 cache: 'yarn'
 
-            - name: Install semver
-              run: yarn global add semver
-
             - name: Detect version bump type
               id: bump-type
               run: |
@@ -55,6 +52,7 @@ jobs:
               id: versions
               if: steps.bump-type.outputs.bump-type != 'null'
               run: |
+                  npm add --global semver
                   OLD_VERSION=$(jq ".version" package.json -r)
                   NEW_VERSION=$(semver $OLD_VERSION -i ${{ steps.bump-type.outputs.bump-type }})
                   echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
