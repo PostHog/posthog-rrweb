@@ -2,21 +2,24 @@ name: Autobump
 
 on:
     pull_request:
-      # always run while testing
-#        types: [closed]
+        types: [closed]
 
 jobs:
     label-version-bump:
         name: Bump version based on PR label
         runs-on: ubuntu-22.04
-        if: (contains(github.event.pull_request.labels.*.name, 'bump patch')
-                || contains(github.event.pull_request.labels.*.name, 'bump minor')
-                || contains(github.event.pull_request.labels.*.name, 'bump major'))
+        if: |
+          github.event.pull_request.merged
+          && (
+              contains(github.event.pull_request.labels.*.name, 'bump patch')
+              || contains(github.event.pull_request.labels.*.name, 'bump minor')
+              || contains(github.event.pull_request.labels.*.name, 'bump major')
+          )
         steps:
             - name: Check out repository
               uses: actions/checkout@v4
               with:
-#                  ref: ${{ github.event.pull_request.base.ref }}
+                  ref: ${{ github.event.pull_request.base.ref }}
                   token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
                   fetch-depth: 0
 
@@ -50,12 +53,6 @@ jobs:
               env:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               run: |
-                echo "Current directory: $(pwd)"
-                echo "Listing repo root:"
-                ls -lah $GITHUB_WORKSPACE
-                echo "Listing scripts directory:"
-                ls -lah $GITHUB_WORKSPACE/scripts
-                chmod +x $GITHUB_WORKSPACE/scripts/version-packages.sh
                 $GITHUB_WORKSPACE/scripts/version-packages.sh
 
 
