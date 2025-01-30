@@ -45,46 +45,12 @@ jobs:
                   BUMP_MINOR_PRESENT: ${{ contains(github.event.pull_request.labels.*.name, 'bump minor') }}
                   BUMP_MAJOR_PRESENT: ${{ contains(github.event.pull_request.labels.*.name, 'bump major') }}
 
-            - name: Determine new version
-              id: versions
-              if: steps.bump-type.outputs.bump-type != 'null'
-              run: |
-                npm add --global semver
-                which semver || echo "semver not found"
-                npx semver --version || echo "semver command failed"
-                OLD_VERSION=$(jq ".version" package.json -r)
-                echo "Old Version: $OLD_VERSION"
-                NEW_VERSION=$(npx semver "$OLD_VERSION" -i patch)
-                echo "New Version: $NEW_VERSION"
-                echo "old-version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
-                echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-
-
             - name: Update version in package.json for packages we import in posthog
               if: steps.bump-type.outputs.bump-type != 'null'
+              env:
+                BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               run: |
-                  # Define the package paths
-                  PACKAGES=(
-                    "../packages/record"
-                    "../packages/plugins/rrweb-plugin-console-record"
-                    "../packages/types"
-                    "../packages/rrweb"
-                  )
-            
-                  # Loop through each package and update the package.json
-                  for PACKAGE in "${PACKAGES[@]}"; do
-                    PACKAGE_JSON="$PACKAGE/package.json"
-            
-                    if [ -f "$PACKAGE_JSON" ]; then
-                      echo "Updating version in $PACKAGE_JSON"
-                      mv "$PACKAGE_JSON" "$PACKAGE_JSON.old" || { echo "Failed to rename $PACKAGE_JSON"; exit 1; }
-                      jq --indent 4 '.version = "'${{ steps.versions.outputs.new-version }}'"' "$PACKAGE_JSON.old" > "$PACKAGE_JSON" || { echo "Failed to update version in $PACKAGE_JSON"; exit 1; }
-                      rm "$PACKAGE_JSON.old" || { echo "Failed to remove backup file $PACKAGE_JSON.old"; exit 1; }
-                    else
-                      echo "Error: $PACKAGE_JSON does not exist"
-                      exit 1
-                    fi
-                  done
+                      ./scripts/update-version.sh
 
 
             - name: Update CHANGELOG.md
