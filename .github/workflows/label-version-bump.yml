@@ -51,7 +51,7 @@ jobs:
               run: |
                 npm add --global semver
                 which semver || echo "semver not found"
-                semver --version || echo "semver command failed"
+                npx semver --version || echo "semver command failed"
                 OLD_VERSION=$(jq ".version" package.json -r)
                 echo "Old Version: $OLD_VERSION"
                 NEW_VERSION=$(npx semver "$OLD_VERSION" -i patch)
