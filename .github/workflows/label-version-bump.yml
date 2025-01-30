@@ -50,7 +50,13 @@ jobs:
               env:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               run: |
-                      ./scripts/version-packages.sh
+                echo "Current directory: $(pwd)"
+                echo "Listing repo root:"
+                ls -lah $GITHUB_WORKSPACE
+                echo "Listing scripts directory:"
+                ls -lah $GITHUB_WORKSPACE/scripts
+                chmod +x $GITHUB_WORKSPACE/scripts/version-packages.sh
+                $GITHUB_WORKSPACE/scripts/version-packages.sh
 
 
             - name: Update CHANGELOG.md
