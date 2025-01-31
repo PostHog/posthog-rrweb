@@ -67,6 +67,7 @@ jobs:
             - name: Update the lockfile
               run: yarn install
 
+            # then commit back to main, needs to be able to bypass the branch protection
             - name: Commit bump
               if: steps.bump-type.outputs.bump-type != 'null'
               uses: EndBug/add-and-commit@v7
