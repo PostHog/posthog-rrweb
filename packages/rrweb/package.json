@@ -1,89 +1,89 @@
 {
-  "name": "@posthog/rrweb",
-  "version": "0.0.0",
-  "description": "record and replay the web",
-  "scripts": {
-    "prepare": "npm run prepack",
-    "prepack": "npm run build",
-    "retest": "cross-env PUPPETEER_HEADLESS=true yarn retest:headful",
-    "retest:headful": "vitest run --exclude test/benchmark",
-    "build-and-test": "yarn build && yarn retest",
-    "test:headless": "cross-env PUPPETEER_HEADLESS=true yarn build-and-test",
-    "test:headful": "cross-env PUPPETEER_HEADLESS=false yarn build-and-test",
-    "test": "yarn test:headless",
-    "test:watch": "yarn build && cross-env PUPPETEER_HEADLESS=true yarn vitest --exclude test/benchmark",
-    "test:update": "yarn test:headless --update",
-    "retest:update": "cross-env PUPPETEER_HEADLESS=true yarn retest --update",
-    "repl": "yarn build && node scripts/repl.js",
-    "live-stream": "yarn build && node scripts/stream.js",
-    "dev": "vite build --watch",
-    "build": "yarn turbo run prepublish",
-    "check-types": "tsc -noEmit",
-    "prepublish": "tsc -noEmit && vite build",
-    "lint": "yarn eslint src",
-    "benchmark": "vitest run --maxConcurrency 1 --no-file-parallelism test/benchmark"
-  },
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/rrweb-io/rrweb.git"
-  },
-  "main": "./dist/rrweb.umd.cjs",
-  "module": "./dist/rrweb.js",
-  "unpkg": "./dist/rrweb.umd.cjs",
-  "typings": "dist/rrweb.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/rrweb.d.ts",
-        "default": "./dist/rrweb.js"
-      },
-      "require": {
-        "types": "./dist/rrweb.d.cts",
-        "default": "./dist/rrweb.cjs"
-      }
+    "name": "@posthog/rrweb",
+    "version": "0.0.1",
+    "description": "record and replay the web",
+    "scripts": {
+        "prepare": "npm run prepack",
+        "prepack": "npm run build",
+        "retest": "cross-env PUPPETEER_HEADLESS=true yarn retest:headful",
+        "retest:headful": "vitest run --exclude test/benchmark",
+        "build-and-test": "yarn build && yarn retest",
+        "test:headless": "cross-env PUPPETEER_HEADLESS=true yarn build-and-test",
+        "test:headful": "cross-env PUPPETEER_HEADLESS=false yarn build-and-test",
+        "test": "yarn test:headless",
+        "test:watch": "yarn build && cross-env PUPPETEER_HEADLESS=true yarn vitest --exclude test/benchmark",
+        "test:update": "yarn test:headless --update",
+        "retest:update": "cross-env PUPPETEER_HEADLESS=true yarn retest --update",
+        "repl": "yarn build && node scripts/repl.js",
+        "live-stream": "yarn build && node scripts/stream.js",
+        "dev": "vite build --watch",
+        "build": "yarn turbo run prepublish",
+        "check-types": "tsc -noEmit",
+        "prepublish": "tsc -noEmit && vite build",
+        "lint": "yarn eslint src",
+        "benchmark": "vitest run --maxConcurrency 1 --no-file-parallelism test/benchmark"
     },
-    "./dist/style.css": "./dist/style.css"
-  },
-  "files": [
-    "dist",
-    "package.json"
-  ],
-  "sideEffects": false,
-  "author": "yanzhen@smartx.com",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/rrweb-io/rrweb/issues"
-  },
-  "homepage": "https://github.com/rrweb-io/rrweb#readme",
-  "devDependencies": {
-    "@types/dom-mediacapture-transform": "0.1.4",
-    "@types/inquirer": "^8.2.1",
-    "@types/jest-image-snapshot": "^6.1.0",
-    "@types/node": "^18.15.11",
-    "@types/offscreencanvas": "^2019.6.4",
-    "construct-style-sheets-polyfill": "^3.1.0",
-    "fast-mhtml": "^1.1.9",
-    "identity-obj-proxy": "^3.0.0",
-    "ignore-styles": "^5.0.1",
-    "inquirer": "^9.0.0",
-    "jest-image-snapshot": "^6.2.0",
-    "puppeteer": "^20.9.0",
-    "simple-peer-light": "^9.10.0",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.3.1",
-    "typescript": "^5.4.5",
-    "vite": "^5.3.1",
-    "vite-plugin-dts": "^3.9.1"
-  },
-  "dependencies": {
-    "@posthog/rrweb-types": "*",
-    "@posthog/rrweb-utils": "*",
-    "@types/css-font-loading-module": "0.0.7",
-    "@xstate/fsm": "^1.4.0",
-    "base64-arraybuffer": "^1.0.1",
-    "mitt": "^3.0.0",
-    "@posthog/rrdom": "*",
-    "@posthog/rrweb-snapshot": "*"
-  }
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/rrweb-io/rrweb.git"
+    },
+    "main": "./dist/rrweb.umd.cjs",
+    "module": "./dist/rrweb.js",
+    "unpkg": "./dist/rrweb.umd.cjs",
+    "typings": "dist/rrweb.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/rrweb.d.ts",
+                "default": "./dist/rrweb.js"
+            },
+            "require": {
+                "types": "./dist/rrweb.d.cts",
+                "default": "./dist/rrweb.cjs"
+            }
+        },
+        "./dist/style.css": "./dist/style.css"
+    },
+    "files": [
+        "dist",
+        "package.json"
+    ],
+    "sideEffects": false,
+    "author": "yanzhen@smartx.com",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/rrweb-io/rrweb/issues"
+    },
+    "homepage": "https://github.com/rrweb-io/rrweb#readme",
+    "devDependencies": {
+        "@types/dom-mediacapture-transform": "0.1.4",
+        "@types/inquirer": "^8.2.1",
+        "@types/jest-image-snapshot": "^6.1.0",
+        "@types/node": "^18.15.11",
+        "@types/offscreencanvas": "^2019.6.4",
+        "construct-style-sheets-polyfill": "^3.1.0",
+        "fast-mhtml": "^1.1.9",
+        "identity-obj-proxy": "^3.0.0",
+        "ignore-styles": "^5.0.1",
+        "inquirer": "^9.0.0",
+        "jest-image-snapshot": "^6.2.0",
+        "puppeteer": "^20.9.0",
+        "simple-peer-light": "^9.10.0",
+        "ts-node": "^10.9.1",
+        "tslib": "^2.3.1",
+        "typescript": "^5.4.5",
+        "vite": "^5.3.1",
+        "vite-plugin-dts": "^3.9.1"
+    },
+    "dependencies": {
+        "@posthog/rrweb-types": "*",
+        "@posthog/rrweb-utils": "*",
+        "@types/css-font-loading-module": "0.0.7",
+        "@xstate/fsm": "^1.4.0",
+        "base64-arraybuffer": "^1.0.1",
+        "mitt": "^3.0.0",
+        "@posthog/rrdom": "*",
+        "@posthog/rrweb-snapshot": "*"
+    }
 }
