@@ -17,6 +17,7 @@ echo "semver bin: $SEMVER_BIN"
     "./packages/types"
     "./packages/rrweb"
     "./packages/utils"
+    "./packages/rr-dom"
   )
 
   # Loop through each package and update the package.json
@@ -40,3 +41,6 @@ echo "semver bin: $SEMVER_BIN"
       exit 1
     fi
   done
+
+  # Print JSON output
+echo "{\"old_version\":\"$OLD_VERSION\", \"new_version\":\"$NEW_VERSION\"}"
