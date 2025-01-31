@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb",
+  "name": "@posthog/rrweb",
   "version": "0.0.0",
   "description": "record and replay the web",
   "scripts": {
@@ -77,13 +77,13 @@
     "vite-plugin-dts": "^3.9.1"
   },
   "dependencies": {
-    "@posthog-internal/rrweb-types": "*",
-    "@posthog-internal/rrweb-utils": "*",
+    "@posthog/rrweb-types": "*",
+    "@posthog/rrweb-utils": "*",
     "@types/css-font-loading-module": "0.0.7",
     "@xstate/fsm": "^1.4.0",
     "base64-arraybuffer": "^1.0.1",
     "mitt": "^3.0.0",
-    "@posthog-internal/rrdom": "*",
-    "@posthog-internal/rrweb-snapshot": "*"
+    "@posthog/rrdom": "*",
+    "@posthog/rrweb-snapshot": "*"
   }
 }

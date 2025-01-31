@@ -6,12 +6,12 @@ import { vi, type MockInstance } from 'vitest';
 import type {
   styleDeclarationData,
   styleSheetRuleData,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import {
   createMirror,
   Mirror as NodeMirror,
-} from '@posthog-internal/rrweb-snapshot';
-import type { ReplayerHandler } from '@posthog-internal/rrdom';
+} from '@posthog/rrweb-snapshot';
+import type { ReplayerHandler } from '@posthog/rrdom';
 
 describe('diff algorithm for rrdom', () => {
   let mirror: NodeMirror;

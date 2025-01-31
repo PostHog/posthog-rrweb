@@ -1,15 +1,15 @@
-import type { Emitter } from '@posthog-internal/rrweb-types';
+import type { Emitter } from '@posthog/rrweb-types';
 import {
   MediaInteractions,
   ReplayerEvents,
-} from '@posthog-internal/rrweb-types';
-import type { RRMediaElement } from '@posthog-internal/rrdom';
+} from '@posthog/rrweb-types';
+import type { RRMediaElement } from '@posthog/rrdom';
 import type { createPlayerService, createSpeedService } from '../machine';
-import type { Mirror } from '@posthog-internal/rrweb-snapshot';
+import type { Mirror } from '@posthog/rrweb-snapshot';
 import type {
   mediaInteractionData,
   mediaAttributes,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 
 const SUPPORTED_MEDIA_ELEMENT_NAMES = ['AUDIO', 'VIDEO'];
 

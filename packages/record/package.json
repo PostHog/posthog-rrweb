@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-record",
+  "name": "@posthog/rrweb-record",
   "version": "0.0.0",
   "publishConfig": {
     "access": "public"
@@ -47,9 +47,9 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@posthog-internal/rrweb-types": "*",
-    "@posthog-internal/rrweb": "*",
-    "@posthog-internal/rrweb-utils": "*"
+    "@posthog/rrweb-types": "*",
+    "@posthog/rrweb": "*",
+    "@posthog/rrweb-utils": "*"
   },
   "browserslist": [
     "supports es6-class"

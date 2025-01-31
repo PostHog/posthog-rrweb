@@ -15,7 +15,7 @@ import {
   EventType,
   eventWithTime,
   listenerHandler,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { recordOptions } from '../../src/types';
 
 interface IWindow extends Window {

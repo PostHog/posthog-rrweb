@@ -12,7 +12,7 @@ npm install @rrweb/replay
 ## Usage
 
 ```js
-import { Replayer } from '@posthog-internal/rrweb-replay';
+import { Replayer } from '@posthog/rrweb-replay';
 
 const replayer = new Replayer(events, {
   // options

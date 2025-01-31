@@ -1,4 +1,4 @@
-import { NodeType as RRNodeType } from '@posthog-internal/rrweb-types';
+import { NodeType as RRNodeType } from '@posthog/rrweb-types';
 import type { NWSAPI } from 'nwsapi';
 import type { CSSStyleDeclaration as CSSStyleDeclarationType } from 'cssstyle';
 import {
@@ -13,7 +13,7 @@ import {
   ClassList,
   type IRRDocument,
   type CSSStyleDeclaration,
-} from '@posthog-internal/rrdom';
+} from '@posthog/rrdom';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const nwsapi = require('nwsapi');
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires

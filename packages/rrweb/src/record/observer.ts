@@ -4,7 +4,7 @@ import {
   Mirror,
   getInputType,
   toLowerCase,
-} from '@posthog-internal/rrweb-snapshot';
+} from '@posthog/rrweb-snapshot';
 import type { FontFaceSet } from 'css-font-loading-module';
 import {
   throttle,
@@ -18,14 +18,14 @@ import {
   StyleSheetMirror,
   nowTimestamp,
 } from '../utils';
-import { patch } from '@posthog-internal/rrweb-utils';
+import { patch } from '@posthog/rrweb-utils';
 import type { observerParam, MutationBufferParam } from '../types';
 import {
   IncrementalSource,
   MouseInteractions,
   PointerTypes,
   MediaInteractions,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import type {
   mutationCallBack,
   mousemoveCallBack,
@@ -49,10 +49,10 @@ import type {
   SelectionRange,
   selectionCallback,
   customElementCallback,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import MutationBuffer from './mutation';
 import { callbackWrapper } from './error-handler';
-import dom, { mutationObserverCtor } from '@posthog-internal/rrweb-utils';
+import dom, { mutationObserverCtor } from '@posthog/rrweb-utils';
 
 export const mutationBuffers: MutationBuffer[] = [];
 

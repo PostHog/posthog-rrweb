@@ -5,9 +5,9 @@ import {
   type canvasMutationWithType,
   type IWindow,
   type listenerHandler,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { hookSetter, isBlocked } from '../../../utils';
-import { patch } from '@posthog-internal/rrweb-utils';
+import { patch } from '@posthog/rrweb-utils';
 import { saveWebGLVar, serializeArgs } from './serialize-args';
 
 function patchGLPrototype(

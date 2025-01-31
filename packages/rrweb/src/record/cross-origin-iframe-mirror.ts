@@ -1,4 +1,4 @@
-import type { ICrossOriginIframeMirror } from '@posthog-internal/rrweb-types';
+import type { ICrossOriginIframeMirror } from '@posthog/rrweb-types';
 export default class CrossOriginIframeMirror
   implements ICrossOriginIframeMirror
 {

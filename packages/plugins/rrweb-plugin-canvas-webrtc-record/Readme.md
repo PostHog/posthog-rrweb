@@ -13,8 +13,8 @@ https://user-images.githubusercontent.com/4106/186701616-fd71a107-5d53-423c-ba09
 ```js
 // Record side
 
-import rrweb from '@posthog-internal/rrweb';
-import { RRWebPluginCanvasWebRTCRecord } from '@posthog-internal/plugin-canvas-webrtc-record';
+import rrweb from '@posthog/rrweb';
+import { RRWebPluginCanvasWebRTCRecord } from '@posthog/plugin-canvas-webrtc-record';
 
 const webRTCRecordPlugin = new RRWebPluginCanvasWebRTCRecord({
   signalSendCallback: (msg) => {
@@ -42,8 +42,8 @@ rrweb.record({
 
 ```js
 // Replay side
-import rrweb from '@posthog-internal/rrweb';
-import { RRWebPluginCanvasWebRTCReplay } from '@posthog-internal/plugin-canvas-webrtc-replay';
+import rrweb from '@posthog/rrweb';
+import { RRWebPluginCanvasWebRTCReplay } from '@posthog/plugin-canvas-webrtc-replay';
 
 const webRTCReplayPlugin = new RRWebPluginCanvasWebRTCReplay({
   canvasFoundCallback(canvas, context) {

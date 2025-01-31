@@ -6,8 +6,8 @@ import {
   createMirror,
   Mirror as NodeMirror,
   serializedNodeWithId,
-} from '@posthog-internal/rrweb-snapshot';
-import { NodeType as RRNodeType } from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-snapshot';
+import { NodeType as RRNodeType } from '@posthog/rrweb-types';
 import { RRDocument } from '../../src';
 import { diff, ReplayerHandler } from '../../src/diff';
 

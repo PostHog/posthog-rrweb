@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-snapshot",
+  "name": "@posthog/rrweb-snapshot",
   "version": "0.0.0",
   "description": "rrweb's component to take a snapshot of DOM, aka DOM serializer",
   "scripts": {
@@ -45,8 +45,8 @@
   "author": "yanzhen@smartx.com",
   "license": "MIT",
   "devDependencies": {
-    "@posthog-internal/rrweb-types": "*",
-    "@posthog-internal/rrweb-utils": "*",
+    "@posthog/rrweb-types": "*",
+    "@posthog/rrweb-utils": "*",
     "@types/jsdom": "^20.0.0",
     "@types/node": "^18.15.11",
     "@types/puppeteer": "^5.4.4",

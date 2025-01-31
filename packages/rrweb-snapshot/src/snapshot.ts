@@ -7,7 +7,7 @@ import type {
   ICanvas,
   DialogAttributes,
 } from './types';
-import { NodeType } from '@posthog-internal/rrweb-types';
+import { NodeType } from '@posthog/rrweb-types';
 import type {
   serializedNode,
   serializedNodeWithId,
@@ -16,7 +16,7 @@ import type {
   attributes,
   mediaAttributes,
   DataURLOptions,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import {
   Mirror,
   is2DCanvasBlank,
@@ -31,7 +31,7 @@ import {
   absolutifyURLs,
   markCssSplits,
 } from './utils';
-import dom from '@posthog-internal/rrweb-utils';
+import dom from '@posthog/rrweb-utils';
 
 let _id = 1;
 const tagNameRegex = new RegExp('[^a-z0-9-_:]');

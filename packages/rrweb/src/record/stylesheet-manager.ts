@@ -1,4 +1,4 @@
-import { stringifyRule } from '@posthog-internal/rrweb-snapshot';
+import { stringifyRule } from '@posthog/rrweb-snapshot';
 import type {
   elementNode,
   serializedNodeWithId,
@@ -6,7 +6,7 @@ import type {
   adoptedStyleSheetParam,
   attributeMutation,
   mutationCallBack,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { StyleSheetMirror } from '../utils';
 
 export class StylesheetManager {

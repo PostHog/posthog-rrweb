@@ -12,8 +12,8 @@ npm install @rrweb/rrweb-plugin-sequential-id-record
 ## Usage
 
 ```js
-import rrweb from '@posthog-internal/rrweb';
-import { getRecordSequentialIdPlugin } from '@posthog-internal/rrweb-plugin-sequential-id-record';
+import rrweb from '@posthog/rrweb';
+import { getRecordSequentialIdPlugin } from '@posthog/rrweb-plugin-sequential-id-record';
 
 rrweb.record({
   emit: function emit(event) {

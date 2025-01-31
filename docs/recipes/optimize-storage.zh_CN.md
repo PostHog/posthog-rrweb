@@ -72,7 +72,7 @@ rrweb.record({
 rrweb 提供了一个基于 fflate 的简单压缩函数，在 [@rrweb/packer](../../packages/packer/) 中可以作为 `packFn` 传入使用。
 
 ```js
-import { pack } from '@posthog-internal/rrweb-packer';
+import { pack } from '@posthog/rrweb-packer';
 
 rrweb.record({
   emit(event) {},
@@ -83,7 +83,7 @@ rrweb.record({
 回放时通用需要传入 packer.unpack 作为 `unpackFn` 传入。
 
 ```js
-import { unpack } from '@posthog-internal/rrweb-packer';
+import { unpack } from '@posthog/rrweb-packer';
 
 const replayer = new rrweb.Replayer(events, {
   unpackFn: rrweb.unpack,

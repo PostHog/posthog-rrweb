@@ -1,5 +1,5 @@
 import type { Replayer } from '../';
-import type { canvasMutationCommand } from '@posthog-internal/rrweb-types';
+import type { canvasMutationCommand } from '@posthog/rrweb-types';
 import { deserializeArg } from './deserialize-args';
 
 export default async function canvasMutation({

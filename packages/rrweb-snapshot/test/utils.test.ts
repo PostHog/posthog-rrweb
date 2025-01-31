@@ -8,11 +8,11 @@ import {
   fixSafariColons,
   isNodeMetaEqual,
 } from '../src/utils';
-import { NodeType } from '@posthog-internal/rrweb-types';
+import { NodeType } from '@posthog/rrweb-types';
 import type {
   serializedNode,
   serializedNodeWithId,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 
 describe('utils', () => {
   describe('isNodeMetaEqual()', () => {

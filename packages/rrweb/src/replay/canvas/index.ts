@@ -4,7 +4,7 @@ import {
   type canvasMutationCommand,
   type canvasMutationData,
   type canvasMutationParam,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import webglMutation from './webgl';
 import canvas2DMutation from './2d';
 

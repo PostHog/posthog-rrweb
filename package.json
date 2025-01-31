@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-_monorepo",
+  "name": "@posthog/rrweb-_monorepo",
   "description": "record and replay the web",
   "repository": {
     "type": "git",
