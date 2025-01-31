@@ -55,14 +55,6 @@ jobs:
               id: version-update
               run: |
                 OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh | tail -n1)
-#                echo " --- DEBUG ZONE ---"
-#                echo "just the output"
-#                echo "$OUTPUT"
-#                echo "now xxd it"
-#                echo -n "$OUTPUT" | xxd
-#                # Debug JSON format before parsing
-#                echo -n "$OUTPUT" | jq .
-#                echo " --- DEBUG ZONE ENDS ---"
                 echo "OLD_VERSION=$(echo -n "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
                 echo "NEW_VERSION=$(echo -n "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
 
