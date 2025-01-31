@@ -16,11 +16,11 @@ yarn run build:all
 # first as a dry run to check they should all publish
 for PACKAGE in "${PACKAGES[@]}"; do
   echo "Publishing $PACKAGE"
-  npm publish  --dry-run --workspace "$PACKAGE" || { echo "Failed to dry-run publish $PACKAGE"; exit 1; }
+  npm publish  --dry-run --workspace "$PACKAGE" --access public || { echo "Failed to dry-run publish $PACKAGE"; exit 1; }
 done
 
 # then for real
 for PACKAGE in "${PACKAGES[@]}"; do
   echo "Publishing $PACKAGE"
-  npm publish --workspace "$PACKAGE" || { echo "Failed to publish $PACKAGE"; exit 1; }
+  npm publish --workspace "$PACKAGE" --access public || { echo "Failed to publish $PACKAGE"; exit 1; }
 done
