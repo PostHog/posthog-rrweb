@@ -9,6 +9,7 @@
     "./packages/plugins/rrweb-plugin-console-record"
     "./packages/types"
     "./packages/rrweb"
+    "./packages/rrweb-utils"
   )
 
 yarn run build:all
