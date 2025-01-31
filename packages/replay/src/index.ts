@@ -4,7 +4,7 @@ import {
   type PlayerMachineState,
   type SpeedMachineState,
 } from '@posthog/rrweb';
-import '@posthog/rrweb/dist/style.css';
+import '@posthog/rrweb/dist/rrweb.css';
 
 export {
   Replayer,
