@@ -43,11 +43,14 @@ jobs:
         with:
           node-version: lts/*
           cache: 'yarn'
+          registry-url: https://registry.npmjs.org
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
       - name: npm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           $GITHUB_WORKSPACE/scripts/npm-release.sh
           
