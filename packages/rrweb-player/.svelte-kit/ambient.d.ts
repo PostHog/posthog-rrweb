@@ -138,6 +138,7 @@ declare module '$env/static/private' {
 	export const PATH: string;
 	export const NODE: string;
 	export const ANT_HOME: string;
+	export const NEW_VERSION: string;
 	export const DOTNET_MULTILEVEL_LOOKUP: string;
 	export const RUNNER_TRACKING_ID: string;
 	export const INVOCATION_ID: string;
@@ -167,6 +168,7 @@ declare module '$env/static/private' {
 	export const STATS_D_D: string;
 	export const npm_lifecycle_script: string;
 	export const npm_package_scripts_test_cross_platform_dev: string;
+	export const OLD_VERSION: string;
 	export const STATS_UE: string;
 	export const ANDROID_NDK_ROOT: string;
 	export const GITHUB_ACTION_REF: string;
@@ -383,6 +385,7 @@ declare module '$env/dynamic/private' {
 		PATH: string;
 		NODE: string;
 		ANT_HOME: string;
+		NEW_VERSION: string;
 		DOTNET_MULTILEVEL_LOOKUP: string;
 		RUNNER_TRACKING_ID: string;
 		INVOCATION_ID: string;
@@ -412,6 +415,7 @@ declare module '$env/dynamic/private' {
 		STATS_D_D: string;
 		npm_lifecycle_script: string;
 		npm_package_scripts_test_cross_platform_dev: string;
+		OLD_VERSION: string;
 		STATS_UE: string;
 		ANDROID_NDK_ROOT: string;
 		GITHUB_ACTION_REF: string;
