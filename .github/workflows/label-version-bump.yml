@@ -54,19 +54,24 @@ jobs:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               id: version-update
               run: |
-                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh | tr -d '\n' | tr -d '\r')
+                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh)
                 echo "$OUTPUT"
-                echo "old-version=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
-                echo "new-version=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
+                # Debug JSON format before parsing
+                echo "$OUTPUT" | jq .
+                echo "OLD_VERSION=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
+                echo "NEW_VERSION=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
 
 
             - name: Update CHANGELOG.md
               run: |
-                CHANGELOG_HEADING="## $new-version - $(date --iso-8601)"
-                CHANGELOG_POINTS=$(git log v"$old-version"..v"$new-version" --pretty=format:%s --grep='^.*\d*)$' | sed -e 's/^/- /')
+                CHANGELOG_HEADING="## $NEW_VERSION - $(date --iso-8601)"
+                CHANGELOG_POINTS=$(git log v"$OLD_VERSION"..v"$NEW_VERSION" --pretty=format:%s --grep='^.*\d*)$' | sed -e 's/^/- /')
                 mv CHANGELOG.md CHANGELOG.old.md
                 echo -e "$CHANGELOG_HEADING\n\n$CHANGELOG_POINTS\n\n$(cat CHANGELOG.old.md)" > CHANGELOG.md
                 rm CHANGELOG.old.md
+              env:
+                OLD_VERSION: ${{ env.OLD_VERSION }}
+                NEW_VERSION: ${{ env.NEW_VERSION }}
 
             - name: Update the lockfile
               run: yarn install
@@ -78,5 +83,5 @@ jobs:
               uses: EndBug/add-and-commit@v7
               with:
                   branch: ${{ github.event.pull_request.base.ref }}
-                  message: "chore: Bump version to $new-version"
+                  message: "chore: Bump version to ${{ env.NEW_VERSION }}"
                   github_token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
