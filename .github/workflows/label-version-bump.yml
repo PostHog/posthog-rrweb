@@ -54,15 +54,17 @@ jobs:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               id: version-update
               run: |
-                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh)
+                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh | tail -n1)
                 echo " --- DEBUG ZONE ---"
                 echo "just the output"
-                echo "$OUTPUT" | tail -n1
+                echo "$OUTPUT"
+                echo "now xxd it"
+                echo "$OUTPUT" | xxd
                 # Debug JSON format before parsing
-                echo $OUTPUT | tail -n1 | jq .
+                echo $OUTPUT | jq .
                 echo " --- DEBUG ZONE ENDS ---"
-                echo "OLD_VERSION=$(echo "$OUTPUT" | tail -n1 | jq -r '.old_version')" >> "$GITHUB_ENV"
-                echo "NEW_VERSION=$(echo "$OUTPUT" | tail -n1 | jq -r '.new_version')" >> "$GITHUB_ENV"
+                echo "OLD_VERSION=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
+                echo "NEW_VERSION=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
 
 
 #            - name: Update CHANGELOG.md
