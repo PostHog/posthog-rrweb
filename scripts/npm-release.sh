@@ -10,7 +10,7 @@
     "./packages/types"
     "./packages/rrweb"
     "./packages/utils"
-    "./packages/rr-dom"
+    "./packages/rrdom"
   )
 
 yarn run build:all
