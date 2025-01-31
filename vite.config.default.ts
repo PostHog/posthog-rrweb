@@ -140,11 +140,6 @@ export default function (
 
       sourcemap: true,
 
-      // rollupOptions: {
-      //   output: {
-      //     manualChunks: {},
-      //   },
-      // },
     },
     plugins: [
       dts({

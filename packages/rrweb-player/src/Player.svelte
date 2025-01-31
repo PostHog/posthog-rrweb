@@ -195,7 +195,7 @@
 </script>
 
 <style global>
-  @import '@posthog/rrweb-replay/dist/style.css';
+  @import '@posthog/rrweb-replay/dist/rrweb.css';
 
   .rr-player {
     position: relative;
