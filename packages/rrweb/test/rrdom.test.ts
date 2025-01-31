@@ -7,10 +7,7 @@ import type {
   styleDeclarationData,
   styleSheetRuleData,
 } from '@posthog/rrweb-types';
-import {
-  createMirror,
-  Mirror as NodeMirror,
-} from '@posthog/rrweb-snapshot';
+import { createMirror, Mirror as NodeMirror } from '@posthog/rrweb-snapshot';
 import type { ReplayerHandler } from '@posthog/rrdom';
 
 describe('diff algorithm for rrdom', () => {

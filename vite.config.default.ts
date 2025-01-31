@@ -139,7 +139,6 @@ export default function (
       minify: false,
 
       sourcemap: true,
-
     },
     plugins: [
       dts({
