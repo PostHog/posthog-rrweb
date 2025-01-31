@@ -54,10 +54,12 @@ jobs:
                 BUMP_TYPE: ${{ steps.bump-type.outputs.bump-type }}
               id: version-update
               run: |
-                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh)
+                OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh | tr -d '\n' | tr -d '\r')
+                echo " --- DEBUG ZONE ---"
                 echo "$OUTPUT"
                 # Debug JSON format before parsing
                 echo "$OUTPUT" | jq .
+                echo " --- DEBUG ZONE ENDS ---"
                 echo "OLD_VERSION=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
                 echo "NEW_VERSION=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
 
