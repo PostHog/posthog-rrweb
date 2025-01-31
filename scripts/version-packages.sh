@@ -16,7 +16,7 @@ echo "semver bin: $SEMVER_BIN"
     "./packages/plugins/rrweb-plugin-console-record"
     "./packages/types"
     "./packages/rrweb"
-    "./packages/rrweb-utils"
+    "./packages/utils"
   )
 
   # Loop through each package and update the package.json
