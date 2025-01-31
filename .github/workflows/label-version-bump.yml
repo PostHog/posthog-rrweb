@@ -56,12 +56,13 @@ jobs:
               run: |
                 OUTPUT=$($GITHUB_WORKSPACE/scripts/version-packages.sh)
                 echo " --- DEBUG ZONE ---"
-                echo "$OUTPUT"
+                echo "just the output"
+                echo "$OUTPUT" | tail -n1
                 # Debug JSON format before parsing
-                echo $OUTPUT | jq .
+                echo $OUTPUT | tail -n1 | jq .
                 echo " --- DEBUG ZONE ENDS ---"
-                echo "OLD_VERSION=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
-                echo "NEW_VERSION=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
+                echo "OLD_VERSION=$(echo "$OUTPUT" | tail -n1 | jq -r '.old_version')" >> "$GITHUB_ENV"
+                echo "NEW_VERSION=$(echo "$OUTPUT" | tail -n1 | jq -r '.new_version')" >> "$GITHUB_ENV"
 
 
 #            - name: Update CHANGELOG.md
