@@ -44,4 +44,4 @@ echo "semver bin: $SEMVER_BIN"
   done
 
   # Print JSON output
-echo "{\"old_version\":\"$OLD_VERSION\", \"new_version\":\"$NEW_VERSION\"}"
+echo -n "{\"old_version\":\"$OLD_VERSION\", \"new_version\":\"$NEW_VERSION\"}"
