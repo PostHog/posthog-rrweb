@@ -59,12 +59,12 @@ jobs:
                 echo "just the output"
                 echo "$OUTPUT"
                 echo "now xxd it"
-                echo "$OUTPUT" | xxd
+                echo -n "$OUTPUT" | xxd
                 # Debug JSON format before parsing
-                echo $OUTPUT | jq .
+                echo -n "$OUTPUT" | jq .
                 echo " --- DEBUG ZONE ENDS ---"
-                echo "OLD_VERSION=$(echo "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
-                echo "NEW_VERSION=$(echo "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
+                echo "OLD_VERSION=$(echo -n "$OUTPUT" | jq -r '.old_version')" >> "$GITHUB_ENV"
+                echo "NEW_VERSION=$(echo -n "$OUTPUT" | jq -r '.new_version')" >> "$GITHUB_ENV"
 
 
 #            - name: Update CHANGELOG.md
