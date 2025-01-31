@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-plugin-console-record",
+  "name": "@posthog/rrweb-plugin-console-record",
   "version": "0.0.0",
   "description": "",
   "type": "module",
@@ -38,7 +38,7 @@
   "author": "yanzhen@smartx.com",
   "license": "MIT",
   "devDependencies": {
-    "@posthog-internal/rrweb": "*",
+    "@posthog/rrweb": "*",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
     "vite-plugin-dts": "^3.9.1",
@@ -46,7 +46,7 @@
     "puppeteer": "^20.9.0"
   },
   "peerDependencies": {
-    "@posthog-internal/rrweb": "*",
-    "@posthog-internal/rrweb-utils": "*"
+    "@posthog/rrweb": "*",
+    "@posthog/rrweb-utils": "*"
   }
 }

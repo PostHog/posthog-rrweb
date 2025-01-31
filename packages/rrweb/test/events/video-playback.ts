@@ -1,4 +1,4 @@
-import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import type { eventWithTime } from '@posthog/rrweb-types';
 
 const events: eventWithTime[] = [
   { type: 0, data: {}, timestamp: 1900000001 },

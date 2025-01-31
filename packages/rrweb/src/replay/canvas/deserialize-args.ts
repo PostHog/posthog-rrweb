@@ -3,7 +3,7 @@ import type { Replayer } from '../';
 import type {
   CanvasArg,
   SerializedCanvasArg,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 
 // TODO: add ability to wipe this list
 type GLVarMap = Map<string, any[]>;

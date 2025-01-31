@@ -11,7 +11,7 @@ import {
   EventType,
   type Emitter,
   IncrementalSource,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { Timer, addDelay } from './timer';
 
 export type PlayerContext = {

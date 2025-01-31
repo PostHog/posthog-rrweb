@@ -8,7 +8,7 @@ import { vi, MockInstance } from 'vitest';
 import {
   createMirror,
   Mirror as NodeMirror,
-} from '@posthog-internal/rrweb-snapshot';
+} from '@posthog/rrweb-snapshot';
 import {
   buildFromDom,
   getDefaultSN,
@@ -29,12 +29,12 @@ import type {
   serializedNodeWithId,
   canvasMutationData,
   styleSheetRuleData,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import {
   NodeType as RRNodeType,
   EventType,
   IncrementalSource,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 
 const elementSn = {
   type: RRNodeType.Element,

@@ -1,5 +1,5 @@
-import { EventType } from '@posthog-internal/rrweb-types';
-import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import { EventType } from '@posthog/rrweb-types';
+import type { eventWithTime } from '@posthog/rrweb-types';
 
 const now = Date.now();
 const events: eventWithTime[] = [

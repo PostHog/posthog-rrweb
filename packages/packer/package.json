@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-packer",
+  "name": "@posthog/rrweb-packer",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite build --watch",
@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "fflate": "^0.4.4",
-    "@posthog-internal/rrweb-types": "*"
+    "@posthog/rrweb-types": "*"
   },
   "browserslist": [
     "supports es6-class"

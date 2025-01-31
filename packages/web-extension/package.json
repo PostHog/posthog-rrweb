@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-web-extension",
+  "name": "@posthog/rrweb-web-extension",
   "private": true,
   "version": "0.0.0",
   "description": "The web extension of rrweb which helps to run rrweb on any website out of box",
@@ -18,7 +18,7 @@
     "prepublish": "yarn build"
   },
   "devDependencies": {
-    "@posthog-internal/rrweb-types": "*",
+    "@posthog/rrweb-types": "*",
     "@types/chrome": "^0.0.287",
     "@types/react-dom": "^18.0.6",
     "@types/semver": "^7.5.8",
@@ -44,7 +44,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "react-router-dom": "^6.4.1",
-    "@posthog-internal/rrweb": "*",
-    "@posthog-internal/rrweb-player": "*"
+    "@posthog/rrweb": "*",
+    "@posthog/rrweb-player": "*"
   }
 }

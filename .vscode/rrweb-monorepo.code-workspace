@@ -25,27 +25,27 @@
       "path": "../packages/rrweb-snapshot"
     },
     {
-      "name": "@posthog-internal/rrweb-all",
+      "name": "@posthog/rrweb-all",
       "path": "../packages/all"
     },
     {
-      "name": "@posthog-internal/rrweb-record",
+      "name": "@posthog/rrweb-record",
       "path": "../packages/record"
     },
     {
-      "name": "@posthog-internal/rrweb-replay",
+      "name": "@posthog/rrweb-replay",
       "path": "../packages/replay"
     },
     {
-      "name": "@posthog-internal/rrweb-types",
+      "name": "@posthog/rrweb-types",
       "path": "../packages/types"
     },
     {
-      "name": "@posthog-internal/rrweb-utils",
+      "name": "@posthog/rrweb-utils",
       "path": "../packages/utils"
     },
     {
-      "name": "@posthog-internal/rrweb-packer",
+      "name": "@posthog/rrweb-packer",
       "path": "../packages/packer"
     },
     {
@@ -54,27 +54,27 @@
     },
     { "name": "rrvideo (package)", "path": "../packages/rrvideo" },
     {
-      "name": "@posthog-internal/rrweb-plugin-console-record",
+      "name": "@posthog/rrweb-plugin-console-record",
       "path": "../packages/plugins/rrweb-plugin-console-record"
     },
     {
-      "name": "@posthog-internal/rrweb-plugin-console-replay",
+      "name": "@posthog/rrweb-plugin-console-replay",
       "path": "../packages/plugins/rrweb-plugin-console-replay"
     },
     {
-      "name": "@posthog-internal/rrweb-plugin-sequential-id-record",
+      "name": "@posthog/rrweb-plugin-sequential-id-record",
       "path": "../packages/plugins/rrweb-plugin-sequential-id-record"
     },
     {
-      "name": "@posthog-internal/rrweb-plugin-sequential-id-replay",
+      "name": "@posthog/rrweb-plugin-sequential-id-replay",
       "path": "../packages/plugins/rrweb-plugin-sequential-id-replay"
     },
     {
-      "name": "@posthog-internal/rrweb-plugin-canvas-webrtc-record",
+      "name": "@posthog/rrweb-plugin-canvas-webrtc-record",
       "path": "../packages/plugins/rrweb-plugin-canvas-webrtc-record"
     },
     {
-      "name": "@posthog-internal/rrweb-plugin-canvas-webrtc-replay",
+      "name": "@posthog/rrweb-plugin-canvas-webrtc-replay",
       "path": "../packages/plugins/rrweb-plugin-canvas-webrtc-replay"
     }
   ],
@@ -88,17 +88,17 @@
       "rrweb-snapshot (package)",
       "rrdom (package)",
       "rrdom-nodejs (package)",
-      "@posthog-internal/rrweb-all",
-      "@posthog-internal/rrweb-record",
-      "@posthog-internal/rrweb-replay",
-      "@posthog-internal/rrweb-types",
-      "@posthog-internal/rrweb-utils",
-      "@posthog-internal/rrweb-packer",
-      "@posthog-internal/rrweb-plugin-console-record",
-      "@posthog-internal/rrweb-plugin-console-replay",
-      "@posthog-internal/rrweb-plugin-sequential-id",
-      "@posthog-internal/rrweb-plugin-canvas-webrtc-record",
-      "@posthog-internal/rrweb-plugin-canvas-webrtc-replay"
+      "@posthog/rrweb-all",
+      "@posthog/rrweb-record",
+      "@posthog/rrweb-replay",
+      "@posthog/rrweb-types",
+      "@posthog/rrweb-utils",
+      "@posthog/rrweb-packer",
+      "@posthog/rrweb-plugin-console-record",
+      "@posthog/rrweb-plugin-console-replay",
+      "@posthog/rrweb-plugin-sequential-id",
+      "@posthog/rrweb-plugin-canvas-webrtc-record",
+      "@posthog/rrweb-plugin-canvas-webrtc-replay"
     ],
     "typescript.tsdk": " rrweb monorepo/node_modules/typescript/lib"
   }

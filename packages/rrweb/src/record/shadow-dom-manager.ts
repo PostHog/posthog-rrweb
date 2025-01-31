@@ -3,16 +3,16 @@ import type {
   mutationCallBack,
   scrollCallback,
   SamplingStrategy,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import {
   initMutationObserver,
   initScrollObserver,
   initAdoptedStyleSheetObserver,
 } from './observer';
 import { inDom } from '../utils';
-import type { Mirror } from '@posthog-internal/rrweb-snapshot';
-import { isNativeShadowDom } from '@posthog-internal/rrweb-snapshot';
-import dom, { patch } from '@posthog-internal/rrweb-utils';
+import type { Mirror } from '@posthog/rrweb-snapshot';
+import { isNativeShadowDom } from '@posthog/rrweb-snapshot';
+import dom, { patch } from '@posthog/rrweb-utils';
 
 type BypassOptions = Omit<
   MutationBufferParam,

@@ -1,4 +1,4 @@
-import type { serializedNodeWithId } from '@posthog-internal/rrweb-types';
+import type { serializedNodeWithId } from '@posthog/rrweb-types';
 
 export type tagMap = {
   [key: string]: string;

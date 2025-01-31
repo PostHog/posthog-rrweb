@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-plugin-sequential-id-record",
+  "name": "@posthog/rrweb-plugin-sequential-id-record",
   "version": "0.0.0",
   "description": "",
   "type": "module",
@@ -36,12 +36,12 @@
   "author": "yanzhen@smartx.com",
   "license": "MIT",
   "devDependencies": {
-    "@posthog-internal/rrweb": "*",
+    "@posthog/rrweb": "*",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
     "vite-plugin-dts": "^3.9.1"
   },
   "peerDependencies": {
-    "@posthog-internal/rrweb": "*"
+    "@posthog/rrweb": "*"
   }
 }

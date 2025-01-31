@@ -1,7 +1,7 @@
-import type { RRNode } from '@posthog-internal/rrdom';
-import type { Mirror } from '@posthog-internal/rrweb-snapshot';
+import type { RRNode } from '@posthog/rrdom';
+import type { Mirror } from '@posthog/rrweb-snapshot';
 import SimplePeer from 'simple-peer-light';
-import type { ReplayPlugin, Replayer } from '@posthog-internal/rrweb';
+import type { ReplayPlugin, Replayer } from '@posthog/rrweb';
 import type { WebRTCDataChannel } from './types';
 
 // TODO: restrict callback to real nodes only, or make sure callback gets called when real node gets added to dom as well

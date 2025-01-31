@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrdom",
+  "name": "@posthog/rrdom",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
@@ -37,7 +37,7 @@
     "lint": "yarn eslint src/**/*.ts"
   },
   "devDependencies": {
-    "@posthog-internal/rrweb-types": "*",
+    "@posthog/rrweb-types": "*",
     "@types/puppeteer": "^5.4.4",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
@@ -48,6 +48,6 @@
     "vite-plugin-dts": "^3.9.1"
   },
   "dependencies": {
-    "@posthog-internal/rrweb-snapshot": "*"
+    "@posthog/rrweb-snapshot": "*"
   }
 }

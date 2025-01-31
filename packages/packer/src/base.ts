@@ -1,4 +1,4 @@
-import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import type { eventWithTime } from '@posthog/rrweb-types';
 
 export type eventWithTimeAndPacker = eventWithTime & {
   v: string;

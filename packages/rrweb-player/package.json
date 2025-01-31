@@ -1,8 +1,8 @@
 {
-  "name": "@posthog-internal/rrweb-player",
+  "name": "@posthog/rrweb-player",
   "version": "0.0.0",
   "devDependencies": {
-    "@posthog-internal/rrweb-types": "*",
+    "@posthog/rrweb-types": "*",
     "@sveltejs/adapter-auto": "^3.0.0",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/package": "^2.0.0",
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@tsconfig/svelte": "^1.0.0",
-    "@posthog-internal/rrweb-replay": "*",
-    "@posthog-internal/rrweb-packer": "*"
+    "@posthog/rrweb-replay": "*",
+    "@posthog/rrweb-packer": "*"
   },
   "scripts": {
     "dev": "vite build --watch",

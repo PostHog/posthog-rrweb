@@ -1,3 +1,3 @@
-import { record } from '@posthog-internal/rrweb';
+import { record } from '@posthog/rrweb';
 
 export { record };

@@ -15,7 +15,7 @@ export {
   MouseInteractions,
   ReplayerEvents,
   type eventWithTime,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 
 // exports style.css from replay
 import './replay/styles/style.css';

@@ -7,7 +7,7 @@ import {
   listenerHandler,
   eventWithTime,
   EventType,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { launchPuppeteer } from '../utils';
 import {
   callbackWrapper,

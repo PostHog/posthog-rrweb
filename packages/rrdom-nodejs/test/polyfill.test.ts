@@ -9,7 +9,7 @@ import {
   polyfillDocument,
 } from '../src/polyfill';
 import { performance as nativePerformance } from 'perf_hooks';
-import { BaseRRNode } from '@posthog-internal/rrdom';
+import { BaseRRNode } from '@posthog/rrdom';
 
 describe('polyfill for nodejs', () => {
   it('should polyfill performance api', () => {

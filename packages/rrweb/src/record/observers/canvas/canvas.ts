@@ -1,11 +1,11 @@
-import type { ICanvas } from '@posthog-internal/rrweb-snapshot';
+import type { ICanvas } from '@posthog/rrweb-snapshot';
 import type {
   blockClass,
   IWindow,
   listenerHandler,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import { isBlocked } from '../../../utils';
-import { patch } from '@posthog-internal/rrweb-utils';
+import { patch } from '@posthog/rrweb-utils';
 
 function getNormalizedContextName(contextType: string) {
   return contextType === 'experimental-webgl' ? 'webgl' : contextType;

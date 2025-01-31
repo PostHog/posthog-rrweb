@@ -1,5 +1,5 @@
 import Browser from 'webextension-polyfill';
-import type { eventWithTime } from '@posthog-internal/rrweb-types';
+import type { eventWithTime } from '@posthog/rrweb-types';
 import Channel from '~/utils/channel';
 import {
   type LocalData,

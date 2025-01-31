@@ -14,7 +14,7 @@ import type {
   BuildCache,
   textNode,
 } from '../src/types';
-import { NodeType } from '@posthog-internal/rrweb-types';
+import { NodeType } from '@posthog/rrweb-types';
 import { Window } from 'happy-dom';
 
 describe('css parser', () => {

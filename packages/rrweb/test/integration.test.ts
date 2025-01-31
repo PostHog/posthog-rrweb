@@ -18,8 +18,8 @@ import {
   eventWithTime,
   NodeType,
   EventType,
-} from '@posthog-internal/rrweb-types';
-import { visitSnapshot } from '@posthog-internal/rrweb-snapshot';
+} from '@posthog/rrweb-types';
+import { visitSnapshot } from '@posthog/rrweb-snapshot';
 
 describe('record integration tests', function (this: ISuite) {
   vi.setConfig({ testTimeout: 10_000 });

@@ -1,5 +1,5 @@
 {
-  "name": "@posthog-internal/rrweb-types",
+  "name": "@posthog/rrweb-types",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite build --watch",

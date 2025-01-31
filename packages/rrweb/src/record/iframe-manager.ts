@@ -1,18 +1,18 @@
-import type { Mirror } from '@posthog-internal/rrweb-snapshot';
-import { genId } from '@posthog-internal/rrweb-snapshot';
+import type { Mirror } from '@posthog/rrweb-snapshot';
+import { genId } from '@posthog/rrweb-snapshot';
 import type { CrossOriginIframeMessageEvent } from '../types';
 import CrossOriginIframeMirror from './cross-origin-iframe-mirror';
 import {
   EventType,
   NodeType,
   IncrementalSource,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import type {
   eventWithTime,
   eventWithoutTime,
   serializedNodeWithId,
   mutationCallBack,
-} from '@posthog-internal/rrweb-types';
+} from '@posthog/rrweb-types';
 import type { StylesheetManager } from './stylesheet-manager';
 
 export class IframeManager {
