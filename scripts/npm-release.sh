@@ -11,6 +11,7 @@
     "./packages/rrweb"
     "./packages/utils"
     "./packages/rrdom"
+    "./packages/rrweb-snapshot"
   )
 
 yarn run build:all
