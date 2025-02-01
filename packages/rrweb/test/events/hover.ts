@@ -1,4 +1,7 @@
-import { IncrementalSource, MouseInteractions } from '@posthog/rrweb-types';
+import {
+  IncrementalSource,
+  MouseInteractions,
+} from '@posthog/rrweb-types';
 import type { eventWithTime } from '../../../types/src';
 
 const events: eventWithTime[] = [

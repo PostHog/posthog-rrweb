@@ -14,7 +14,11 @@ import {
   ISuite,
 } from './utils';
 import type { recordOptions } from '../src/types';
-import { eventWithTime, NodeType, EventType } from '@posthog/rrweb-types';
+import {
+  eventWithTime,
+  NodeType,
+  EventType,
+} from '@posthog/rrweb-types';
 import { visitSnapshot } from '@posthog/rrweb-snapshot';
 
 describe('record integration tests', function (this: ISuite) {

@@ -1,5 +1,8 @@
 import type { Emitter } from '@posthog/rrweb-types';
-import { MediaInteractions, ReplayerEvents } from '@posthog/rrweb-types';
+import {
+  MediaInteractions,
+  ReplayerEvents,
+} from '@posthog/rrweb-types';
 import type { RRMediaElement } from '@posthog/rrdom';
 import type { createPlayerService, createSpeedService } from '../machine';
 import type { Mirror } from '@posthog/rrweb-snapshot';
