@@ -72,7 +72,7 @@
     "not op_mini all"
   ],
   "lint-staged": {
-    "*.ts": "yarn run format"
+    "*.{ts, md}": "yarn run format"
   },
   "packageManager": "yarn@1.22.19"
 }
