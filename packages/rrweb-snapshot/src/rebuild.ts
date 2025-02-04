@@ -1,4 +1,5 @@
 import { mediaSelectorPlugin, pseudoClassPlugin } from './css';
+import safeParser from 'postcss-safe-parser';
 import {
   type serializedNodeWithId,
   type serializedElementNodeWithId,
@@ -67,7 +68,7 @@ export function adaptCssForReplay(cssText: string, cache: BuildCache): string {
     const ast: { css: string } = postcss([
       mediaSelectorPlugin,
       pseudoClassPlugin,
-    ]).process(cssText);
+    ]).process(cssText, { parser: safeParser });
     result = ast.css;
   } catch (error) {
     // on the replay side so should be ok to just log here
