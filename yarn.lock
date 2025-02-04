@@ -2444,14 +2444,14 @@
   dependencies:
     import-meta-resolve "^4.1.0"
 
-"@sveltejs/kit@^2.0.0":
-  version "2.5.10"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.5.10.tgz#c52e54508d96af5db8a92f2a81250bd81d0c409b"
-  integrity sha512-OqoyTmFG2cYmCFAdBfW+Qxbg8m23H4dv6KqwEt7ofr/ROcfcIl3Z/VT56L22H9f0uNZyr+9Bs1eh2gedOCK9kA==
+"@sveltejs/kit@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-2.8.3.tgz#e67f7af2b1f792819877c2cbbc9f8ab7dee411a7"
+  integrity sha512-DVBVwugfzzn0SxKA+eAmKqcZ7aHZROCHxH7/pyrOi+HLtQ721eEsctGb9MkhEuqj6q/9S/OFYdn37vdxzFPdvw==
   dependencies:
     "@types/cookie" "^0.6.0"
     cookie "^0.6.0"
-    devalue "^5.0.0"
+    devalue "^5.1.0"
     esm-env "^1.0.0"
     import-meta-resolve "^4.1.0"
     kleur "^4.1.5"
@@ -2459,7 +2459,7 @@
     mrmime "^2.0.0"
     sade "^1.8.1"
     set-cookie-parser "^2.6.0"
-    sirv "^2.0.4"
+    sirv "^3.0.0"
     tiny-glob "^0.2.9"
 
 "@sveltejs/package@^2.0.0":
@@ -4377,6 +4377,7 @@ cssesc@^3.0.0:
 
 cssom@^0.4.4, cssom@^0.5.0, "cssom@https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.6.0.tgz", cssom@~0.3.6:
   version "0.6.0"
+  uid ed298055b97cbddcdeb278f904857629dec5e0e1
   resolved "https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.6.0.tgz#ed298055b97cbddcdeb278f904857629dec5e0e1"
 
 cssstyle@^2.3.0:
@@ -4643,10 +4644,10 @@ detect-node-es@^1.1.0:
   resolved "https://registry.yarnpkg.com/detect-node-es/-/detect-node-es-1.1.0.tgz#163acdf643330caa0b4cd7c21e7ee7755d6fa493"
   integrity sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==
 
-devalue@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/devalue/-/devalue-5.0.0.tgz#1ca0099a7d715b4d6cac3924e770ccbbc584ad98"
-  integrity sha512-gO+/OMXF7488D+u3ue+G7Y4AA3ZmUnB3eHJXmBTgNHvr4ZNzl36A0ZtG+XCRNYCkYx/bFmw4qtkoFLa+wSrwAA==
+devalue@^5.1.0:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/devalue/-/devalue-5.1.1.tgz#a71887ac0f354652851752654e4bd435a53891ae"
+  integrity sha512-maua5KUiapvEwiEAe+XnlZ3Rh0GD+qI1J/nb9vrJc3muPXvcF/8gXYTWF76+5DAqHyDUtOIImEuo0YKE9mshVw==
 
 devtools-protocol@0.0.1036444:
   version "0.0.1036444"
@@ -9385,10 +9386,10 @@ simple-peer-light@^9.10.0:
   resolved "https://registry.yarnpkg.com/simple-peer-light/-/simple-peer-light-9.10.0.tgz#6f3699b80e4b6d3a9374a865e1a8e497aa623afb"
   integrity sha512-E0INlXmVy2XvVkyMallKYQlcTAD8S0ov+goSVDGD2k9vwkjBCOyFmESoUsv0Pi7P3nSh6TuMIIi+S/YRok9WLg==
 
-sirv@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/sirv/-/sirv-2.0.4.tgz#5dd9a725c578e34e449f332703eb2a74e46a29b0"
-  integrity sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==
+sirv@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/sirv/-/sirv-3.0.0.tgz#f8d90fc528f65dff04cb597a88609d4e8a4361ce"
+  integrity sha512-BPwJGUeDaDCHihkORDchNyyTvWFhcusy1XMmhEVTQTwGeybFbp8YEmB+njbPnth1FibULBSBVwCQni25XlCUDg==
   dependencies:
     "@polka/url" "^1.0.0-next.24"
     mrmime "^2.0.0"
