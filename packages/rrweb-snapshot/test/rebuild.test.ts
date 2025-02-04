@@ -271,16 +271,17 @@ ul li.specified c.\\:hover img {
     );
   });
 
-  it('handles exceptions from postcss when calling adaptCssForReplay', () => {
+  it('safe parser handles exceptions from postcss when calling adaptCssForReplay', () => {
     const consoleWarnSpy = vi
       .spyOn(console, 'warn')
       .mockImplementation(() => {});
     // trigger CssSyntaxError by passing invalid css
     const cssText = 'a{';
-    adaptCssForReplay(cssText, cache);
-    expect(consoleWarnSpy).toHaveBeenLastCalledWith(
+    const parsed = adaptCssForReplay(cssText, cache);
+    expect(consoleWarnSpy).not.toHaveBeenLastCalledWith(
       'Failed to adapt css for replay',
       expect.any(Error),
     );
+    expect(parsed).toBe('a{}');
   });
 });
