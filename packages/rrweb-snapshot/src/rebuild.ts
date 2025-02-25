@@ -8,7 +8,7 @@ import {
   type legacyAttributes,
 } from '@posthog/rrweb-types';
 import { type tagMap, type BuildCache } from './types';
-import { isElement, Mirror, isNodeMetaEqual } from './utils';
+import { isElement, Mirror, isNodeMetaEqual, extractFileExtension, } from './utils';
 import postcss from 'postcss';
 
 const tagMap: tagMap = {
@@ -271,16 +271,15 @@ function buildNode(
             continue;
           } else if (
             tagName === 'link' &&
-            (n.attributes.rel === 'preload' ||
-              n.attributes.rel === 'modulepreload') &&
-            n.attributes.as === 'script'
+            ((n.attributes.rel === 'preload' && n.attributes.as === 'script') ||
+              n.attributes.rel === 'modulepreload')
           ) {
             // ignore
           } else if (
             tagName === 'link' &&
             n.attributes.rel === 'prefetch' &&
             typeof n.attributes.href === 'string' &&
-            n.attributes.href.endsWith('.js')
+            extractFileExtension(n.attributes.href) === 'js'
           ) {
             // ignore
           } else if (
