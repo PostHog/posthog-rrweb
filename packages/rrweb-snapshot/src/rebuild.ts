@@ -8,7 +8,12 @@ import {
   type legacyAttributes,
 } from '@posthog/rrweb-types';
 import { type tagMap, type BuildCache } from './types';
-import { isElement, Mirror, isNodeMetaEqual, extractFileExtension, } from './utils';
+import {
+  isElement,
+  Mirror,
+  isNodeMetaEqual,
+  extractFileExtension,
+} from './utils';
 import postcss from 'postcss';
 
 const tagMap: tagMap = {
