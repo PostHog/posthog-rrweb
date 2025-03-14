@@ -1,6 +1,5 @@
 import {
   rebuild,
-  adaptCssForReplay,
   buildNodeWithSN,
   type BuildCache,
   createCache,
@@ -882,9 +881,6 @@ export class Replayer {
         'html.rrweb-paused *, html.rrweb-paused *:before, html.rrweb-paused *:after { animation-play-state: paused !important; }',
       );
     }
-    if (!injectStylesRules.length) {
-      return;
-    }
     if (this.usingVirtualDom) {
       const styleEl = this.virtualDom.createElement('style');
       this.virtualDom.mirror.add(
@@ -1747,14 +1743,7 @@ export class Replayer {
         }
         return this.warnNodeNotFound(d, mutation.id);
       }
-
-      const parentEl = target.parentElement as Element | RRElement;
-      if (mutation.value && parentEl && parentEl.tagName === 'STYLE') {
-        // assumes hackCss: true (which isn't currently configurable from rrweb)
-        target.textContent = adaptCssForReplay(mutation.value, this.cache);
-      } else {
-        target.textContent = mutation.value;
-      }
+      target.textContent = mutation.value;
 
       /**
        * https://github.com/rrweb-io/rrweb/pull/865

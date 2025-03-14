@@ -29,7 +29,6 @@ import {
   toLowerCase,
   extractFileExtension,
   absolutifyURLs,
-  markCssSplits,
 } from './utils';
 import dom from '@posthog/rrweb-utils';
 
@@ -407,7 +406,6 @@ function serializeNode(
      * `newlyAddedElement: true` skips scrollTop and scrollLeft check
      */
     newlyAddedElement?: boolean;
-    cssCaptured?: boolean;
   },
 ): serializedNode | false {
   const {
@@ -425,7 +423,6 @@ function serializeNode(
     recordCanvas,
     keepIframeSrcFn,
     newlyAddedElement = false,
-    cssCaptured = false,
   } = options;
   // Only record root id when document object is not the base document
   const rootId = getRootId(doc, mirror);
@@ -472,7 +469,6 @@ function serializeNode(
         needsMask,
         maskTextFn,
         rootId,
-        cssCaptured,
       });
     case n.CDATA_SECTION_NODE:
       return {
@@ -504,38 +500,48 @@ function serializeTextNode(
     needsMask: boolean;
     maskTextFn: MaskTextFn | undefined;
     rootId: number | undefined;
-    cssCaptured?: boolean;
   },
 ): serializedNode {
-  const { needsMask, maskTextFn, rootId, cssCaptured } = options;
+  const { needsMask, maskTextFn, rootId } = options;
   // The parent node may not be a html element which has a tagName attribute.
   // So just let it be undefined which is ok in this use case.
   const parent = dom.parentNode(n);
   const parentTagName = parent && (parent as HTMLElement).tagName;
-  let textContent: string | null = '';
+  let text = dom.textContent(n);
   const isStyle = parentTagName === 'STYLE' ? true : undefined;
   const isScript = parentTagName === 'SCRIPT' ? true : undefined;
-  if (isScript) {
-    textContent = 'SCRIPT_PLACEHOLDER';
-  } else if (!cssCaptured) {
-    textContent = dom.textContent(n);
-    if (isStyle && textContent) {
-      // mutation only: we don't need to use stringifyStylesheet
-      // as a <style> text node mutation obliterates any previous
-      // programmatic rule manipulation (.insertRule etc.)
-      // so the current textContent represents the most up to date state
-      textContent = absolutifyURLs(textContent, getHref(options.doc));
+  if (isStyle && text) {
+    try {
+      // try to read style sheet
+      if (n.nextSibling || n.previousSibling) {
+        // This is not the only child of the stylesheet.
+        // We can't read all of the sheet's .cssRules and expect them
+        // to _only_ include the current rule(s) added by the text node.
+        // So we'll be conservative and keep textContent as-is.
+      } else if ((parent as HTMLStyleElement).sheet?.cssRules) {
+        text = stringifyStylesheet((parent as HTMLStyleElement).sheet!);
+      }
+    } catch (err) {
+      console.warn(
+        `Cannot get CSS styles from text's parentNode. Error: ${err as string}`,
+        n,
+      );
     }
+    text = absolutifyURLs(text, getHref(options.doc));
   }
-  if (!isStyle && !isScript && textContent && needsMask) {
-    textContent = maskTextFn
-      ? maskTextFn(textContent, dom.parentElement(n))
-      : textContent.replace(/[\S]/g, '*');
+  if (isScript) {
+    text = 'SCRIPT_PLACEHOLDER';
+  }
+  if (!isStyle && !isScript && text && needsMask) {
+    text = maskTextFn
+      ? maskTextFn(text, dom.parentElement(n))
+      : text.replace(/[\S]/g, '*');
   }
 
   return {
     type: NodeType.Text,
-    textContent: textContent || '',
+    textContent: text || '',
+    isStyle,
     rootId,
   };
 }
@@ -628,14 +634,17 @@ function serializeElementNode(
       }
     }
   }
-  if (tagName === 'style' && (n as HTMLStyleElement).sheet) {
-    let cssText = stringifyStylesheet(
+  // dynamic stylesheet
+  if (
+    tagName === 'style' &&
+    (n as HTMLStyleElement).sheet &&
+    // TODO: Currently we only try to get dynamic stylesheet when it is an empty style element
+    !(n.innerText || dom.textContent(n) || '').trim().length
+  ) {
+    const cssText = stringifyStylesheet(
       (n as HTMLStyleElement).sheet as CSSStyleSheet,
     );
     if (cssText) {
-      if (n.childNodes.length > 1) {
-        cssText = markCssSplits(cssText, n as HTMLStyleElement);
-      }
       attributes._cssText = cssText;
     }
   }
@@ -961,7 +970,6 @@ export function serializeNodeWithId(
       node: serializedElementNodeWithId,
     ) => unknown;
     stylesheetLoadTimeout?: number;
-    cssCaptured?: boolean;
   },
 ): serializedNodeWithId | null {
   const {
@@ -987,7 +995,6 @@ export function serializeNodeWithId(
     stylesheetLoadTimeout = 5000,
     keepIframeSrcFn = () => false,
     newlyAddedElement = false,
-    cssCaptured = false,
   } = options;
   let { needsMask } = options;
   let { preserveWhiteSpace = true } = options;
@@ -1018,7 +1025,6 @@ export function serializeNodeWithId(
     recordCanvas,
     keepIframeSrcFn,
     newlyAddedElement,
-    cssCaptured,
   });
   if (!_serializedNode) {
     // TODO: dev only
@@ -1034,6 +1040,7 @@ export function serializeNodeWithId(
     slimDOMExcluded(_serializedNode, slimDOMOptions) ||
     (!preserveWhiteSpace &&
       _serializedNode.type === NodeType.Text &&
+      !_serializedNode.isStyle &&
       !_serializedNode.textContent.replace(/^\s+|\s+$/gm, '').length)
   ) {
     id = IGNORED_NODE;
@@ -1098,7 +1105,6 @@ export function serializeNodeWithId(
       onStylesheetLoad,
       stylesheetLoadTimeout,
       keepIframeSrcFn,
-      cssCaptured: false,
     };
 
     if (
@@ -1108,13 +1114,6 @@ export function serializeNodeWithId(
     ) {
       // value parameter in DOM reflects the correct value, so ignore childNode
     } else {
-      if (
-        serializedNode.type === NodeType.Element &&
-        (serializedNode as elementNode).attributes._cssText !== undefined &&
-        typeof serializedNode.attributes._cssText === 'string'
-      ) {
-        bypassOptions.cssCaptured = true;
-      }
       for (const childN of Array.from(dom.childNodes(n))) {
         const serializedChildNode = serializeNodeWithId(childN, bypassOptions);
         if (serializedChildNode) {

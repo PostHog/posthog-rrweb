@@ -1,4 +1,82 @@
+export enum NodeType {
+  Document,
+  DocumentType,
+  Element,
+  Text,
+  CDATA,
+  Comment,
+}
+
+export type documentNode = {
+  type: NodeType.Document;
+  childNodes: serializedNodeWithId[];
+  compatMode?: string;
+};
+
+export type documentTypeNode = {
+  type: NodeType.DocumentType;
+  name: string;
+  publicId: string;
+  systemId: string;
+};
+
+export type attributes = {
+  [key: string]: string | number | true | null;
+};
+export type legacyAttributes = {
+  /**
+   * @deprecated old bug in rrweb was causing these to always be set
+   * @see https://github.com/rrweb-io/rrweb/pull/651
+   */
+  selected: false;
+};
+
+export type elementNode = {
+  type: NodeType.Element;
+  tagName: string;
+  attributes: attributes;
+  childNodes: serializedNodeWithId[];
+  isSVG?: true;
+  needBlock?: boolean;
+  // This is a custom element or not.
+  isCustom?: true;
+};
+
+export type textNode = {
+  type: NodeType.Text;
+  textContent: string;
+  isStyle?: true;
+};
+
+export type cdataNode = {
+  type: NodeType.CDATA;
+  textContent: '';
+};
+
+export type commentNode = {
+  type: NodeType.Comment;
+  textContent: string;
+};
+
+export type serializedNode = (
+  | documentNode
+  | documentTypeNode
+  | elementNode
+  | textNode
+  | cdataNode
+  | commentNode
+) & {
+  rootId?: number;
+  isShadowHost?: boolean;
+  isShadow?: boolean;
+};
+
 import type { serializedNodeWithId } from '@posthog/rrweb-types';
+
+export type serializedElementNodeWithId = Extract<
+  serializedNodeWithId,
+  Record<'type', NodeType.Element>
+>;
 
 export type tagMap = {
   [key: string]: string;
