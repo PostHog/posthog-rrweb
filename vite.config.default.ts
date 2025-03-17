@@ -22,7 +22,6 @@ function minifyAndUMDPlugin({
     name: 'minify-plugin',
     async writeBundle(outputOptions, bundle) {
       for (const file of Object.values(bundle)) {
-
         if (
           file.type === 'asset' &&
           (file.fileName.endsWith('.cjs.map') || file.fileName.endsWith('.css'))
