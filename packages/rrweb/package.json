@@ -44,10 +44,12 @@
             }
         },
         "./dist/rrweb.css": "./dist/rrweb.css",
-        "./dist/style.css": "./dist/style.css"
+        "./dist/style.css": "./dist/style.css",
+        "./dist/assets/*": "./dist/assets/*"
     },
     "files": [
         "dist",
+        "dist/assets",
         "package.json"
     ],
     "sideEffects": false,
