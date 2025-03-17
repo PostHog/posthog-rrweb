@@ -55,8 +55,8 @@ describe('record integration tests', function (this: ISuite) {
   });
 
   afterAll(async () => {
-    await browser.close();
-    server.close();
+    await browser?.close();
+    server?.close();
   });
 
   it('can record clicks', async () => {

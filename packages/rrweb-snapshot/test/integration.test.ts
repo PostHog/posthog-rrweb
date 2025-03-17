@@ -112,8 +112,8 @@ describe('integration tests', function (this: ISuite) {
   });
 
   afterAll(async () => {
-    await browser.close();
-    await server.close();
+    await browser?.close();
+    await server?.close();
   });
 
   for (const html of htmls) {
@@ -141,14 +141,14 @@ describe('integration tests', function (this: ISuite) {
         assert(
           outerCompatMode === 'CSS1Compat',
           outerCompatMode +
-            ' for outer iframe.html should be CSS1Compat as it has "<!DOCTYPE html>"',
+          ' for outer iframe.html should be CSS1Compat as it has "<!DOCTYPE html>"',
         );
         // inner omits a doctype so gets rendered in backwards compat mode
         // although this was originally accidental, we'll add a synthetic doctype to the rebuild to recreate this
         assert(
           innerCompatMode === 'BackCompat',
           innerCompatMode +
-            ' for iframe-inner.html should be BackCompat as it lacks "<!DOCTYPE html>"',
+          ' for iframe-inner.html should be BackCompat as it lacks "<!DOCTYPE html>"',
         );
       } else {
         // loading indirectly is improtant for relative path testing
@@ -192,7 +192,7 @@ describe('integration tests', function (this: ISuite) {
     assert(
       compatMode === 'BackCompat',
       compatMode +
-        ' for compat-mode.html should be BackCompat as DOCTYPE is deliberately omitted',
+      ' for compat-mode.html should be BackCompat as DOCTYPE is deliberately omitted',
     );
     const renderedHeight = (await page.evaluate(
       'document.querySelector("center").clientHeight',
@@ -219,7 +219,7 @@ iframe.contentDocument.querySelector('center').clientHeight
     assert(
       rebuildCompatMode === 'BackCompat',
       "rebuilt compatMode should match source compatMode, but doesn't: " +
-        rebuildCompatMode,
+      rebuildCompatMode,
     );
     assert(
       rebuildRenderedHeight === renderedHeight,
@@ -266,8 +266,8 @@ iframe.contentDocument.querySelector('center').clientHeight
 <html xmlns="http://www.w3.org/1999/xhtml">
   <body>
     <img src="${getServerURL(
-      server,
-    )}/images/rrweb-favicon-20x20.png" alt="CORS restricted but has access-control-allow-origin: *" />
+        server,
+      )}/images/rrweb-favicon-20x20.png" alt="CORS restricted but has access-control-allow-origin: *" />
   </body>
 </html>
 `,
