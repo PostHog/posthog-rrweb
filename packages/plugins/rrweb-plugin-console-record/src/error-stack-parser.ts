@@ -71,10 +71,6 @@ export const ErrorStackParser = {
     } else if (error.stack) {
       return this.parseFFOrSafari(error as { stack: string });
     } else {
-      console.warn(
-        '[console-record-plugin]: Failed to parse error object:',
-        error,
-      );
       return [];
     }
   },
