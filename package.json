@@ -71,6 +71,10 @@
     "defaults",
     "not op_mini all"
   ],
+  "engines": {
+    "node": ">=20.0.0",
+    "yarn": ">=1.22.19"
+  },
   "lint-staged": {
     "*.{ts, md}": "yarn run format"
   },
