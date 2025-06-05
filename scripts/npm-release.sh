@@ -6,6 +6,7 @@
 # assumes this is run with cwd as the root of the repo
   PACKAGES=(
     "./packages/record"
+    "./packages/replay"
     "./packages/plugins/rrweb-plugin-console-record"
     "./packages/types"
     "./packages/rrweb"
