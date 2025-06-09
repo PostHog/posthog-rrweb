@@ -83,3 +83,5 @@ jobs:
                   message: "chore: Bump version to ${{ env.NEW_VERSION }}"
                   github_token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
                   commit: --no-verify
+                  push: --no-verify
+
