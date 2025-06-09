@@ -333,6 +333,10 @@ function buildNode(
           : n.textContent,
       );
     case NodeType.CDATA:
+      if (n.textContent.trim() === '') {
+        return null;
+      }
+
       return doc.createCDATASection(n.textContent);
     case NodeType.Comment:
       return doc.createComment(n.textContent);
