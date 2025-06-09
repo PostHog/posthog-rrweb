@@ -64,10 +64,21 @@ jobs:
             - name: Update CHANGELOG.md
               run: |
                 set -e
+                
+                # Check if tag exists for old version
+                if git tag -l | grep -q "^$OLD_VERSION$"; then
+                  echo "Found tag for old version: $OLD_VERSION"
+                  # Get commit titles between old version tag and HEAD
+                  COMMIT_MESSAGES=$(git log --oneline --pretty=format:" - %s" $OLD_VERSION..HEAD)
+                else
+                  echo "No tag found for old version: $OLD_VERSION"
+                  # Fall back to simple message
+                  COMMIT_MESSAGES=" - Bump version to $NEW_VERSION"
+                fi
+                
                 CHANGELOG_HEADING="## $NEW_VERSION - $(date --iso-8601)"
-                CHANGELOG_POINTS=" - Bump version to $NEW_VERSION"
                 mv CHANGELOG.md CHANGELOG.old.md
-                echo -e "$CHANGELOG_HEADING\n\n$CHANGELOG_POINTS\n\n$(cat CHANGELOG.old.md)" > CHANGELOG.md
+                echo -e "$CHANGELOG_HEADING\n\n$COMMIT_MESSAGES\n\n$(cat CHANGELOG.old.md)" > CHANGELOG.md
                 rm CHANGELOG.old.md
                 yarn run format:head
               env:
@@ -84,4 +95,8 @@ jobs:
                   github_token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
                   commit: --no-verify
                   push: --no-verify
+                  tag: ${{ env.NEW_VERSION }} --no-verify
+                  tag_push: --no-verify
+              env:
+                NEW_VERSION: ${{ env.NEW_VERSION }}
 
