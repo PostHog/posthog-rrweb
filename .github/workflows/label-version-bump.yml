@@ -66,6 +66,7 @@ jobs:
                 mv CHANGELOG.md CHANGELOG.old.md
                 echo -e "$CHANGELOG_HEADING\n\n$CHANGELOG_POINTS\n\n$(cat CHANGELOG.old.md)" > CHANGELOG.md
                 rm CHANGELOG.old.md
+                yarn run format:head
               env:
                 OLD_VERSION: ${{ env.OLD_VERSION }}
                 NEW_VERSION: ${{ env.NEW_VERSION }}
