@@ -95,7 +95,7 @@ jobs:
                   github_token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
                   commit: --no-verify
                   push: --no-verify
-                  tag: ${{ env.NEW_VERSION }} --no-verify
+                  tag: ${{ env.NEW_VERSION }}
                   tag_push: --no-verify
               env:
                 NEW_VERSION: ${{ env.NEW_VERSION }}
