@@ -10,7 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   check-package-version:
     name: Check package version and detect an update
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       committed-version: ${{ steps.check-package-version.outputs.committed-version }}
       published-version: ${{ steps.check-package-version.outputs.published-version }}
