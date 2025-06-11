@@ -130,9 +130,17 @@ export function stringifyRule(rule: CSSRule, sheetHref: string | null): string {
     } catch (error) {
       importStringified = rule.cssText;
     }
-    if (rule.styleSheet.href) {
-      // url()s within the imported stylesheet are relative to _that_ sheet's href
-      return absolutifyURLs(importStringified, rule.styleSheet.href);
+    // if importStringified is not null,
+    // there should be a stylesheet and a rule here,
+    // but we avoid errors in this method by checking for null
+    // see https://github.com/rrweb-io/rrweb/pull/1686
+    try {
+      if (importStringified && rule.styleSheet?.href) {
+        // url()s within the imported stylesheet are relative to _that_ sheet's href
+        return absolutifyURLs(importStringified, rule.styleSheet.href);
+      }
+    } catch {
+      // swallow this, we'll return null
     }
     return importStringified;
   } else {
