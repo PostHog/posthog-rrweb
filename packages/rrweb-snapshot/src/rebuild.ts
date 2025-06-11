@@ -6,7 +6,7 @@ import {
   type elementNode,
   type legacyAttributes,
 } from '@posthog/rrweb-types';
-import { type tagMap, type BuildCache } from './types';
+import { type tagMap, type BuildCache, type textNode } from './types';
 import {
   isElement,
   Mirror,
@@ -87,6 +87,29 @@ export function createCache(): BuildCache {
   return {
     stylesWithHoverClass,
   };
+}
+
+function safeDocNode(
+  n: textNode,
+  options: {
+    doc: Document;
+    hackCss: boolean;
+    cache: BuildCache;
+  },
+) {
+  let stringContent = n.textContent;
+  if (n.isStyle && options.hackCss) {
+    try {
+      stringContent = adaptCssForReplay(n.textContent, options.cache);
+    } catch {
+      // if, for example, a style node has multiple text nodes
+      // which can only be adopted to CSS all together,
+      // then this will fail...
+      // ignore
+    }
+  }
+
+  return options.doc.createTextNode(stringContent);
 }
 
 function buildNode(
@@ -327,11 +350,12 @@ function buildNode(
       return node;
     }
     case NodeType.Text:
-      return doc.createTextNode(
-        n.isStyle && hackCss
-          ? adaptCssForReplay(n.textContent, cache)
-          : n.textContent,
-      );
+      return safeDocNode(n, {
+        cache,
+        doc,
+        hackCss,
+      });
+
     case NodeType.CDATA:
       if (n.textContent.trim() === '') {
         return null;
