@@ -19,6 +19,7 @@ echo "semver bin: $SEMVER_BIN"
     "./packages/utils"
     "./packages/rrdom"
     "./packages/rrweb-snapshot"
+    "./packages/rrweb-player"
   )
 
   # Loop through each package and update the package.json
