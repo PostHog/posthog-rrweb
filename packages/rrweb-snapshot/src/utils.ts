@@ -108,8 +108,13 @@ export function stringifyStylesheet(s: CSSStyleSheet): string | null {
     if (!rules) {
       return null;
     }
+    let sheetHref = s.href;
+    if (!sheetHref && s.ownerNode && s.ownerNode.ownerDocument) {
+      // an inline <style> element
+      sheetHref = s.ownerNode.ownerDocument.baseURI;
+    }
     const stringifiedRules = Array.from(rules, (rule: CSSRule) =>
-      stringifyRule(rule, s.href),
+      stringifyRule(rule, sheetHref),
     ).join('');
     return fixBrowserCompatibilityIssuesInCSS(stringifiedRules);
   } catch (error) {
