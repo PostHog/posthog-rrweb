@@ -1472,24 +1472,6 @@ export class Replayer {
     };
     const queue: addedNodeMutation[] = [];
 
-    // next not present at this moment
-    const nextNotInDOM = (mutation: addedNodeMutation) => {
-      let next: TNode | null = null;
-      if (mutation.nextId) {
-        next = mirror.getNode(mutation.nextId) as TNode | null;
-      }
-      // next not present at this moment
-      if (
-        mutation.nextId !== null &&
-        mutation.nextId !== undefined &&
-        mutation.nextId !== -1 &&
-        !next
-      ) {
-        return true;
-      }
-      return false;
-    };
-
     const appendNode = (mutation: addedNodeMutation) => {
       if (!this.iframe.contentDocument) {
         return this.warn('Looks like your replayer has been destroyed.');
@@ -1502,7 +1484,12 @@ export class Replayer {
           // is newly added document, maybe the document node of an iframe
           return this.newDocumentQueue.push(mutation);
         }
-        return queue.push(mutation);
+        // Only re-queue if the parent id is actually in the current batch of adds
+        // This prevents infinite loops when parentId will never be available
+        const parentIdInCurrentBatch = d.adds.some(
+          (add) => add.node.id === mutation.parentId,
+        );
+        return parentIdInCurrentBatch ? queue.push(mutation) : undefined;
       }
 
       if (mutation.node.isShadow) {
@@ -1520,9 +1507,6 @@ export class Replayer {
       }
       if (mutation.nextId) {
         next = mirror.getNode(mutation.nextId);
-      }
-      if (nextNotInDOM(mutation)) {
-        return queue.push(mutation);
       }
 
       if (mutation.node.rootId && !mirror.getNode(mutation.node.rootId)) {
@@ -1703,18 +1687,22 @@ export class Replayer {
       appendNode(mutation);
     });
 
-    const startTime = Date.now();
+    const startTime = performance.now();
+
     while (queue.length) {
       // transform queue to resolve tree
       const resolveTrees = queueToResolveTrees(queue);
+
       queue.length = 0;
-      if (Date.now() - startTime > 500) {
+
+      if (performance.now() - startTime > 500) {
         this.warn(
           'Timeout in the loop, please check the resolve tree data:',
           resolveTrees,
         );
         break;
       }
+
       for (const tree of resolveTrees) {
         const parent = mirror.getNode(tree.value.parentId);
         if (!parent) {
