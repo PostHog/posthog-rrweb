@@ -1695,7 +1695,7 @@ export class Replayer {
 
       queue.length = 0;
 
-      if (performance.now() - startTime > 500) {
+      if (performance.now() - startTime > 150) {
         this.warn(
           'Timeout in the loop, please check the resolve tree data:',
           resolveTrees,
