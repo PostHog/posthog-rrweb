@@ -2015,7 +2015,7 @@ export class Replayer {
         styleSheet.rules,
         data.index,
       ) as unknown as CSSStyleRule;
-      rule.style.setProperty(
+      rule?.style?.setProperty(
         data.set.property,
         data.set.value,
         data.set.priority,
