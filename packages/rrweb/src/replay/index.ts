@@ -2027,7 +2027,7 @@ export class Replayer {
         styleSheet.rules,
         data.index,
       ) as unknown as CSSStyleRule;
-      rule.style.removeProperty(data.remove.property);
+      rule?.style?.removeProperty(data.remove.property);
     }
   }
 
