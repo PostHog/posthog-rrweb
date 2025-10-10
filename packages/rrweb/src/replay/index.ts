@@ -176,6 +176,13 @@ export class Replayer {
   // Similar to the reason for constructedStyleMutations.
   private adoptedStyleSheets: adoptedStyleSheetData[] = [];
 
+  // Track resources for cleanup
+  private emitterHandlers: Array<{ event: string; handler: Handler }> = [];
+  private serviceSubscription?: { unsubscribe: () => void };
+  private speedServiceSubscription?: { unsubscribe: () => void };
+  private timeouts: Set<ReturnType<typeof setTimeout>> = new Set();
+  private styleSheetLoadListeners: Map<HTMLLinkElement, () => void> = new Map();
+
   constructor(
     events: Array<eventWithTime | string>,
     config?: Partial<playerConfig>,
@@ -207,7 +214,7 @@ export class Replayer {
     this.handleResize = this.handleResize.bind(this);
     this.getCastFn = this.getCastFn.bind(this);
     this.applyEventsSynchronously = this.applyEventsSynchronously.bind(this);
-    this.emitter.on(ReplayerEvents.Resize, this.handleResize as Handler);
+    this.addEmitterHandler(ReplayerEvents.Resize, this.handleResize as Handler);
 
     this.setupDom();
 
@@ -218,7 +225,7 @@ export class Replayer {
       if (plugin.getMirror) plugin.getMirror({ nodeMirror: this.mirror });
     }
 
-    this.emitter.on(ReplayerEvents.Flush, () => {
+    const flushHandler = () => {
       if (this.usingVirtualDom) {
         const replayerHandler: ReplayerHandler = {
           mirror: this.mirror,
@@ -330,13 +337,16 @@ export class Replayer {
         this.applySelection(this.lastSelectionData);
         this.lastSelectionData = null;
       }
-    });
-    this.emitter.on(ReplayerEvents.PlayBack, () => {
+    };
+    this.addEmitterHandler(ReplayerEvents.Flush, flushHandler);
+
+    const playBackHandler = () => {
       this.firstFullSnapshot = null;
       this.mirror.reset();
       this.styleMirror.reset();
       this.mediaManager.reset();
-    });
+    };
+    this.addEmitterHandler(ReplayerEvents.PlayBack, playBackHandler);
 
     const timer = new Timer([], {
       speed: this.config.speed,
@@ -363,7 +373,7 @@ export class Replayer {
       },
     );
     this.service.start();
-    this.service.subscribe((state) => {
+    this.serviceSubscription = this.service.subscribe((state) => {
       this.emitter.emit(ReplayerEvents.StateChange, {
         player: state,
       });
@@ -373,7 +383,7 @@ export class Replayer {
       timer,
     });
     this.speedService.start();
-    this.speedService.subscribe((state) => {
+    this.speedServiceSubscription = this.speedService.subscribe((state) => {
       this.emitter.emit(ReplayerEvents.StateChange, {
         speed: state,
       });
@@ -396,7 +406,7 @@ export class Replayer {
     );
     if (firstMeta) {
       const { width, height } = firstMeta.data as metaEvent['data'];
-      setTimeout(() => {
+      this.addTimeout(() => {
         this.emitter.emit(ReplayerEvents.Resize, {
           width,
           height,
@@ -404,7 +414,7 @@ export class Replayer {
       }, 0);
     }
     if (firstFullsnapshot) {
-      setTimeout(() => {
+      this.addTimeout(() => {
         // when something has been played, there is no need to rebuild poster
         if (this.firstFullSnapshot) {
           // true if any other fullSnapshot has been executed by Timer already
@@ -432,6 +442,29 @@ export class Replayer {
   public off(event: string, handler: Handler) {
     this.emitter.off(event, handler);
     return this;
+  }
+
+  /**
+   * Track emitter handlers for cleanup
+   */
+  private addEmitterHandler(event: string, handler: Handler) {
+    this.emitter.on(event, handler);
+    this.emitterHandlers.push({ event, handler });
+  }
+
+  /**
+   * Track timeouts for cleanup
+   */
+  private addTimeout(
+    callback: () => void,
+    delay: number,
+  ): ReturnType<typeof setTimeout> {
+    const timeout = setTimeout(() => {
+      this.timeouts.delete(timeout);
+      callback();
+    }, delay);
+    this.timeouts.add(timeout);
+    return timeout;
   }
 
   public setConfig(config: Partial<playerConfig>) {
@@ -551,11 +584,49 @@ export class Replayer {
    * Memory occupation can be released by removing all references to this replayer.
    */
   public destroy() {
+    // Make destroy() idempotent - return early if already destroyed
+    if (!this.wrapper || !this.wrapper.parentNode) {
+      return;
+    }
+
     this.pause();
+
+    // Remove all tracked emitter handlers
+    this.emitterHandlers.forEach(({ event, handler }) => {
+      this.emitter.off(event, handler);
+    });
+    this.emitterHandlers = [];
+
+    // Unsubscribe from services
+    this.serviceSubscription?.unsubscribe();
+    this.speedServiceSubscription?.unsubscribe();
+    this.serviceSubscription = undefined;
+    this.speedServiceSubscription = undefined;
+
+    // Clear all pending timeouts
+    this.timeouts.forEach((timeout) => clearTimeout(timeout));
+    this.timeouts.clear();
+
+    // Remove all CSS link load listeners
+    this.styleSheetLoadListeners.forEach((handler, element) => {
+      element.removeEventListener('load', handler);
+    });
+    this.styleSheetLoadListeners.clear();
+
+    // Clear maps to allow garbage collection
+    this.imageMap.clear();
+    this.canvasEventMap.clear();
+
+    // Reset caches and mirrors
     this.mirror.reset();
     this.styleMirror.reset();
     this.mediaManager.reset();
+    this.resetCache();
+
+    // Remove DOM elements
     this.config.root.removeChild(this.wrapper);
+
+    // Emit destroy event last
     this.emitter.emit(ReplayerEvents.Destroy);
   }
 
