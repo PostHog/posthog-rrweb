@@ -20,9 +20,13 @@ describe('memory leak prevention', () => {
     // Clear any existing mutation buffers
     mutationBuffers.length = 0;
 
-    // Make window global for record to use
+    // Make window and all its properties global for record to use
     global.window = window as any;
     global.document = document as any;
+    global.Element = dom.window.Element as any;
+    global.HTMLElement = dom.window.HTMLElement as any;
+    global.Node = dom.window.Node as any;
+    global.MutationObserver = dom.window.MutationObserver as any;
   });
 
   describe('mutationBuffers cleanup', () => {
