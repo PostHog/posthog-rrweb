@@ -1364,6 +1364,9 @@ export function initObservers(
     selectionObserver();
     customElementObserver();
     pluginHandlers.forEach((h) => h());
+
+    // Clear the mutation buffers array to prevent memory leaks across recording sessions
+    mutationBuffers.length = 0;
   });
 }
 

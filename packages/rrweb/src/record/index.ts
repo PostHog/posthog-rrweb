@@ -619,6 +619,7 @@ function record<T = eventWithTime>(
     return () => {
       handlers.forEach((h) => h());
       processedNodeManager.destroy();
+      iframeManager.destroy();
       recording = false;
       unregisterErrorHandler();
     };

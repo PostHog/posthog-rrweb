@@ -25,6 +25,11 @@ export class IframeManager {
   private loadListener?: (iframeEl: HTMLIFrameElement) => unknown;
   private stylesheetManager: StylesheetManager;
   private recordCrossOriginIframes: boolean;
+  private messageHandler: (message: MessageEvent) => void;
+  private nestedIframeListeners: Map<
+    HTMLIFrameElement,
+    (message: MessageEvent) => void
+  > = new Map();
 
   constructor(options: {
     mirror: Mirror;
@@ -43,8 +48,9 @@ export class IframeManager {
       ),
     );
     this.mirror = options.mirror;
+    this.messageHandler = this.handleMessage.bind(this);
     if (this.recordCrossOriginIframes) {
-      window.addEventListener('message', this.handleMessage.bind(this));
+      window.addEventListener('message', this.messageHandler);
     }
   }
 
@@ -77,11 +83,15 @@ export class IframeManager {
     });
 
     // Receive messages (events) coming from cross-origin iframes that are nested in this same-origin iframe.
-    if (this.recordCrossOriginIframes)
-      iframeEl.contentWindow?.addEventListener(
-        'message',
-        this.handleMessage.bind(this),
-      );
+    if (
+      this.recordCrossOriginIframes &&
+      iframeEl.contentWindow &&
+      !this.nestedIframeListeners.has(iframeEl)
+    ) {
+      const nestedHandler = this.handleMessage.bind(this);
+      this.nestedIframeListeners.set(iframeEl, nestedHandler);
+      iframeEl.contentWindow.addEventListener('message', nestedHandler);
+    }
 
     this.loadListener?.(iframeEl);
 
@@ -307,5 +317,17 @@ export class IframeManager {
         this.patchRootIdOnNode(child, rootId);
       });
     }
+  }
+
+  public destroy() {
+    if (this.recordCrossOriginIframes) {
+      window.removeEventListener('message', this.messageHandler);
+    }
+
+    // Clean up nested iframe listeners
+    this.nestedIframeListeners.forEach((handler, iframe) => {
+      iframe.contentWindow?.removeEventListener('message', handler);
+    });
+    this.nestedIframeListeners.clear();
   }
 }
