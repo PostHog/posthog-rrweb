@@ -26,10 +26,12 @@ export class IframeManager {
   private stylesheetManager: StylesheetManager;
   private recordCrossOriginIframes: boolean;
   private messageHandler: (message: MessageEvent) => void;
-  private nestedIframeListeners: Map<
+  private nestedIframeListeners: WeakMap<
     HTMLIFrameElement,
     (message: MessageEvent) => void
-  > = new Map();
+  > = new WeakMap();
+  // Keep track of contentWindows we've attached listeners to for cleanup
+  private attachedIframeWindows: Set<Window> = new Set();
 
   constructor(options: {
     mirror: Mirror;
@@ -90,6 +92,7 @@ export class IframeManager {
     ) {
       const nestedHandler = this.handleMessage.bind(this);
       this.nestedIframeListeners.set(iframeEl, nestedHandler);
+      this.attachedIframeWindows.add(iframeEl.contentWindow);
       iframeEl.contentWindow.addEventListener('message', nestedHandler);
     }
 
@@ -325,9 +328,22 @@ export class IframeManager {
     }
 
     // Clean up nested iframe listeners
-    this.nestedIframeListeners.forEach((handler, iframe) => {
-      iframe.contentWindow?.removeEventListener('message', handler);
+    // Note: We can't iterate over WeakMap, so we iterate over the tracked windows
+    this.attachedIframeWindows.forEach((contentWindow) => {
+      // Try to get the iframe element from the window to retrieve the handler
+      // This is a best-effort cleanup - if the iframe is already GC'd, the WeakMap entry is already gone
+      try {
+        const iframeEl = contentWindow.frameElement as HTMLIFrameElement | null;
+        if (iframeEl) {
+          const handler = this.nestedIframeListeners.get(iframeEl);
+          if (handler) {
+            contentWindow.removeEventListener('message', handler);
+          }
+        }
+      } catch (e) {
+        // Cross-origin access may fail, which is fine - listener will be cleaned up when window is GC'd
+      }
     });
-    this.nestedIframeListeners.clear();
+    this.attachedIframeWindows.clear();
   }
 }
