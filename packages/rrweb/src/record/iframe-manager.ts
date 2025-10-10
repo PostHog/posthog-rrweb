@@ -85,15 +85,16 @@ export class IframeManager {
     });
 
     // Receive messages (events) coming from cross-origin iframes that are nested in this same-origin iframe.
+    const win = iframeEl.contentWindow;
     if (
       this.recordCrossOriginIframes &&
-      iframeEl.contentWindow &&
+      win &&
       !this.nestedIframeListeners.has(iframeEl)
     ) {
       const nestedHandler = this.handleMessage.bind(this);
       this.nestedIframeListeners.set(iframeEl, nestedHandler);
-      this.attachedIframeWindows.add(iframeEl.contentWindow);
-      iframeEl.contentWindow.addEventListener('message', nestedHandler);
+      this.attachedIframeWindows.add(win);
+      win.addEventListener('message', nestedHandler);
     }
 
     this.loadListener?.(iframeEl);

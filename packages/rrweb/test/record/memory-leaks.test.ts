@@ -25,6 +25,15 @@ describe('memory leak prevention', () => {
     global.document = document as any;
     global.Element = dom.window.Element as any;
     global.HTMLElement = dom.window.HTMLElement as any;
+    global.HTMLFormElement = dom.window.HTMLFormElement as any;
+    global.HTMLImageElement = dom.window.HTMLImageElement as any;
+    global.HTMLCanvasElement = dom.window.HTMLCanvasElement as any;
+    global.HTMLAnchorElement = dom.window.HTMLAnchorElement as any;
+    global.HTMLStyleElement = dom.window.HTMLStyleElement as any;
+    global.HTMLLinkElement = dom.window.HTMLLinkElement as any;
+    global.HTMLScriptElement = dom.window.HTMLScriptElement as any;
+    global.HTMLMediaElement = dom.window.HTMLMediaElement as any;
+    global.SVGElement = dom.window.SVGElement as any;
     global.Node = dom.window.Node as any;
     global.MutationObserver = dom.window.MutationObserver as any;
   });
@@ -78,7 +87,7 @@ describe('memory leak prevention', () => {
       expect(mutationBuffers.length).toBe(0);
     });
 
-    it('should clear buffers even if recording had mutations', () => {
+    it('should clear buffers even if recording had mutations', async () => {
       const emit = (event: eventWithTime) => {
         events.push(event);
       };
@@ -91,15 +100,15 @@ describe('memory leak prevention', () => {
       document.body.appendChild(div);
 
       // Wait for mutations to be processed
-      setTimeout(() => {
-        expect(mutationBuffers.length).toBeGreaterThan(0);
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
-        // Stop recording
-        stopRecording?.();
+      expect(mutationBuffers.length).toBeGreaterThan(0);
 
-        // Verify buffers are cleared
-        expect(mutationBuffers.length).toBe(0);
-      }, 10);
+      // Stop recording
+      stopRecording?.();
+
+      // Verify buffers are cleared
+      expect(mutationBuffers.length).toBe(0);
     });
   });
 
