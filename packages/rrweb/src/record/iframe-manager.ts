@@ -26,12 +26,9 @@ export class IframeManager {
   private stylesheetManager: StylesheetManager;
   private recordCrossOriginIframes: boolean;
   private messageHandler: (message: MessageEvent) => void;
-  private nestedIframeListeners: WeakMap<
-    HTMLIFrameElement,
-    (message: MessageEvent) => void
-  > = new WeakMap();
-  // Keep track of contentWindows we've attached listeners to for cleanup
-  private attachedIframeWindows: Set<Window> = new Set();
+  // Map window to handler for cleanup - windows are browser-owned and won't prevent GC
+  private nestedIframeListeners: Map<Window, (message: MessageEvent) => void> =
+    new Map();
 
   constructor(options: {
     mirror: Mirror;
@@ -89,11 +86,10 @@ export class IframeManager {
     if (
       this.recordCrossOriginIframes &&
       win &&
-      !this.nestedIframeListeners.has(iframeEl)
+      !this.nestedIframeListeners.has(win)
     ) {
       const nestedHandler = this.handleMessage.bind(this);
-      this.nestedIframeListeners.set(iframeEl, nestedHandler);
-      this.attachedIframeWindows.add(win);
+      this.nestedIframeListeners.set(win, nestedHandler);
       win.addEventListener('message', nestedHandler);
     }
 
@@ -329,22 +325,9 @@ export class IframeManager {
     }
 
     // Clean up nested iframe listeners
-    // Note: We can't iterate over WeakMap, so we iterate over the tracked windows
-    this.attachedIframeWindows.forEach((contentWindow) => {
-      // Try to get the iframe element from the window to retrieve the handler
-      // This is a best-effort cleanup - if the iframe is already GC'd, the WeakMap entry is already gone
-      try {
-        const iframeEl = contentWindow.frameElement as HTMLIFrameElement | null;
-        if (iframeEl) {
-          const handler = this.nestedIframeListeners.get(iframeEl);
-          if (handler) {
-            contentWindow.removeEventListener('message', handler);
-          }
-        }
-      } catch (e) {
-        // Cross-origin access may fail, which is fine - listener will be cleaned up when window is GC'd
-      }
+    this.nestedIframeListeners.forEach((handler, contentWindow) => {
+      contentWindow.removeEventListener('message', handler);
     });
-    this.attachedIframeWindows.clear();
+    this.nestedIframeListeners.clear();
   }
 }
