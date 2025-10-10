@@ -20,7 +20,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.pull_request.base.ref }}
-                  token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+                  token: ${{ secrets.POSTHOG_BOT_PAT }}
                   fetch-depth: 0
 
             - name: Setup Node.js lts/*
@@ -92,7 +92,7 @@ jobs:
               uses: EndBug/add-and-commit@v9
               with:
                   message: "chore: Bump version to ${{ env.NEW_VERSION }}"
-                  github_token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+                  github_token: ${{ secrets.POSTHOG_BOT_PAT }}
                   commit: --no-verify
                   push: --no-verify
                   tag: ${{ env.NEW_VERSION }}
