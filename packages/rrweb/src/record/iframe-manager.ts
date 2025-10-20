@@ -63,6 +63,10 @@ export class IframeManager {
     this.loadListener = cb;
   }
 
+  public removeLoadListener() {
+    this.loadListener = undefined;
+  }
+
   public attachIframe(
     iframeEl: HTMLIFrameElement,
     childSn: serializedNodeWithId,
