@@ -1,5 +1,5 @@
 import { encode } from 'base64-arraybuffer';
-import type { IWindow, CanvasArg } from '@posthog/rrweb-types';
+import type { IWindow, CanvasArg, DataURLOptions } from '@posthog/rrweb-types';
 
 // TODO: unify with `replay/webgl.ts`
 type CanvasVarMap = Map<string, unknown[]>;
@@ -43,9 +43,10 @@ export function serializeArg(
   value: unknown,
   win: IWindow,
   ctx: RenderingContext,
+  dataURLOptions: DataURLOptions,
 ): CanvasArg {
   if (value instanceof Array) {
-    return value.map((arg) => serializeArg(arg, win, ctx));
+    return value.map((arg) => serializeArg(arg, win, ctx, dataURLOptions));
   } else if (value === null) {
     return value;
   } else if (
@@ -82,7 +83,7 @@ export function serializeArg(
     return {
       rr_type: name,
       args: [
-        serializeArg(value.buffer, win, ctx),
+        serializeArg(value.buffer, win, ctx, dataURLOptions),
         value.byteOffset,
         value.byteLength,
       ],
@@ -97,7 +98,7 @@ export function serializeArg(
   } else if (value instanceof HTMLCanvasElement) {
     const name = 'HTMLImageElement';
     // TODO: move `toDataURL` to web worker if possible
-    const src = value.toDataURL(); // heavy on large canvas
+    const src = value.toDataURL(dataURLOptions.type, dataURLOptions.quality);
     return {
       rr_type: name,
       src,
@@ -106,13 +107,17 @@ export function serializeArg(
     const name = value.constructor.name;
     return {
       rr_type: name,
-      args: [serializeArg(value.data, win, ctx), value.width, value.height],
+      args: [
+        serializeArg(value.data, win, ctx, dataURLOptions),
+        value.width,
+        value.height,
+      ],
     };
     // } else if (value instanceof Blob) {
     //   const name = value.constructor.name;
     //   return {
     //     rr_type: name,
-    //     data: [serializeArg(await value.arrayBuffer(), win, ctx)],
+    //     data: [serializeArg(await value.arrayBuffer(), win, ctx, dataURLOptions)],
     //     type: value.type,
     //   };
   } else if (isInstanceOfWebGLObject(value, win) || typeof value === 'object') {
@@ -132,8 +137,9 @@ export const serializeArgs = (
   args: Array<unknown>,
   win: IWindow,
   ctx: RenderingContext,
+  dataURLOptions: DataURLOptions,
 ) => {
-  return args.map((arg) => serializeArg(arg, win, ctx));
+  return args.map((arg) => serializeArg(arg, win, ctx, dataURLOptions));
 };
 
 export const isInstanceOfWebGLObject = (

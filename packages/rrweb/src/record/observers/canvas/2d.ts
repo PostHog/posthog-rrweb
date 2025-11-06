@@ -4,6 +4,7 @@ import {
   type canvasManagerMutationCallback,
   type IWindow,
   type listenerHandler,
+  type DataURLOptions,
 } from '@posthog/rrweb-types';
 import { hookSetter, isBlocked } from '../../../utils';
 import { patch } from '@posthog/rrweb-utils';
@@ -14,6 +15,7 @@ export default function initCanvas2DMutationObserver(
   win: IWindow,
   blockClass: blockClass,
   blockSelector: string | null,
+  dataURLOptions: DataURLOptions,
 ): listenerHandler {
   const handlers: listenerHandler[] = [];
   const props2D = Object.getOwnPropertyNames(
@@ -45,7 +47,12 @@ export default function initCanvas2DMutationObserver(
               // Using setTimeout as toDataURL can be heavy
               // and we'd rather not block the main thread
               setTimeout(() => {
-                const recordArgs = serializeArgs(args, win, this);
+                const recordArgs = serializeArgs(
+                  args,
+                  win,
+                  this,
+                  dataURLOptions,
+                );
                 cb(this.canvas, {
                   type: CanvasContext['2D'],
                   property: prop,

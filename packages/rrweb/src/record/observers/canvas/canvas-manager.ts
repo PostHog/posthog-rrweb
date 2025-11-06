@@ -78,7 +78,12 @@ export class CanvasManager {
     this.mirror = options.mirror;
 
     if (recordCanvas && sampling === 'all')
-      this.initCanvasMutationObserver(win, blockClass, blockSelector);
+      this.initCanvasMutationObserver(
+        win,
+        blockClass,
+        blockSelector,
+        dataURLOptions,
+      );
     if (recordCanvas && typeof sampling === 'number')
       this.initCanvasFPSObserver(sampling, win, blockClass, blockSelector, {
         dataURLOptions,
@@ -256,6 +261,7 @@ export class CanvasManager {
     win: IWindow,
     blockClass: blockClass,
     blockSelector: string | null,
+    dataURLOptions: DataURLOptions,
   ): void {
     this.startRAFTimestamping();
     this.startPendingCanvasMutationFlusher();
@@ -271,6 +277,7 @@ export class CanvasManager {
       win,
       blockClass,
       blockSelector,
+      dataURLOptions,
     );
 
     const canvasWebGL1and2Reset = initCanvasWebGLMutationObserver(
@@ -278,6 +285,7 @@ export class CanvasManager {
       win,
       blockClass,
       blockSelector,
+      dataURLOptions,
     );
 
     this.resetObservers = () => {

@@ -5,6 +5,7 @@ import {
   type canvasMutationWithType,
   type IWindow,
   type listenerHandler,
+  type DataURLOptions,
 } from '@posthog/rrweb-types';
 import { hookSetter, isBlocked } from '../../../utils';
 import { patch } from '@posthog/rrweb-utils';
@@ -17,6 +18,7 @@ function patchGLPrototype(
   blockClass: blockClass,
   blockSelector: string | null,
   win: IWindow,
+  dataURLOptions: DataURLOptions,
 ): listenerHandler[] {
   const handlers: listenerHandler[] = [];
 
@@ -52,7 +54,7 @@ function patchGLPrototype(
               'tagName' in this.canvas &&
               !isBlocked(this.canvas, blockClass, blockSelector, true)
             ) {
-              const recordArgs = serializeArgs(args, win, this);
+              const recordArgs = serializeArgs(args, win, this, dataURLOptions);
               const mutation: canvasMutationWithType = {
                 type,
                 property: prop,
@@ -92,6 +94,7 @@ export default function initCanvasWebGLMutationObserver(
   win: IWindow,
   blockClass: blockClass,
   blockSelector: string | null,
+  dataURLOptions: DataURLOptions,
 ): listenerHandler {
   const handlers: listenerHandler[] = [];
 
@@ -103,6 +106,7 @@ export default function initCanvasWebGLMutationObserver(
       blockClass,
       blockSelector,
       win,
+      dataURLOptions,
     ),
   );
 
@@ -115,6 +119,7 @@ export default function initCanvasWebGLMutationObserver(
         blockClass,
         blockSelector,
         win,
+        dataURLOptions,
       ),
     );
   }
