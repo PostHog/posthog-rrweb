@@ -300,6 +300,33 @@ describe('absolutifyURLs', () => {
       expect(result.split('url(').length - 1).toBe(50);
     });
 
+    it('should handle pathological nested url( patterns efficiently (CodeQL scenario)', () => {
+      // CodeQL warns: "may run slow on strings starting with 'url(' and with many repetitions of 'url(('"
+      // This tests nested/malformed url( patterns that could cause backtracking
+      const nestedUrlPattern = 'url(('.repeat(1000);
+      const input = nestedUrlPattern + 'file.jpg' + ')'.repeat(1000);
+
+      const start = Date.now();
+      const result = absolutifyURLs(input, baseHref);
+      const duration = Date.now() - start;
+
+      // Should complete quickly even with pathological input
+      // O(n²) or worse would take much longer
+      expect(duration).toBeLessThan(200);
+    });
+
+    it('should handle many failed url( matches efficiently', () => {
+      // Test many 'url(' patterns without proper closing
+      const malformedUrls = 'url((((( '.repeat(500);
+
+      const start = Date.now();
+      const result = absolutifyURLs(malformedUrls, baseHref);
+      const duration = Date.now() - start;
+
+      // Should complete quickly - linear time, not quadratic
+      expect(duration).toBeLessThan(200);
+    });
+
     it('should handle realistic CSS file with many URLs and rules efficiently', () => {
       // Simulate a real style.css with various patterns that could trigger backtracking
       const longPath = 'assets/images/components/'.repeat(10);
