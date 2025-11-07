@@ -1,5 +1,3 @@
-import { mediaSelectorPlugin, pseudoClassPlugin } from './css';
-import safeParser from 'postcss-safe-parser';
 import {
   type serializedNodeWithId,
   NodeType,
@@ -13,7 +11,7 @@ import {
   isNodeMetaEqual,
   extractFileExtension,
 } from './utils';
-import postcss from 'postcss';
+import { adaptCssForReplay } from './utils-rebuild';
 
 const tagMap: tagMap = {
   script: 'noscript',
@@ -61,25 +59,6 @@ function getTagName(n: elementNode): string {
     tagName = 'style';
   }
   return tagName;
-}
-
-export function adaptCssForReplay(cssText: string, cache: BuildCache): string {
-  const cachedStyle = cache?.stylesWithHoverClass.get(cssText);
-  if (cachedStyle) return cachedStyle;
-
-  let result = cssText;
-  try {
-    const ast: { css: string } = postcss([
-      mediaSelectorPlugin,
-      pseudoClassPlugin,
-    ]).process(cssText, { parser: safeParser });
-    result = ast.css;
-  } catch (error) {
-    // on the replay side so should be ok to just log here
-    console.warn('Failed to adapt css for replay', error);
-  }
-  cache?.stylesWithHoverClass.set(cssText, result);
-  return result;
 }
 
 export function createCache(): BuildCache {

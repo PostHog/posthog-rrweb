@@ -24,12 +24,11 @@ import {
   isShadowRoot,
   maskInputValue,
   isNativeShadowDom,
-  stringifyStylesheet,
   getInputType,
   toLowerCase,
   extractFileExtension,
-  absolutifyURLs,
 } from './utils';
+import { stringifyStylesheet, absolutifyURLs } from './utils-snapshot';
 import dom from '@posthog/rrweb-utils';
 
 let _id = 1;
