@@ -9,7 +9,8 @@ import snapshot, {
   serializeNodeWithId,
 } from '../src/snapshot';
 import { elementNode, serializedNodeWithId } from '../src/types';
-import { Mirror, absolutifyURLs } from '../src/utils';
+import { Mirror } from '../src/utils';
+import { absolutifyURLs } from '../src/utils-snapshot';
 
 const serializeNode = (node: Node): serializedNodeWithId | null => {
   return serializeNodeWithId(node, {
