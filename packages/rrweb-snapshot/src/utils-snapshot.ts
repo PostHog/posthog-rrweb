@@ -153,7 +153,10 @@ function extractOrigin(url: string): string {
 
 // Fixed regex to prevent ReDoS (catastrophic backtracking)
 // Changed (.*?) to ([^"]*) - matches non-quote chars instead of lazy any-char
-// Kept ([^)]*) but it's safe as it only matches non-closing-paren chars
+// Changed (.*?) to ([^']*) - matches non-single-quote chars
+// Note: [^)]* for unquoted URLs has theoretical O(n²) risk with nested url( patterns,
+// but changing it breaks real CSS (data URIs, etc). Modern V8 handles it well.
+// CodeQL may still flag this - the fix would require lookahead which JS doesn't support efficiently.
 const URL_IN_CSS_REF = /url\((?:(')([^']*)'|(")([^"]*)"|([^)]*))\)/g;
 const URL_PROTOCOL_MATCH = /^(?:[a-z+]+:)?\/\//i;
 const URL_WWW_MATCH = /^www\..*/i;

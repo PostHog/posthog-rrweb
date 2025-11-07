@@ -315,6 +315,21 @@ describe('absolutifyURLs', () => {
       expect(duration).toBeLessThan(200);
     });
 
+    it('should handle unquoted url( without closing parens reasonably', () => {
+      // NOTE: [^)]* has theoretical O(n²) risk with pathological input like url(aaa...
+      // However, changing it to [^()] breaks real CSS (data URIs, integration tests fail)
+      // Modern V8 optimizes this well - completes in <100ms even with 50k chars
+      // This test documents that the regex performs acceptably in practice
+      const pathologicalInput = 'url(' + 'a'.repeat(50000);
+
+      const start = Date.now();
+      const result = absolutifyURLs(pathologicalInput, baseHref);
+      const duration = Date.now() - start;
+
+      // Modern JS engines handle this efficiently despite theoretical O(n²)
+      expect(duration).toBeLessThan(100);
+    });
+
     it('should handle many failed url( matches efficiently', () => {
       // Test many 'url(' patterns without proper closing
       const malformedUrls = 'url((((( '.repeat(500);
