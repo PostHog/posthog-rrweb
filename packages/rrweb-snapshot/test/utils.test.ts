@@ -2,12 +2,13 @@
  * @vitest-environment jsdom
  */
 import { describe, it, test, expect } from 'vitest';
-import { extractFileExtension, isNodeMetaEqual } from '../src/utils';
 import {
   escapeImportStatement,
+  extractFileExtension,
   fixSafariColons,
+  isNodeMetaEqual,
   stringifyStylesheet,
-} from '../src/utils-snapshot';
+} from '../src/utils';
 import { NodeType } from '@posthog/rrweb-types';
 import type {
   serializedNode,

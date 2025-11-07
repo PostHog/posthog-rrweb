@@ -9,17 +9,20 @@ import snapshot, {
   IGNORED_NODE,
   genId,
 } from './snapshot';
-import rebuild, { buildNodeWithSN, createCache } from './rebuild';
+import rebuild, {
+  buildNodeWithSN,
+  adaptCssForReplay,
+  createCache,
+} from './rebuild';
 export * from './types';
 export * from './utils';
-export * from './utils-snapshot'; // CSS stringifying for recording
-export * from './utils-rebuild'; // CSS transformation for replay
 
 export {
   snapshot,
   serializeNodeWithId,
   rebuild,
   buildNodeWithSN,
+  adaptCssForReplay,
   createCache,
   transformAttribute,
   ignoreAttribute,
