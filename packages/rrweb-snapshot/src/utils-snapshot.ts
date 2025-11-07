@@ -151,7 +151,10 @@ function extractOrigin(url: string): string {
   return origin;
 }
 
-const URL_IN_CSS_REF = /url\((?:(')([^']*)'|(")(.*?)"|([^)]*))\)/gm;
+// Fixed regex to prevent ReDoS (catastrophic backtracking)
+// Changed (.*?) to ([^"]*) - matches non-quote chars instead of lazy any-char
+// Kept ([^)]*) but it's safe as it only matches non-closing-paren chars
+const URL_IN_CSS_REF = /url\((?:(')([^']*)'|(")([^"]*)"|([^)]*))\)/g;
 const URL_PROTOCOL_MATCH = /^(?:[a-z+]+:)?\/\//i;
 const URL_WWW_MATCH = /^www\..*/i;
 const DATA_URI = /^(data:)([^,]*),(.*)/i;
