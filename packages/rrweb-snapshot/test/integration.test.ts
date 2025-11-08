@@ -175,6 +175,10 @@ describe('integration tests', function (this: ISuite) {
         .replace(
           /blob:http:\/\/localhost:\d+\/[0-9a-z\-]+/,
           'blob:http://localhost:xxxx/...',
+        )
+        .replace(
+          /data:image\/png;base64,[A-Za-z0-9+/=]{500,}/g,
+          'data:image/png;base64,CANVAS_GENERATED_IMAGE',
         );
 
       await assertSnapshot(rebuildHtml);
