@@ -28,6 +28,8 @@ import {
   getInputType,
   toLowerCase,
   extractFileExtension,
+  checkDataURLSize,
+  recompressBase64Image,
   absolutifyURLs,
 } from './utils';
 import dom from '@posthog/rrweb-utils';
@@ -175,6 +177,8 @@ export function transformAttribute(
   tagName: Lowercase<string>,
   name: Lowercase<string>,
   value: string | null,
+  element?: HTMLElement,
+  dataURLOptions?: DataURLOptions,
 ): string | null {
   if (!value) {
     return value;
@@ -186,7 +190,33 @@ export function transformAttribute(
     (name === 'href' && !(tagName === 'use' && value[0] === '#'))
   ) {
     // href starts with a # is an id pointer for svg
-    return absoluteToDoc(doc, value);
+    const transformedValue = absoluteToDoc(doc, value);
+
+    if (tagName === 'img' && transformedValue.startsWith('data:') && element) {
+      const img = element as HTMLImageElement;
+
+      let processedDataURL = transformedValue;
+
+      if (dataURLOptions?.type || dataURLOptions?.quality !== undefined) {
+        processedDataURL = recompressBase64Image(
+          img,
+          transformedValue,
+          dataURLOptions.type,
+          dataURLOptions.quality,
+        );
+      }
+
+      if (dataURLOptions?.maxBase64ImageLength) {
+        processedDataURL = checkDataURLSize(
+          processedDataURL,
+          dataURLOptions.maxBase64ImageLength,
+        );
+      }
+
+      return processedDataURL;
+    }
+
+    return transformedValue;
   } else if (name === 'xlink:href' && value[0] !== '#') {
     // xlink:href starts with # is an id pointer
     return absoluteToDoc(doc, value);
@@ -608,6 +638,8 @@ function serializeElementNode(
         tagName,
         toLowerCase(attr.name),
         attr.value,
+        n,
+        dataURLOptions,
       );
     }
   }

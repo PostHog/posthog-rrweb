@@ -619,6 +619,8 @@ export default class MutationBuffer {
             toLowerCase(target.tagName),
             toLowerCase(attributeName),
             value,
+            target as HTMLElement,
+            this.dataURLOptions,
           );
           if (attributeName === 'style') {
             if (!this.unattachedDoc) {

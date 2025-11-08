@@ -84,7 +84,7 @@ function record<T = eventWithTime>(
     hooks,
     packFn,
     sampling = {},
-    dataURLOptions = {},
+    dataURLOptions: _dataURLOptions = {},
     mousemoveWait,
     recordDOM = true,
     recordCanvas = false,
@@ -102,6 +102,13 @@ function record<T = eventWithTime>(
   } = options;
 
   registerErrorHandler(errorHandler);
+
+  const dataURLOptions = {
+    type: 'image/webp',
+    quality: 0.4,
+    maxBase64ImageLength: 1048576,
+    ..._dataURLOptions,
+  };
 
   const inEmittingFrame = recordCrossOriginIframes
     ? window.parent === window

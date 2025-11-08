@@ -444,3 +444,56 @@ export function absolutifyURLs(cssText: string | null, href: string): string {
     },
   );
 }
+
+const STRIPED_PLACEHOLDER_SVG =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9InN0cmlwZXMiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+CiAgICAgIDxyZWN0IHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iYmxhY2siLz4KICAgICAgPHBhdGggZD0iTTggMEgxNkwwIDE2VjhMOCAwWiIgZmlsbD0iIzJEMkQyRCIvPgogICAgICA8cGF0aCBkPSJNMTYgOFYxNkg4TDE2IDhaIiBmaWxsPSIjMkQyRDJEIi8+CiAgICA8L3BhdHRlcm4+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjc3RyaXBlcykiLz4KPC9zdmc+Cg==';
+
+const MAX_IMAGE_DIMENSION_FOR_RECOMPRESSION = 4096;
+
+export function recompressBase64Image(
+  img: HTMLImageElement,
+  dataURL: string,
+  type?: string,
+  quality?: number,
+): string {
+  if (!img.complete || img.naturalWidth === 0) {
+    return dataURL;
+  }
+
+  // don't recompress very large images to avoid performance issues
+  if (
+    img.naturalWidth > MAX_IMAGE_DIMENSION_FOR_RECOMPRESSION ||
+    img.naturalHeight > MAX_IMAGE_DIMENSION_FOR_RECOMPRESSION
+  ) {
+    return dataURL;
+  }
+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return dataURL;
+    }
+
+    ctx.drawImage(img, 0, 0);
+    const recompressed = canvas.toDataURL(type || 'image/webp', quality ?? 0.4);
+
+    return recompressed;
+  } catch (err) {
+    return dataURL;
+  }
+}
+
+export function checkDataURLSize(
+  dataURL: string,
+  maxLength: number | undefined,
+): string {
+  if (!maxLength || dataURL.length <= maxLength) {
+    return dataURL;
+  }
+
+  return STRIPED_PLACEHOLDER_SVG;
+}

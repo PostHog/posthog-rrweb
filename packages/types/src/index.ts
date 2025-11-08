@@ -844,6 +844,7 @@ export interface IMirror<TNode> {
 export type DataURLOptions = Partial<{
   type: string;
   quality: number;
+  maxBase64ImageLength: number;
 }>;
 
 // Types for @rrweb/packer
