@@ -1349,6 +1349,7 @@ export function initObservers(
   }
 
   return callbackWrapper(() => {
+    mutationBuffers.forEach((b) => b.destroy());
     mutationBuffers.forEach((b) => b.reset());
     mutationObserver?.disconnect();
     mousemoveHandler();

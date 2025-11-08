@@ -34,10 +34,20 @@ export class CanvasManager {
   private resetObservers?: listenerHandler;
   private frozen = false;
   private locked = false;
+  private rafIdTimestamp: number | null = null;
+  private rafIdFlush: number | null = null;
 
   public reset() {
     this.pendingCanvasMutations.clear();
     this.resetObservers && this.resetObservers();
+    if (this.rafIdTimestamp !== null) {
+      cancelAnimationFrame(this.rafIdTimestamp);
+      this.rafIdTimestamp = null;
+    }
+    if (this.rafIdFlush !== null) {
+      cancelAnimationFrame(this.rafIdFlush);
+      this.rafIdFlush = null;
+    }
   }
 
   public freeze() {
@@ -296,15 +306,17 @@ export class CanvasManager {
   }
 
   private startPendingCanvasMutationFlusher() {
-    requestAnimationFrame(() => this.flushPendingCanvasMutations());
+    this.rafIdFlush = requestAnimationFrame(() =>
+      this.flushPendingCanvasMutations(),
+    );
   }
 
   private startRAFTimestamping() {
     const setLatestRAFTimestamp = (timestamp: DOMHighResTimeStamp) => {
       this.rafStamps.latestId = timestamp;
-      requestAnimationFrame(setLatestRAFTimestamp);
+      this.rafIdTimestamp = requestAnimationFrame(setLatestRAFTimestamp);
     };
-    requestAnimationFrame(setLatestRAFTimestamp);
+    this.rafIdTimestamp = requestAnimationFrame(setLatestRAFTimestamp);
   }
 
   flushPendingCanvasMutations() {
@@ -314,7 +326,9 @@ export class CanvasManager {
         this.flushPendingCanvasMutationFor(canvas, id);
       },
     );
-    requestAnimationFrame(() => this.flushPendingCanvasMutations());
+    this.rafIdFlush = requestAnimationFrame(() =>
+      this.flushPendingCanvasMutations(),
+    );
   }
 
   flushPendingCanvasMutationFor(canvas: HTMLCanvasElement, id: number) {

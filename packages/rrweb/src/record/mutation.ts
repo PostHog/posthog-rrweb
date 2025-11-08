@@ -256,6 +256,12 @@ export default class MutationBuffer {
     this.canvasManager.reset();
   }
 
+  public destroy() {
+    while (this.mapRemoves.length) {
+      this.mirror.removeNodeFromMap(this.mapRemoves.shift()!);
+    }
+  }
+
   public processMutations = (mutations: mutationRecord[]) => {
     mutations.forEach(this.processMutation); // adds mutations to the buffer
     this.emit(); // clears buffer if not locked/frozen

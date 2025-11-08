@@ -333,5 +333,8 @@ export class IframeManager {
       contentWindow.removeEventListener('message', handler);
     });
     this.nestedIframeListeners.clear();
+
+    this.crossOriginIframeMirror.reset();
+    this.crossOriginIframeStyleMirror.reset();
   }
 }

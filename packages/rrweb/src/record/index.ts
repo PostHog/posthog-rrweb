@@ -622,6 +622,7 @@ function record<T = eventWithTime>(
       processedNodeManager.destroy();
       iframeManager.removeLoadListener();
       iframeManager.destroy();
+      mirror.reset();
       recording = false;
       unregisterErrorHandler();
     };
