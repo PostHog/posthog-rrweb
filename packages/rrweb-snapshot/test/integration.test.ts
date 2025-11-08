@@ -497,7 +497,7 @@ describe('base64 image compression tests', function (this: ISuite) {
 
     const result = await page.evaluate(`${code}
       const snapshot = rrwebSnapshot.snapshot(document, {
-        dataURLOptions: { type: "image/webp", quality: 0.4, maxBase64ImageLength: 1048576 }
+        dataURLOptions: { type: "image/webp", quality: 0.4, maxBase64ImageLength: 10000 }
       });
 
       function findImages(node, images = []) {
@@ -580,7 +580,17 @@ describe('base64 image compression tests', function (this: ISuite) {
         dataURLOptions: { type: "image/webp", quality: 0.8, maxBase64ImageLength: 1048576 }
       });
 
-      const images = snapshot.childNodes[0].childNodes[1].childNodes.filter((cn) => cn.type === 2 && cn.tagName === 'img');
+      function findImages(node, images = []) {
+        if (node.type === 2 && node.tagName === 'img') {
+          images.push(node);
+        }
+        if (node.childNodes) {
+          node.childNodes.forEach(child => findImages(child, images));
+        }
+        return images;
+      }
+
+      const images = findImages(snapshot);
       const smallImage = images.find(img => img.attributes.id === 'small-image');
 
       ({
