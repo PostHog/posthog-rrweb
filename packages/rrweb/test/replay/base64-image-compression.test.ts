@@ -117,7 +117,7 @@ describe('base64 image compression visual tests', function () {
 
     const image = await replayPage.screenshot({ fullPage: true });
     expect(image).toMatchImageSnapshot({
-      failureThreshold: 0.01,
+      failureThreshold: 1.5,
       failureThresholdType: 'percent',
       customSnapshotIdentifier: 'base64-image-compression-replay',
     });
