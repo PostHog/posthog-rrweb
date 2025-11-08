@@ -424,6 +424,181 @@ iframe.contentDocument.querySelector('center').clientHeight
   });
 });
 
+describe('base64 image compression tests', function (this: ISuite) {
+  vi.setConfig({ testTimeout: 30_000 });
+  let server: ISuite['server'];
+  let serverURL: ISuite['serverURL'];
+  let browser: ISuite['browser'];
+  let code: ISuite['code'];
+
+  beforeAll(async () => {
+    server = await startServer();
+    serverURL = getServerURL(server);
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox'],
+    });
+
+    code = fs.readFileSync(
+      path.resolve(__dirname, '../dist/rrweb-snapshot.umd.cjs'),
+      'utf-8',
+    );
+  });
+
+  afterAll(async () => {
+    await browser.close();
+    await server.close();
+  });
+
+  it('should recompress base64 images with configured quality', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto(`${serverURL}/html/base64-images.html`, {
+      waitUntil: 'load',
+    });
+    await page.waitForSelector('#small-image', { timeout: 2000 });
+    await page.waitForSelector('#medium-image', { timeout: 2000 });
+
+    const result = await page.evaluate(`${code}
+      const snapshot = rrwebSnapshot.snapshot(document, {
+        dataURLOptions: { type: "image/webp", quality: 0.4, maxBase64ImageLength: 1048576 }
+      });
+
+      function findImages(node, images = []) {
+        if (node.type === 2 && node.tagName === 'img') {
+          images.push(node);
+        }
+        if (node.childNodes) {
+          node.childNodes.forEach(child => findImages(child, images));
+        }
+        return images;
+      }
+
+      const images = findImages(snapshot);
+
+      ({
+        smallImageSrc: images[0].attributes.src,
+        mediumImageSrc: images[1].attributes.src,
+        smallOriginalLength: images[0].attributes.src.length,
+        mediumOriginalLength: images[1].attributes.src.length
+      });
+    `);
+
+    expect(result.smallImageSrc).toMatch(/^data:image\/webp;base64,/);
+    expect(result.mediumImageSrc).toMatch(/^data:image\/webp;base64,/);
+
+    await page.close();
+  });
+
+  it('should replace oversized base64 images with striped placeholder', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto(`${serverURL}/html/base64-images.html`, {
+      waitUntil: 'load',
+    });
+    await page.waitForSelector('#large-image', { timeout: 5000 });
+
+    const result = await page.evaluate(`${code}
+      const snapshot = rrwebSnapshot.snapshot(document, {
+        dataURLOptions: { type: "image/webp", quality: 0.4, maxBase64ImageLength: 1048576 }
+      });
+
+      function findImages(node, images = []) {
+        if (node.type === 2 && node.tagName === 'img') {
+          images.push(node);
+        }
+        if (node.childNodes) {
+          node.childNodes.forEach(child => findImages(child, images));
+        }
+        return images;
+      }
+
+      const images = findImages(snapshot);
+      const largeImage = images.find(img => img.attributes.id === 'large-image');
+
+      ({
+        largeImageSrc: largeImage.attributes.src,
+        isPlaceholder: largeImage.attributes.src.startsWith('data:image/svg+xml'),
+        srcLength: largeImage.attributes.src.length
+      });
+    `);
+
+    expect(result.isPlaceholder).toBe(true);
+    expect(result.largeImageSrc).toMatch(/^data:image\/svg\+xml;base64,/);
+    expect(result.srcLength).toBeLessThan(1000);
+
+    await page.close();
+  });
+
+  it('should skip recompression for images larger than 4096px', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto(`${serverURL}/html/base64-images.html`, {
+      waitUntil: 'load',
+    });
+    await page.waitForSelector('#huge-image', { timeout: 5000 });
+
+    const result = await page.evaluate(`${code}
+      const originalSrc = document.getElementById('huge-image').src;
+
+      const snapshot = rrwebSnapshot.snapshot(document, {
+        dataURLOptions: { type: "image/webp", quality: 0.4, maxBase64ImageLength: 10000000 }
+      });
+
+      function findImages(node, images = []) {
+        if (node.type === 2 && node.tagName === 'img') {
+          images.push(node);
+        }
+        if (node.childNodes) {
+          node.childNodes.forEach(child => findImages(child, images));
+        }
+        return images;
+      }
+
+      const images = findImages(snapshot);
+      const hugeImage = images.find(img => img.attributes.id === 'huge-image');
+
+      ({
+        originalFormat: originalSrc.substring(0, 30),
+        snapshotFormat: hugeImage.attributes.src.substring(0, 30),
+        wasRecompressed: originalSrc !== hugeImage.attributes.src,
+        isPNG: hugeImage.attributes.src.startsWith('data:image/png')
+      });
+    `);
+
+    expect(result.isPNG).toBe(true);
+    expect(result.wasRecompressed).toBe(false);
+
+    await page.close();
+  });
+
+  it('should preserve small images under limit without replacing', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto(`${serverURL}/html/base64-images.html`, {
+      waitUntil: 'load',
+    });
+    await page.waitForSelector('#small-image', { timeout: 2000 });
+
+    const result = await page.evaluate(`${code}
+      const snapshot = rrwebSnapshot.snapshot(document, {
+        dataURLOptions: { type: "image/webp", quality: 0.8, maxBase64ImageLength: 1048576 }
+      });
+
+      const images = snapshot.childNodes[0].childNodes[1].childNodes.filter((cn) => cn.type === 2 && cn.tagName === 'img');
+      const smallImage = images.find(img => img.attributes.id === 'small-image');
+
+      ({
+        isWebP: smallImage.attributes.src.startsWith('data:image/webp'),
+        isNotPlaceholder: !smallImage.attributes.src.includes('svg+xml'),
+        srcLength: smallImage.attributes.src.length
+      });
+    `);
+
+    expect(result.isWebP).toBe(true);
+    expect(result.isNotPlaceholder).toBe(true);
+    expect(result.srcLength).toBeGreaterThan(0);
+    expect(result.srcLength).toBeLessThan(1048576);
+
+    await page.close();
+  });
+});
+
 describe('iframe integration tests', function (this: ISuite) {
   vi.setConfig({ testTimeout: 30_000 });
   let server: ISuite['server'];
