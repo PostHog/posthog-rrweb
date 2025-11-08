@@ -12083,7 +12083,7 @@ exports[`record integration tests > should record images inside iframe with blob
             \\"tagName\\": \\"img\\",
             \\"attributes\\": {
               \\"src\\": \\"blob:http://localhost:xxxx/...\\",
-              \\"rr_dataURL\\": \\"data:image/png;base64,...\\"
+              \\"rr_dataURL\\": \\"data:image/webp;base64,...\\"
             },
             \\"childNodes\\": [],
             \\"rootId\\": 21,
@@ -12517,7 +12517,7 @@ exports[`record integration tests > should record images inside iframe with blob
             \\"tagName\\": \\"img\\",
             \\"attributes\\": {
               \\"src\\": \\"blob:http://localhost:xxxx/...\\",
-              \\"rr_dataURL\\": \\"data:image/png;base64,...\\"
+              \\"rr_dataURL\\": \\"data:image/webp;base64,...\\"
             },
             \\"childNodes\\": [],
             \\"rootId\\": 27,
@@ -12725,7 +12725,7 @@ exports[`record integration tests > should record images with blob url 1`] = `
             \\"tagName\\": \\"img\\",
             \\"attributes\\": {
               \\"src\\": \\"blob:http://localhost:xxxx/...\\",
-              \\"rr_dataURL\\": \\"data:image/png;base64,...\\"
+              \\"rr_dataURL\\": \\"data:image/webp;base64,...\\"
             },
             \\"childNodes\\": [],
             \\"id\\": 24
