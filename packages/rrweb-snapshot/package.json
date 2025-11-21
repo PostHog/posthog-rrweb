@@ -22,19 +22,39 @@
         "type": "git",
         "url": "git+https://github.com/PostHog/posthog-rrweb.git"
     },
-    "main": "./dist/rrweb-snapshot.umd.cjs",
+    "main": "./dist/rrweb-snapshot.cjs",
     "module": "./dist/rrweb-snapshot.js",
     "unpkg": "./dist/rrweb-snapshot.umd.cjs",
-    "typings": "dist/index.d.ts",
+    "typings": "dist/rrweb-snapshot.d.ts",
     "exports": {
         ".": {
             "import": {
-                "types": "./dist/index.d.ts",
+                "types": "./dist/rrweb-snapshot.d.ts",
                 "default": "./dist/rrweb-snapshot.js"
             },
             "require": {
-                "types": "./dist/index.d.cts",
-                "default": "./dist/rrweb-snapshot.umd.cjs"
+                "types": "./dist/rrweb-snapshot.d.cts",
+                "default": "./dist/rrweb-snapshot.cjs"
+            }
+        },
+        "./record": {
+            "import": {
+                "types": "./dist/record.d.ts",
+                "default": "./dist/record.js"
+            },
+            "require": {
+                "types": "./dist/record.d.cts",
+                "default": "./dist/record.cjs"
+            }
+        },
+        "./replay": {
+            "import": {
+                "types": "./dist/replay.d.ts",
+                "default": "./dist/replay.js"
+            },
+            "require": {
+                "types": "./dist/replay.d.cts",
+                "default": "./dist/replay.cjs"
             }
         }
     },
