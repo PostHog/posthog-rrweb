@@ -39,7 +39,7 @@ jobs:
 
   annotation:
     # Skip the annotation action in push events
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     needs: eslint_check_upload
     runs-on: ubuntu-latest
     name: ESLint Annotation
