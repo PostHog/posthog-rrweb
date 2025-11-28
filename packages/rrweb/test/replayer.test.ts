@@ -66,7 +66,7 @@ describe('replayer', function () {
   });
 
   afterAll(async () => {
-    await browser.close();
+    await browser?.close();
   });
 
   it('can get meta data', async () => {

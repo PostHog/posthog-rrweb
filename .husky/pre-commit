@@ -1,2 +1,2 @@
-yarn run format:head
-yarn run lint-staged
+pnpm run format:head
+pnpm run lint-staged

@@ -9,7 +9,8 @@ export async function launchPuppeteer(
   options?: Parameters<(typeof puppeteer)['launch']>[0],
 ) {
   return await puppeteer.launch({
-    headless: process.env.PUPPETEER_HEADLESS ? true : false,
+    headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     defaultViewport: {
       width: 1920,
       height: 1080,
@@ -46,8 +47,8 @@ describe('rrweb-plugin-console-record', () => {
   });
 
   afterAll(async () => {
-    await browser.close();
-    await server.close();
+    await browser?.close();
+    await server?.close();
   });
 
   it('should handle recursive console messages', async () => {

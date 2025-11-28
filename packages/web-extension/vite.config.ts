@@ -44,6 +44,9 @@ function useSpecialFormat(
  * Get the extension version based on the rrweb version.
  */
 function getExtensionVersion(rrwebVersion: string): string {
+  if (rrwebVersion.startsWith('workspace:')) {
+    return '0.0.0';
+  }
   const parsedVersion = parse(rrwebVersion.replace('^', '')) || parse('0.0.0');
 
   if (!parsedVersion) {

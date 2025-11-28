@@ -127,9 +127,9 @@ const setup = function (
   });
 
   afterAll(async () => {
-    await ctx.browser.close();
-    ctx.server.close();
-    ctx.serverB.close();
+    await ctx.browser?.close();
+    ctx.server?.close();
+    ctx.serverB?.close();
   });
 
   return ctx;

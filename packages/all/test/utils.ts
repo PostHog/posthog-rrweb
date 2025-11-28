@@ -15,6 +15,16 @@ import * as http from 'http';
 import * as url from 'url';
 import * as fs from 'fs';
 
+declare module 'puppeteer' {
+  interface Page {
+    waitForTimeout(ms: number): Promise<void>;
+  }
+}
+
+puppeteer.Page.prototype.waitForTimeout = function (ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 export async function launchPuppeteer(
   options?: Parameters<(typeof puppeteer)['launch']>[0],
 ) {
@@ -275,4 +285,46 @@ export async function waitForRAF(
       });
     });
   });
+}
+
+export async function waitForIFrameLoad(
+  page: puppeteer.Frame | puppeteer.Page,
+  iframeSelector: string,
+  timeout = 10000,
+): Promise<puppeteer.Frame> {
+  const el = await page.waitForSelector(iframeSelector);
+  if (!el)
+    throw new Error('Waiting for iframe load has timed out - no element found');
+
+  let frame = await el.contentFrame();
+  if (frame && frame.isDetached()) {
+    throw new Error(
+      'Waiting for iframe load has timed out - frame is detached',
+    );
+  }
+  if (frame && frame.url() !== '') {
+    return frame;
+  }
+
+  await page.$eval(
+    iframeSelector,
+    async (iframe, timeout) => {
+      await new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(
+          () => reject(new Error('Waiting for iframe load has timed out')),
+          timeout,
+        );
+        iframe.addEventListener('load', () => {
+          clearTimeout(timeoutId);
+          resolve();
+        });
+      });
+    },
+    timeout,
+  );
+
+  frame = await el.contentFrame();
+  if (!frame)
+    throw new Error('Waiting for iframe load has timed out - no frame');
+  return frame;
 }

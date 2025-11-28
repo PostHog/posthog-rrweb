@@ -27,7 +27,7 @@
         "dev": "vite build --watch",
         "test": "vitest run",
         "test:watch": "vitest watch",
-        "build": "yarn turbo run prepublish",
+        "build": "pnpm turbo run prepublish",
         "check-types": "tsc -noEmit",
         "prepublish": "tsc -noEmit && vite build"
     },
@@ -38,15 +38,17 @@
     "author": "yanzhen@smartx.com",
     "license": "MIT",
     "devDependencies": {
-        "@posthog/rrweb": "*",
+        "@posthog/rrweb": "workspace:*",
+        "@posthog/rrweb-types": "workspace:*",
+        "@posthog/rrweb-utils": "workspace:*",
         "typescript": "^5.4.5",
         "vite": "^6.2.0",
         "vite-plugin-dts": "^3.9.1",
         "vitest": "^1.4.0",
-        "puppeteer": "^20.9.0"
+        "puppeteer": "^23.11.1"
     },
     "peerDependencies": {
-        "@posthog/rrweb": "*",
-        "@posthog/rrweb-utils": "*"
+        "@posthog/rrweb": "workspace:*",
+        "@posthog/rrweb-utils": "workspace:*"
     }
 }

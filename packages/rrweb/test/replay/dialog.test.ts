@@ -48,8 +48,8 @@ describe('dialog', () => {
   });
 
   afterAll(async () => {
-    await server.close();
-    await browser.close();
+    await server?.close();
+    await browser?.close();
   });
 
   beforeEach(async () => {

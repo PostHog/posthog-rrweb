@@ -15,10 +15,6 @@
   },
   "private": true,
   "homepage": "https://github.com/PostHog/posthog-rrweb#readme",
-  "workspaces": [
-    "packages/*",
-    "packages/plugins/*"
-  ],
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.1",
@@ -45,39 +41,41 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build:all": "NODE_OPTIONS='--max-old-space-size=4096' yarn turbo run prepublish",
-    "references:update": "yarn workspaces-to-typescript-project-references",
-    "test": "yarn turbo run test --concurrency=1 --continue",
-    "test:watch": "yarn turbo run test:watch",
-    "test:update": "yarn turbo run test:update",
-    "check-types": "yarn turbo run check-types --continue",
-    "format": "yarn prettier --write '**/*.{ts,md}'",
-    "format:head": "git diff --name-only HEAD^ |grep '\\.ts$\\|\\.md$' |xargs yarn prettier --write",
-    "dev": "yarn turbo run dev --concurrency=18",
+    "build:all": "NODE_OPTIONS='--max-old-space-size=4096' pnpm turbo run prepublish",
+    "references:update": "pnpm workspaces-to-typescript-project-references",
+    "test": "pnpm turbo run test --concurrency=1 --continue",
+    "test:watch": "pnpm turbo run test:watch",
+    "test:update": "pnpm turbo run test:update",
+    "check-types": "pnpm turbo run check-types --continue",
+    "format": "pnpm prettier --write '**/*.{ts,md}'",
+    "format:head": "git diff --name-only HEAD^ |grep '\\.ts$\\|\\.md$' |xargs pnpm prettier --write",
+    "dev": "pnpm turbo run dev --concurrency=18",
     "repl": "cd packages/rrweb && npm run repl",
-    "live-stream": "cd packages/rrweb && yarn live-stream",
-    "lint": "yarn run concurrently --success=all -r -m=1 'yarn run markdownlint docs' 'yarn eslint packages/*/src --ext .ts,.tsx,.js,.jsx,.svelte'",
-    "lint:report": "yarn eslint --output-file eslint_report.json --format json packages/*/src --ext .ts,.tsx,.js,.jsx",
-    "release": "yarn build:all && changeset publish",
+    "live-stream": "cd packages/rrweb && pnpm live-stream",
+    "lint": "pnpm run concurrently --success=all -r -m=1 'pnpm run markdownlint docs' 'pnpm eslint packages/*/src --ext .ts,.tsx,.js,.jsx,.svelte'",
+    "lint:report": "pnpm eslint --output-file eslint_report.json --format json packages/*/src --ext .ts,.tsx,.js,.jsx",
+    "lint-staged": "lint-staged",
+    "release": "pnpm build:all && changeset publish",
     "postinstall": "husky",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable"
   },
-  "resolutions": {
-    "**/cssom": "https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.6.0.tgz",
-    "**/@types/dom-webcodecs": "0.1.5",
-    "node-forge": "1.3.2"
+  "pnpm": {
+    "overrides": {
+      "cssom": "https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.6.0.tgz",
+      "@types/dom-webcodecs": "0.1.5",
+      "node-forge": "1.3.2"
+    }
   },
   "browserslist": [
     "defaults",
     "not op_mini all"
   ],
   "engines": {
-    "node": ">=20.0.0",
-    "yarn": ">=1.22.19"
+    "node": ">=20.0.0"
   },
   "lint-staged": {
-    "*.{ts, md}": "yarn run format"
+    "*.{ts, md}": "pnpm run format"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "pnpm@10.24.0"
 }

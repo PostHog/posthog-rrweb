@@ -42,15 +42,18 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js lts/*
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: 'pnpm'
           registry-url: https://registry.npmjs.org
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: npm release
         run: |

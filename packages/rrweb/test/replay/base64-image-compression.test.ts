@@ -56,8 +56,8 @@ describe('base64 image compression visual tests', function () {
   });
 
   afterAll(async () => {
-    await browser.close();
-    await server.close();
+    await browser?.close();
+    await server?.close();
   });
 
   it('should record, mutate with large image, replay, and visually snapshot', async () => {

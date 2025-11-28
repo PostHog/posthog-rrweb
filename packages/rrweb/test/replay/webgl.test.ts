@@ -44,7 +44,7 @@ describe('replayer', function () {
   });
 
   afterAll(async () => {
-    await browser.close();
+    await browser?.close();
   });
 
   describe('webgl', () => {

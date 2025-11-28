@@ -102,7 +102,7 @@ describe('integration tests', function (this: ISuite) {
     server = await startServer();
     serverURL = getServerURL(server);
     browser = await puppeteer.launch({
-      // headless: false,
+      headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
       args: ['--no-sandbox'],
     });
 
@@ -439,6 +439,7 @@ describe('base64 image compression tests', function (this: ISuite) {
     server = await startServer();
     serverURL = getServerURL(server);
     browser = await puppeteer.launch({
+      headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
       args: ['--no-sandbox'],
     });
 
@@ -624,7 +625,7 @@ describe('iframe integration tests', function (this: ISuite) {
     server = await startServer();
     serverURL = getServerURL(server);
     browser = await puppeteer.launch({
-      // headless: false,
+      headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
       args: ['--no-sandbox'],
     });
 
@@ -669,7 +670,7 @@ describe('dialog integration tests', function (this: ISuite) {
     server = await startServer();
     serverURL = getServerURL(server);
     browser = await puppeteer.launch({
-      // headless: false,
+      headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
       args: ['--no-sandbox'],
     });
 
@@ -716,7 +717,7 @@ describe('shadow DOM integration tests', function (this: ISuite) {
     server = await startServer();
     serverURL = getServerURL(server);
     browser = await puppeteer.launch({
-      // headless: false,
+      headless: process.env.PUPPETEER_HEADLESS ? 'new' : false,
       args: ['--no-sandbox'],
     });
 

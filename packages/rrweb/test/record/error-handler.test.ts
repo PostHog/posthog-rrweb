@@ -67,7 +67,7 @@ const setup = function (
   });
 
   afterAll(async () => {
-    await ctx.browser.close();
+    await ctx.browser?.close();
   });
 
   return ctx;

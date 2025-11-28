@@ -56,8 +56,8 @@ describe('video', () => {
   });
 
   afterAll(async () => {
-    await server.close();
-    await browser.close();
+    await server?.close();
+    await browser?.close();
   });
 
   beforeEach(async () => {

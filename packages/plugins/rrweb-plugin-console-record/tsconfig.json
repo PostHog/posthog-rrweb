@@ -18,6 +18,12 @@
   "references": [
     {
       "path": "../../rrweb"
+    },
+    {
+      "path": "../../types"
+    },
+    {
+      "path": "../../utils"
     }
   ]
 }

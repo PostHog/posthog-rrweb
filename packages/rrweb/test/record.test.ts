@@ -77,7 +77,7 @@ const setup = function (this: ISuite, content: string): ISuite {
   });
 
   afterAll(async () => {
-    await ctx.browser.close();
+    await ctx.browser?.close();
   });
 
   return ctx;

@@ -25,6 +25,7 @@ import {
   launchPuppeteer,
   startServer,
   waitForRAF,
+  waitForIFrameLoad,
 } from './utils';
 import type * as http from 'http';
 
@@ -110,6 +111,7 @@ const setup = function (
     });
 
     ctx.page.on('console', (msg) => console.log('PAGE LOG:', msg.text()));
+    await waitForIFrameLoad(ctx.page, 'iframe');
     await injectRecordScript(ctx.page.mainFrame(), options);
   });
 
@@ -118,8 +120,8 @@ const setup = function (
   });
 
   afterAll(async () => {
-    await ctx.browser.close();
-    ctx.server.close();
+    await ctx.browser?.close();
+    ctx.server?.close();
   });
 
   return ctx;
@@ -143,6 +145,7 @@ describe('cross origin iframes & packer', function (this: ISuite) {
       it('', async () => {
         const frame = ctx.page.mainFrame().childFrames()[0];
         await waitForRAF(frame);
+        await ctx.page.waitForTimeout(100);
         const packedSnapshots = (await ctx.page.evaluate(
           'window.snapshots',
         )) as string[];

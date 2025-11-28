@@ -6,7 +6,7 @@
         "build": "tsc -noEmit && vite build",
         "check-types": "tsc -noEmit",
         "prepublish": "npm run build",
-        "lint": "yarn eslint src/**/*.ts"
+        "lint": "pnpm eslint src/**/*.ts"
     },
     "repository": {
         "type": "git",

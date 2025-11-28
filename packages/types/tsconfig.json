@@ -4,7 +4,8 @@
   "exclude": ["vite.config.ts"],
   "compilerOptions": {
     "rootDir": "src",
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "types": ["vite/client"]
   },
   "references": []
 }

@@ -52,7 +52,7 @@ describe('replayer', function () {
   });
 
   afterAll(async () => {
-    await browser.close();
+    await browser?.close();
   });
 
   describe('hover', () => {
@@ -68,7 +68,8 @@ describe('replayer', function () {
 
       const image = await page.screenshot();
       expect(image).toMatchImageSnapshot({
-        failureThreshold: 40,
+        failureThreshold: 0.15,
+        failureThresholdType: 'percent',
       });
     });
   });

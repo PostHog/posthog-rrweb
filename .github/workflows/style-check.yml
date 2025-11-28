@@ -16,19 +16,21 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.head_ref }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: 'pnpm'
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build Packages
-        run: NODE_OPTIONS='--max-old-space-size=4096' yarn build:all
+        run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build:all
       - name: Eslint Check
-        run: yarn turbo run lint
+        run: pnpm turbo run lint
       - name: Save Code Linting Report JSON
-        run: yarn lint:report
+        run: pnpm lint:report
         # Continue to the next step even if this fails
         continue-on-error: true
       - name: Upload ESLint Report
@@ -60,12 +62,14 @@ jobs:
     name: Format Check
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'yarn'
+          cache: 'pnpm'
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Prettier Check
-        run: yarn prettier --check '**/*.{ts,md}'
+        run: pnpm prettier --check '**/*.{ts,md}'

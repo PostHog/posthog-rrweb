@@ -15,10 +15,10 @@
     "pack:firefox": "cross-env TARGET_BROWSER=firefox ZIP=true vite build",
     "check-types": "tsc -noEmit",
     "build": "npm run pack:chrome && npm run pack:firefox",
-    "prepublish": "yarn build"
+    "prepublish": "pnpm build"
   },
   "devDependencies": {
-    "@posthog/rrweb-types": "*",
+    "@posthog/rrweb-types": "workspace:*",
     "@types/chrome": "^0.0.287",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.6",
@@ -45,7 +45,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "react-router-dom": "^6.4.1",
-    "@posthog/rrweb": "*",
-    "@posthog/rrweb-player": "*"
+    "@posthog/rrweb": "workspace:*",
+    "@posthog/rrweb-player": "workspace:*"
   }
 }
