@@ -329,10 +329,22 @@ export class IframeManager {
 
   public reattachIframes() {
     this.attachedIframes.forEach((content, iframe) => {
+      // Only reattach if iframe still exists in the document
+      if (!iframe.isConnected) {
+        this.attachedIframes.delete(iframe);
+        return;
+      }
+
+      const parentId = this.mirror.getId(iframe);
+      if (parentId === -1) {
+        this.attachedIframes.delete(iframe);
+        return;
+      }
+
       this.mutationCb({
         adds: [
           {
-            parentId: this.mirror.getId(iframe),
+            parentId,
             nextId: null,
             node: content,
           },
