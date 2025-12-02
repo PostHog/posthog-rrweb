@@ -29,6 +29,8 @@ export class IframeManager {
   // Map window to handler for cleanup - windows are browser-owned and won't prevent GC
   private nestedIframeListeners: Map<Window, (message: MessageEvent) => void> =
     new Map();
+  private attachedIframes: Map<HTMLIFrameElement, serializedNodeWithId> =
+    new Map();
 
   constructor(options: {
     mirror: Mirror;
@@ -71,6 +73,7 @@ export class IframeManager {
     iframeEl: HTMLIFrameElement,
     childSn: serializedNodeWithId,
   ) {
+    this.attachedIframes.set(iframeEl, childSn);
     this.mutationCb({
       adds: [
         {
@@ -151,6 +154,7 @@ export class IframeManager {
         const rootId = e.data.node.id;
         this.crossOriginIframeRootIdMap.set(iframeEl, rootId);
         this.patchRootIdOnNode(e.data.node, rootId);
+        this.attachedIframes.set(iframeEl, e.data.node);
         return {
           timestamp: e.timestamp,
           type: EventType.IncrementalSnapshot,
@@ -323,6 +327,24 @@ export class IframeManager {
     }
   }
 
+  public reattachIframes() {
+    this.attachedIframes.forEach((content, iframe) => {
+      this.mutationCb({
+        adds: [
+          {
+            parentId: this.mirror.getId(iframe),
+            nextId: null,
+            node: content,
+          },
+        ],
+        removes: [],
+        texts: [],
+        attributes: [],
+        isAttachIframe: true,
+      });
+    });
+  }
+
   public destroy() {
     if (this.recordCrossOriginIframes) {
       window.removeEventListener('message', this.messageHandler);
@@ -336,5 +358,6 @@ export class IframeManager {
 
     this.crossOriginIframeMirror.reset();
     this.crossOriginIframeStyleMirror.reset();
+    this.attachedIframes.clear();
   }
 }

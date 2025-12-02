@@ -230,6 +230,60 @@ describe('cross origin iframes', function (this: ISuite) {
       ).toBeTruthy();
     });
 
+    it('should preserve iframe attachments after full snapshot', async () => {
+      await waitForRAF(ctx.page);
+
+      // Get initial events - should include iframe attachment
+      const initialEvents: eventWithTime[] = await ctx.page.evaluate(
+        () => (window as unknown as IWindow).snapshots,
+      );
+      const initialAttachmentEvents = initialEvents.filter(
+        (e) =>
+          e.type === EventType.IncrementalSnapshot &&
+          (e.data as mutationData).isAttachIframe,
+      );
+      expect(initialAttachmentEvents.length).toBeGreaterThan(0);
+
+      // Trigger a full snapshot
+      await ctx.page.evaluate(() => {
+        const { record } = (window as unknown as IWindow).rrweb;
+        (record as any).takeFullSnapshot();
+      });
+      await waitForRAF(ctx.page);
+
+      // Get events after full snapshot
+      const eventsAfterSnapshot: eventWithTime[] = await ctx.page.evaluate(
+        () => (window as unknown as IWindow).snapshots,
+      );
+
+      // Should have a new full snapshot event
+      const fullSnapshots = eventsAfterSnapshot.filter(
+        (e) => e.type === EventType.FullSnapshot,
+      );
+      expect(fullSnapshots.length).toBe(2); // Initial + new one
+
+      // Should have re-emitted iframe attachment AFTER the full snapshot
+      const attachmentEventsAfter = eventsAfterSnapshot.filter(
+        (e) =>
+          e.type === EventType.IncrementalSnapshot &&
+          (e.data as mutationData).isAttachIframe,
+      );
+      expect(attachmentEventsAfter.length).toBeGreaterThan(
+        initialAttachmentEvents.length,
+      );
+
+      // Verify the last attachment event came after the last full snapshot
+      const lastFullSnapshotIndex = eventsAfterSnapshot.findLastIndex(
+        (e) => e.type === EventType.FullSnapshot,
+      );
+      const lastAttachmentIndex = eventsAfterSnapshot.findLastIndex(
+        (e) =>
+          e.type === EventType.IncrementalSnapshot &&
+          (e.data as mutationData).isAttachIframe,
+      );
+      expect(lastAttachmentIndex).toBeGreaterThan(lastFullSnapshotIndex);
+    });
+
     it('should map input events correctly', async () => {
       const frame = ctx.page.mainFrame().childFrames()[0];
       await frame.type('input[type="text"]', 'test');

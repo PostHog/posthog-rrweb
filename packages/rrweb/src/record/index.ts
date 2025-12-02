@@ -434,6 +434,10 @@ function record<T = eventWithTime>(
     );
     mutationBuffers.forEach((buf) => buf.unlock()); // generate & emit any mutations that happened during snapshotting, as can now apply against the newly built mirror
 
+    if (recordCrossOriginIframes) {
+      iframeManager.reattachIframes();
+    }
+
     // Some old browsers don't support adoptedStyleSheets.
     if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0)
       stylesheetManager.adoptStyleSheets(
