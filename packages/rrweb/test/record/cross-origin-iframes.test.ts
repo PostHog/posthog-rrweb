@@ -273,14 +273,24 @@ describe('cross origin iframes', function (this: ISuite) {
       );
 
       // Verify the last attachment event came after the last full snapshot
-      const lastFullSnapshotIndex = eventsAfterSnapshot.findLastIndex(
-        (e) => e.type === EventType.FullSnapshot,
-      );
-      const lastAttachmentIndex = eventsAfterSnapshot.findLastIndex(
-        (e) =>
+      let lastFullSnapshotIndex = -1;
+      let lastAttachmentIndex = -1;
+      for (let i = eventsAfterSnapshot.length - 1; i >= 0; i--) {
+        const e = eventsAfterSnapshot[i];
+        if (lastFullSnapshotIndex === -1 && e.type === EventType.FullSnapshot) {
+          lastFullSnapshotIndex = i;
+        }
+        if (
+          lastAttachmentIndex === -1 &&
           e.type === EventType.IncrementalSnapshot &&
-          (e.data as mutationData).isAttachIframe,
-      );
+          (e.data as mutationData).isAttachIframe
+        ) {
+          lastAttachmentIndex = i;
+        }
+        if (lastFullSnapshotIndex !== -1 && lastAttachmentIndex !== -1) {
+          break;
+        }
+      }
       expect(lastAttachmentIndex).toBeGreaterThan(lastFullSnapshotIndex);
     });
 
