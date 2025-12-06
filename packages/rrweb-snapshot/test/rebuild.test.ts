@@ -106,6 +106,118 @@ describe('rebuild', function () {
     });
   });
 
+  describe('rr_left/rr_top (CSS transform fix)', function () {
+    it('rebuild blocked element with position for CSS transforms', function () {
+      const node = buildNodeWithSN(
+        {
+          id: 1,
+          tagName: 'div',
+          type: NodeType.Element,
+          attributes: {
+            class: 'ph-no-capture',
+            rr_width: '100px',
+            rr_height: '100px',
+            rr_left: '250px',
+            rr_top: '150px',
+          },
+          childNodes: [],
+        },
+        {
+          doc: document,
+          mirror,
+          hackCss: false,
+          cache,
+        },
+      ) as HTMLDivElement;
+      expect(node.style.width).toBe('100px');
+      expect(node.style.height).toBe('100px');
+      expect(node.style.left).toBe('250px');
+      expect(node.style.top).toBe('150px');
+      expect(node.style.position).toBe('absolute');
+    });
+
+    it('rebuild blocked element at (0,0) position', function () {
+      const node = buildNodeWithSN(
+        {
+          id: 1,
+          tagName: 'div',
+          type: NodeType.Element,
+          attributes: {
+            class: 'ph-no-capture',
+            rr_width: '50px',
+            rr_height: '50px',
+            rr_left: '0px',
+            rr_top: '0px',
+          },
+          childNodes: [],
+        },
+        {
+          doc: document,
+          mirror,
+          hackCss: false,
+          cache,
+        },
+      ) as HTMLDivElement;
+      expect(node.style.left).toBe('0px');
+      expect(node.style.top).toBe('0px');
+      expect(node.style.position).toBe('absolute');
+    });
+
+    it('rebuild blocked element with large position values', function () {
+      const node = buildNodeWithSN(
+        {
+          id: 1,
+          tagName: 'div',
+          type: NodeType.Element,
+          attributes: {
+            class: 'ph-no-capture',
+            rr_width: '200px',
+            rr_height: '100px',
+            rr_left: '1920px',
+            rr_top: '1080px',
+          },
+          childNodes: [],
+        },
+        {
+          doc: document,
+          mirror,
+          hackCss: false,
+          cache,
+        },
+      ) as HTMLDivElement;
+      expect(node.style.left).toBe('1920px');
+      expect(node.style.top).toBe('1080px');
+    });
+
+    it('rebuild blocked element with decimal position values', function () {
+      const node = buildNodeWithSN(
+        {
+          id: 1,
+          tagName: 'div',
+          type: NodeType.Element,
+          attributes: {
+            class: 'ph-no-capture',
+            rr_width: '75.5px',
+            rr_height: '50.25px',
+            rr_left: '123.456px',
+            rr_top: '789.012px',
+          },
+          childNodes: [],
+        },
+        {
+          doc: document,
+          mirror,
+          hackCss: false,
+          cache,
+        },
+      ) as HTMLDivElement;
+      expect(node.style.left).toBe('123.456px');
+      expect(node.style.top).toBe('789.012px');
+      expect(node.style.width).toBe('75.5px');
+      expect(node.style.height).toBe('50.25px');
+    });
+  });
+
   describe('shadowDom', function () {
     it('rebuild shadowRoot without siblings', function () {
       const node = buildNodeWithSN(

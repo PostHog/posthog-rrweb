@@ -832,11 +832,13 @@ function serializeElementNode(
   }
   // block element
   if (needBlock) {
-    const { width, height } = n.getBoundingClientRect();
+    const { width, height, left, top } = n.getBoundingClientRect();
     attributes = {
       class: attributes.class,
       rr_width: `${width}px`,
       rr_height: `${height}px`,
+      rr_left: `${left + (doc.defaultView?.scrollX || 0)}px`,
+      rr_top: `${top + (doc.defaultView?.scrollY || 0)}px`,
     };
   }
   // iframe

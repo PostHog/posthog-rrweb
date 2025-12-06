@@ -292,6 +292,12 @@ function buildNode(
           (node as HTMLElement).style.setProperty('width', value.toString());
         } else if (name === 'rr_height') {
           (node as HTMLElement).style.setProperty('height', value.toString());
+        } else if (name === 'rr_left') {
+          (node as HTMLElement).style.setProperty('left', value.toString());
+          (node as HTMLElement).style.setProperty('position', 'absolute');
+        } else if (name === 'rr_top') {
+          (node as HTMLElement).style.setProperty('top', value.toString());
+          (node as HTMLElement).style.setProperty('position', 'absolute');
         } else if (
           name === 'rr_mediaCurrentTime' &&
           typeof value === 'number'
