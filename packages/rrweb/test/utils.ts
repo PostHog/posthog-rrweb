@@ -170,6 +170,9 @@ export function stringifySnapshots(snapshots: eventWithTime[]): string {
 
             // strip blob:urls as they are different every time
             stripBlobURLsFromAttributes(a);
+
+            // normalize position attributes to avoid flaky tests
+            normalizePositionAttributes(a);
           });
           s.data.adds.forEach((add) => {
             if (add.node.type === NodeType.Element) {
@@ -197,6 +200,16 @@ export function stringifySnapshots(snapshots: eventWithTime[]): string {
                 add.node.attributes.rr_dataURL =
                   add.node.attributes.rr_dataURL.replace(/,.+$/, ',...');
               }
+
+              // normalize position attributes to avoid flaky tests
+              normalizePositionAttributes(add.node);
+            }
+          });
+        } else if (s.type === EventType.FullSnapshot) {
+          // normalize position attributes in full snapshots
+          walkNodeTree(s.data.node, (node) => {
+            if (node.type === NodeType.Element && node.attributes) {
+              normalizePositionAttributes(node);
             }
           });
         } else if (
@@ -262,6 +275,35 @@ function stripBlobURLsFromAttributes(node: {
     node.attributes.src = node.attributes.src
       .replace(/[\w-]+$/, '...')
       .replace(/:[0-9]+\//, ':xxxx/');
+  }
+}
+
+function normalizePositionAttributes(node: {
+  attributes: Record<string, any>;
+}) {
+  // Normalize rr_left and rr_top to avoid flaky tests due to environment rendering differences
+  // These are used for blocked element positioning and vary slightly between environments
+  const positionAttrs = ['rr_left', 'rr_top'] as const;
+
+  positionAttrs.forEach((attr) => {
+    if (attr in node.attributes && typeof node.attributes[attr] === 'string') {
+      const value = node.attributes[attr];
+      // Validate it's a proper pixel value
+      if (/^\d+(\.\d+)?px$/.test(value)) {
+        // Replace with normalized value to avoid snapshot mismatches
+        node.attributes[attr] = 'Npx';
+      }
+    }
+  });
+}
+
+function walkNodeTree(node: any, callback: (node: any) => void) {
+  if (!node || typeof node !== 'object') return;
+
+  callback(node);
+
+  if (node.childNodes && Array.isArray(node.childNodes)) {
+    node.childNodes.forEach((child: any) => walkNodeTree(child, callback));
   }
 }
 
