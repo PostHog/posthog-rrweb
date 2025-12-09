@@ -1,6 +1,6 @@
 {
     "name": "@posthog/rrdom",
-    "version": "0.34",
+    "version": "0.0.34",
     "license": "MIT",
     "type": "module",
     "main": "./dist/rrdom.cjs",
