@@ -837,8 +837,8 @@ function serializeElementNode(
       class: attributes.class,
       rr_width: `${width}px`,
       rr_height: `${height}px`,
-      rr_left: `${left + (doc.defaultView?.scrollX || 0)}px`,
-      rr_top: `${top + (doc.defaultView?.scrollY || 0)}px`,
+      rr_left: `${Math.floor(left + (doc.defaultView?.scrollX || 0))}px`,
+      rr_top: `${Math.floor(top + (doc.defaultView?.scrollY || 0))}px`,
     };
   }
   // iframe
