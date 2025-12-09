@@ -170,6 +170,10 @@ export function stringifySnapshots(snapshots: eventWithTime[]): string {
 
             // strip blob:urls as they are different every time
             stripBlobURLsFromAttributes(a);
+
+            // normalize rr_left/rr_top to avoid environment rendering differences
+            if ('rr_left' in a.attributes) a.attributes.rr_left = 'Npx';
+            if ('rr_top' in a.attributes) a.attributes.rr_top = 'Npx';
           });
           s.data.adds.forEach((add) => {
             if (add.node.type === NodeType.Element) {
@@ -197,8 +201,26 @@ export function stringifySnapshots(snapshots: eventWithTime[]): string {
                 add.node.attributes.rr_dataURL =
                   add.node.attributes.rr_dataURL.replace(/,.+$/, ',...');
               }
+
+              // normalize rr_left/rr_top to avoid environment rendering differences
+              if ('rr_left' in add.node.attributes)
+                add.node.attributes.rr_left = 'Npx';
+              if ('rr_top' in add.node.attributes)
+                add.node.attributes.rr_top = 'Npx';
             }
           });
+        } else if (s.type === EventType.FullSnapshot) {
+          // normalize position attributes in full snapshots
+          const normalizeNode = (node: any) => {
+            if (node.type === NodeType.Element && node.attributes) {
+              if ('rr_left' in node.attributes) node.attributes.rr_left = 'Npx';
+              if ('rr_top' in node.attributes) node.attributes.rr_top = 'Npx';
+            }
+            if (node.childNodes) {
+              node.childNodes.forEach(normalizeNode);
+            }
+          };
+          normalizeNode(s.data.node);
         } else if (
           s.type === EventType.IncrementalSnapshot &&
           s.data.source === IncrementalSource.MediaInteraction
@@ -262,16 +284,6 @@ function stripBlobURLsFromAttributes(node: {
     node.attributes.src = node.attributes.src
       .replace(/[\w-]+$/, '...')
       .replace(/:[0-9]+\//, ':xxxx/');
-  }
-}
-
-function walkNodeTree(node: any, callback: (node: any) => void) {
-  if (!node || typeof node !== 'object') return;
-
-  callback(node);
-
-  if (node.childNodes && Array.isArray(node.childNodes)) {
-    node.childNodes.forEach((child: any) => walkNodeTree(child, callback));
   }
 }
 
