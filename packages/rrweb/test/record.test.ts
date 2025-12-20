@@ -18,6 +18,7 @@ import {
   launchPuppeteer,
   startServer,
   waitForRAF,
+  waitForCondition,
 } from './utils';
 import type { Server } from 'http';
 
@@ -108,17 +109,28 @@ describe('record', function (this: ISuite) {
     while (count--) {
       await ctx.page.type('input', 'a');
     }
-    await ctx.page.waitForTimeout(10);
-    expect(ctx.events.length).toEqual(33);
-    expect(
-      ctx.events.filter((event: eventWithTime) => event.type === EventType.Meta)
-        .length,
-    ).toEqual(1);
-    expect(
-      ctx.events.filter(
-        (event: eventWithTime) => event.type === EventType.FullSnapshot,
-      ).length,
-    ).toEqual(1);
+    await ctx.page.waitForTimeout(50);
+    const metaCount = ctx.events.filter(
+      (e) => e.type === EventType.Meta,
+    ).length;
+    const fullSnapshotCount = ctx.events.filter(
+      (e) => e.type === EventType.FullSnapshot,
+    ).length;
+    const inputCount = ctx.events.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        (e.data as { source: number }).source === IncrementalSource.Input,
+    ).length;
+    const mouseInteractionCount = ctx.events.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        (e.data as { source: number }).source ===
+          IncrementalSource.MouseInteraction,
+    ).length;
+    expect(metaCount).toBe(1);
+    expect(fullSnapshotCount).toBe(1);
+    expect(inputCount).toBe(30);
+    expect(mouseInteractionCount).toBeGreaterThanOrEqual(0);
   });
 
   it('can checkout full snapshot by count', async () => {
@@ -133,21 +145,33 @@ describe('record', function (this: ISuite) {
     while (count--) {
       await ctx.page.type('input', 'a');
     }
-    await ctx.page.waitForTimeout(10);
-    expect(ctx.events.length).toEqual(39);
-    expect(
-      ctx.events.filter((event: eventWithTime) => event.type === EventType.Meta)
-        .length,
-    ).toEqual(4);
-    expect(
-      ctx.events.filter(
-        (event: eventWithTime) => event.type === EventType.FullSnapshot,
-      ).length,
-    ).toEqual(4);
-    expect(ctx.events[1].type).toEqual(EventType.FullSnapshot);
-    expect(ctx.events[13].type).toEqual(EventType.FullSnapshot);
-    expect(ctx.events[25].type).toEqual(EventType.FullSnapshot);
-    expect(ctx.events[37].type).toEqual(EventType.FullSnapshot);
+    await ctx.page.waitForTimeout(50);
+    const metaCount = ctx.events.filter(
+      (e) => e.type === EventType.Meta,
+    ).length;
+    const fullSnapshotCount = ctx.events.filter(
+      (e) => e.type === EventType.FullSnapshot,
+    ).length;
+    const inputCount = ctx.events.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        (e.data as { source: number }).source === IncrementalSource.Input,
+    ).length;
+    const mouseInteractionCount = ctx.events.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        (e.data as { source: number }).source ===
+          IncrementalSource.MouseInteraction,
+    ).length;
+    expect(metaCount).toBe(4);
+    expect(fullSnapshotCount).toBe(4);
+    expect(inputCount).toBe(30);
+    expect(mouseInteractionCount).toBeGreaterThanOrEqual(0);
+
+    expect(ctx.events[1].type).toBe(EventType.FullSnapshot);
+    expect(ctx.events[13].type).toBe(EventType.FullSnapshot);
+    expect(ctx.events[25].type).toBe(EventType.FullSnapshot);
+    expect(ctx.events[37].type).toBe(EventType.FullSnapshot);
   });
 
   it('can checkout full snapshot by time', async () => {

@@ -17,6 +17,42 @@ import * as http from 'http';
 import * as url from 'url';
 import * as fs from 'fs';
 
+declare module 'puppeteer' {
+  interface Page {
+    waitForTimeout(ms: number): Promise<void>;
+  }
+}
+
+puppeteer.Page.prototype.waitForTimeout = function (ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const originalScreenshot = puppeteer.Page.prototype.screenshot;
+puppeteer.Page.prototype.screenshot = async function (
+  ...args: Parameters<typeof originalScreenshot>
+): Promise<Buffer> {
+  const result = await originalScreenshot.apply(this, args);
+  return Buffer.isBuffer(result) ? result : Buffer.from(result);
+};
+
+export async function waitForCondition<T>(
+  condition: () => T | Promise<T>,
+  options: { timeout?: number; interval?: number } = {},
+): Promise<T> {
+  const { timeout = 5000, interval = 50 } = options;
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const result = await condition();
+    if (result) {
+      return result;
+    }
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  throw new Error(`Condition not met within ${timeout}ms`);
+}
+
 export async function launchPuppeteer(
   options?: Parameters<(typeof puppeteer)['launch']>[0],
 ) {
@@ -60,7 +96,7 @@ export const startServer = (defaultPort = 3030) =>
 
       let pathname = path.join(__dirname, sanitizePath);
       if (/^\/rrweb.*\.c?js.*/.test(sanitizePath)) {
-        pathname = path.join(__dirname, `../dist/main`, sanitizePath);
+        pathname = path.join(__dirname, `../dist`, sanitizePath);
       }
 
       try {

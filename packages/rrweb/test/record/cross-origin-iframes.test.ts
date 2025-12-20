@@ -15,6 +15,7 @@ import {
   launchPuppeteer,
   startServer,
   waitForRAF,
+  waitForIFrameLoad,
 } from '../utils';
 import type * as http from 'http';
 
@@ -215,7 +216,9 @@ describe('cross origin iframes', function (this: ISuite) {
         const iframe = document.querySelector('iframe') as HTMLIFrameElement;
         iframe.src = `${url}/html/form.html?2`;
       }, ctx.serverURL);
-      await waitForRAF(ctx.page); // loads iframe
+
+      await waitForIFrameLoad(ctx.page, 'iframe');
+      await ctx.page.waitForTimeout(100);
 
       await injectRecordScript(ctx.page.mainFrame().childFrames()[0]); // injects script into new iframe
 
@@ -302,6 +305,9 @@ describe('cross origin iframes', function (this: ISuite) {
       await frame.type('input[type="password"]', 'password');
       await frame.type('textarea', 'textarea test');
       await frame.select('select', '1');
+
+      // Wait for all input events to be processed
+      await ctx.page.waitForTimeout(100);
 
       const snapshots = (await ctx.page.evaluate(
         'window.snapshots',

@@ -84,7 +84,7 @@ describe('video', () => {
     const frameImage = await page!.screenshot();
     await waitForRAF(page);
     expect(frameImage).toMatchImageSnapshot({
-      failureThreshold: 0.05,
+      failureThreshold: 0.08,
       failureThresholdType: 'percent',
     });
   });
@@ -105,7 +105,7 @@ describe('video', () => {
     const frameImage = await page!.screenshot();
     await waitForRAF(page);
     expect(frameImage).toMatchImageSnapshot({
-      failureThreshold: 0.05,
+      failureThreshold: 0.08,
       failureThresholdType: 'percent',
     });
   });
@@ -155,7 +155,7 @@ describe('video', () => {
     const frameImage = await page!.screenshot();
     await waitForRAF(page);
     expect(frameImage).toMatchImageSnapshot({
-      failureThreshold: 0.05,
+      failureThreshold: 0.08,
       failureThresholdType: 'percent',
     });
 

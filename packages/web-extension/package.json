@@ -20,6 +20,7 @@
   "devDependencies": {
     "@posthog/rrweb-types": "*",
     "@types/chrome": "^0.0.287",
+    "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.6",
     "@types/semver": "^7.5.8",
     "@types/webextension-polyfill": "^0.9.1",

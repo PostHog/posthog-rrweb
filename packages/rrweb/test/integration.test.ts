@@ -539,14 +539,10 @@ describe('record integration tests', function (this: ISuite) {
     await page.goto('about: blank');
     await page.setContent(getHtml.call(this, 'blocked-unblocked.html'));
 
-    const elements1 = (await page.$x(
-      '/html/body/div[1]/button',
-    )) as puppeteer.ElementHandle<HTMLButtonElement>[];
+    const elements1 = await page.$$('::-p-xpath(/html/body/div[1]/button)');
     await elements1[0].click();
 
-    const elements2 = (await page.$x(
-      '/html/body/div[2]/button',
-    )) as puppeteer.ElementHandle<HTMLButtonElement>[];
+    const elements2 = await page.$$('::-p-xpath(/html/body/div[2]/button)');
     await elements2[0].click();
 
     const snapshots = (await page.evaluate(

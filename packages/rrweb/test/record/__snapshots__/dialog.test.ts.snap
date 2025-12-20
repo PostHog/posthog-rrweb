@@ -91,6 +91,14 @@ exports[`dialog > add dialog and show 1`] = `
   {
     \\"type\\": 3,
     \\"data\\": {
+      \\"source\\": 2,
+      \\"type\\": 5,
+      \\"id\\": -1
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
       \\"source\\": 0,
       \\"texts\\": [],
       \\"attributes\\": [],
@@ -207,6 +215,14 @@ exports[`dialog > add dialog and showModal 1`] = `
   {
     \\"type\\": 3,
     \\"data\\": {
+      \\"source\\": 2,
+      \\"type\\": 5,
+      \\"id\\": -1
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
       \\"source\\": 0,
       \\"texts\\": [],
       \\"attributes\\": [],
@@ -318,6 +334,14 @@ exports[`dialog > switch to show dialog 1`] = `
         \\"left\\": 0,
         \\"top\\": 0
       }
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
+      \\"source\\": 2,
+      \\"type\\": 5,
+      \\"id\\": 8
     }
   },
   {
@@ -445,6 +469,14 @@ exports[`dialog > switch to showModal dialog 1`] = `
         \\"left\\": 0,
         \\"top\\": 0
       }
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
+      \\"source\\": 2,
+      \\"type\\": 5,
+      \\"id\\": 8
     }
   },
   {

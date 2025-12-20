@@ -282,7 +282,11 @@ describe('RRDocument for browser environment', () => {
     });
 
     it('can build from a html containing nested shadow doms', async () => {
-      await page.setContent(getHtml('shadow-dom.html'));
+      // Use page.goto with file URL to properly parse declarative shadow DOM
+      // (page.setContent doesn't trigger HTML parser for declarative shadow DOM)
+      const filePath = path.resolve(__dirname, './html/shadow-dom.html');
+      await page.goto(`file://${filePath}`);
+      await page.evaluate(code + printRRDomCode);
       const result = await page.evaluate(`
         const doc = new rrdom.RRDocument();
         rrdom.buildFromDom(document, undefined, doc);
