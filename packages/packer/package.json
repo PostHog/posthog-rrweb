@@ -62,7 +62,7 @@
   "devDependencies": {
     "vite": "^6.2.0",
     "vite-plugin-dts": "^3.9.1",
-    "vitest": "^1.4.0",
+    "vitest": "^1.6.1",
     "typescript": "^5.4.5"
   },
   "dependencies": {
