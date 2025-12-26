@@ -46,21 +46,28 @@ type ExtraOptions = {
 async function injectRecordScript(
   frame: puppeteer.Frame,
   options?: ExtraOptions,
+  retryCount = 0,
 ) {
+  const MAX_RETRIES = 5;
   try {
     await frame.addScriptTag({
       path: path.resolve(__dirname, '../../dist/rrweb.umd.cjs'),
     });
   } catch (e) {
-    // we get this error: `Protocol error (DOM.resolveNode): Node with given id does not belong to the document`
-    // then the page wasn't loaded yet and we try again
-    if (
-      !e.message.includes('DOM.resolveNode') ||
-      !e.message.includes('DOM.describeNode')
-    )
-      throw e;
-    await injectRecordScript(frame, options);
-    return;
+    const retryableErrors = [
+      'DOM.resolveNode',
+      'DOM.describeNode',
+      'Execution context was destroyed',
+    ];
+    const isRetryable = retryableErrors.some((error) =>
+      e.message.includes(error),
+    );
+    if (isRetryable && retryCount < MAX_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      await injectRecordScript(frame, options, retryCount + 1);
+      return;
+    }
+    throw e;
   }
   options = options || {};
   await frame.evaluate((options) => {
