@@ -261,6 +261,13 @@ function record<T = eventWithTime>(
   };
 
   const wrappedMutationEmit = (m: mutationCallbackParam) => {
+    // Clean up removed iframes from the attachedIframes Map to prevent memory leaks
+    if (recordCrossOriginIframes && m.removes) {
+      m.removes.forEach(({ id }) => {
+        iframeManager.removeIframeById(id);
+      });
+    }
+
     wrappedEmit({
       type: EventType.IncrementalSnapshot,
       data: {

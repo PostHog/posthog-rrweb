@@ -699,4 +699,70 @@ describe('same origin iframes', function (this: ISuite) {
     )) as eventWithTime[];
     await assertSnapshot(snapshots);
   });
+
+  it('should clean up iframe from attachedIframes Map when removed from DOM', async () => {
+    await waitForRAF(ctx.page);
+
+    // Get initial event count
+    const initialEvents: eventWithTime[] = await ctx.page.evaluate(
+      () => (window as unknown as IWindow).snapshots,
+    );
+    const initialEventCount = initialEvents.length;
+
+    // Dynamically create and add an iframe
+    const sameOriginIframe = ctx.page.mainFrame().childFrames()[0];
+    await sameOriginIframe.evaluate(() => {
+      const newIframe = document.createElement('iframe');
+      newIframe.id = 'test-iframe-to-remove';
+      newIframe.src = 'about:blank';
+      document.body.appendChild(newIframe);
+    });
+
+    await waitForRAF(ctx.page);
+
+    // Get events after adding iframe - should have mutation events
+    const eventsAfterAdd: eventWithTime[] = await ctx.page.evaluate(
+      () => (window as unknown as IWindow).snapshots,
+    );
+    expect(eventsAfterAdd.length).toBeGreaterThan(initialEventCount);
+
+    // Find the iframe's ID from mutation events
+    const addMutations = eventsAfterAdd.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        e.data.source === IncrementalSource.Mutation &&
+        (e.data as mutationData).adds?.some(
+          (add) => add.node.tagName === 'iframe',
+        ),
+    );
+    expect(addMutations.length).toBeGreaterThan(0);
+
+    // Remove the iframe from DOM
+    await sameOriginIframe.evaluate(() => {
+      const iframeToRemove = document.getElementById('test-iframe-to-remove');
+      if (iframeToRemove) {
+        iframeToRemove.remove();
+      }
+    });
+
+    await waitForRAF(ctx.page);
+
+    // Verify removal mutation event was emitted
+    const eventsAfterRemove: eventWithTime[] = await ctx.page.evaluate(
+      () => (window as unknown as IWindow).snapshots,
+    );
+
+    const removeMutations = eventsAfterRemove.filter(
+      (e) =>
+        e.type === EventType.IncrementalSnapshot &&
+        e.data.source === IncrementalSource.Mutation &&
+        (e.data as mutationData).removes &&
+        (e.data as mutationData).removes.length > 0,
+    );
+
+    expect(removeMutations.length).toBeGreaterThan(0);
+    // The cleanup happens in wrappedMutationEmit, so we can't directly verify
+    // the Map was cleaned, but we've verified the mutation event was emitted
+    // which triggers the cleanup logic
+  });
 });

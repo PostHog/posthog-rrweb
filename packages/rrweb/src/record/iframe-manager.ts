@@ -29,8 +29,10 @@ export class IframeManager {
   // Map window to handler for cleanup - windows are browser-owned and won't prevent GC
   private nestedIframeListeners: Map<Window, (message: MessageEvent) => void> =
     new Map();
-  private attachedIframes: Map<HTMLIFrameElement, serializedNodeWithId> =
-    new Map();
+  private attachedIframes: Map<
+    number,
+    { element: HTMLIFrameElement; content: serializedNodeWithId }
+  > = new Map();
 
   constructor(options: {
     mirror: Mirror;
@@ -69,15 +71,24 @@ export class IframeManager {
     this.loadListener = undefined;
   }
 
+  private trackIframeContent(
+    iframeEl: HTMLIFrameElement,
+    content: serializedNodeWithId,
+  ): number {
+    const iframeId = this.mirror.getId(iframeEl);
+    this.attachedIframes.set(iframeId, { element: iframeEl, content });
+    return iframeId;
+  }
+
   public attachIframe(
     iframeEl: HTMLIFrameElement,
     childSn: serializedNodeWithId,
   ) {
-    this.attachedIframes.set(iframeEl, childSn);
+    const iframeId = this.trackIframeContent(iframeEl, childSn);
     this.mutationCb({
       adds: [
         {
-          parentId: this.mirror.getId(iframeEl),
+          parentId: iframeId,
           nextId: null,
           node: childSn,
         },
@@ -154,7 +165,7 @@ export class IframeManager {
         const rootId = e.data.node.id;
         this.crossOriginIframeRootIdMap.set(iframeEl, rootId);
         this.patchRootIdOnNode(e.data.node, rootId);
-        this.attachedIframes.set(iframeEl, e.data.node);
+        this.trackIframeContent(iframeEl, e.data.node);
         return {
           timestamp: e.timestamp,
           type: EventType.IncrementalSnapshot,
@@ -327,24 +338,34 @@ export class IframeManager {
     }
   }
 
-  public reattachIframes() {
-    this.attachedIframes.forEach((content, iframe) => {
-      // Only reattach if iframe still exists in the document
-      if (!iframe.isConnected) {
-        this.attachedIframes.delete(iframe);
-        return;
-      }
+  public removeIframeById(iframeId: number) {
+    const entry = this.attachedIframes.get(iframeId);
+    if (!entry) return;
 
-      const parentId = this.mirror.getId(iframe);
-      if (parentId === -1) {
-        this.attachedIframes.delete(iframe);
+    // Clean up nested iframe listeners if they exist
+    const win = entry.element.contentWindow;
+    if (win && this.nestedIframeListeners.has(win)) {
+      const handler = this.nestedIframeListeners.get(win)!;
+      win.removeEventListener('message', handler);
+      this.nestedIframeListeners.delete(win);
+    }
+
+    this.attachedIframes.delete(iframeId);
+  }
+
+  public reattachIframes() {
+    this.attachedIframes.forEach(({ content }, iframeId) => {
+      // Verify the iframe ID is still in the mirror (still being tracked by rrweb)
+      // If removed, the mirror would have been cleaned up via removeNodeFromMap()
+      if (!this.mirror.has(iframeId)) {
+        this.attachedIframes.delete(iframeId);
         return;
       }
 
       this.mutationCb({
         adds: [
           {
-            parentId,
+            parentId: iframeId,
             nextId: null,
             node: content,
           },
