@@ -392,5 +392,9 @@ export class IframeManager {
     this.crossOriginIframeMirror.reset();
     this.crossOriginIframeStyleMirror.reset();
     this.attachedIframes.clear();
+
+    this.crossOriginIframeMap = new WeakMap();
+    this.iframes = new WeakMap();
+    this.crossOriginIframeRootIdMap = new WeakMap();
   }
 }

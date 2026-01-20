@@ -208,5 +208,51 @@ describe('memory leak prevention', () => {
 
       addEventListenerSpy.mockRestore();
     });
+
+    it('should clear WeakMaps to prevent iframe memory leaks', () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      // Create an iframe element
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Track WeakMap construction calls
+      const originalWeakMap = global.WeakMap;
+      let weakMapConstructorCalls = 0;
+
+      global.WeakMap = new Proxy(originalWeakMap, {
+        construct(target, args) {
+          weakMapConstructorCalls++;
+          return new target(...args);
+        },
+      }) as any;
+
+      // Start recording with cross-origin iframe support
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Capture count AFTER recording starts (IframeManager created)
+      const weakMapCallsAfterRecord = weakMapConstructorCalls;
+
+      // Stop recording - this should call destroy() which creates new WeakMaps
+      stopRecording?.();
+
+      // Verify that WeakMaps were created during cleanup
+      // The IframeManager destroy() creates:
+      // - 3 WeakMaps for IframeManager (crossOriginIframeMap, iframes, crossOriginIframeRootIdMap)
+      // - 4 WeakMaps from CrossOriginIframeMirror.reset() calls (2 mirrors × 2 WeakMaps each)
+      // - 1 WeakMap from other cleanup
+      // Total: 8 new WeakMaps
+      const newWeakMapsCreated =
+        weakMapConstructorCalls - weakMapCallsAfterRecord;
+      expect(newWeakMapsCreated).toBe(8);
+
+      // Restore original WeakMap
+      global.WeakMap = originalWeakMap;
+    });
   });
 });
