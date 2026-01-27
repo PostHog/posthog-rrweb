@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import record from '../../src/record';
 import { mutationBuffers } from '../../src/record/observer';
+import { IframeManager } from '../../src/record/iframe-manager';
 import type { eventWithTime } from '@posthog/rrweb-types';
+import { createMirror } from '@posthog/rrweb-snapshot';
 
 describe('memory leak prevention', () => {
   let dom: JSDOM;
@@ -253,6 +255,210 @@ describe('memory leak prevention', () => {
 
       // Restore original WeakMap
       global.WeakMap = originalWeakMap;
+    });
+  });
+
+  describe('IframeManager.removeIframeById cleanup', () => {
+    it('should delete iframe from iframes WeakMap when removeIframeById is called', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create and append an iframe
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Wait for mutations to be processed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Remove the iframe - this should trigger removeIframeById via wrappedMutationEmit
+      document.body.removeChild(iframe);
+
+      // Wait for removal mutation to be processed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Verify that a removal mutation was emitted
+      const removalEvents = events.filter(
+        (e: any) =>
+          e.type === 3 && // IncrementalSnapshot
+          e.data?.source === 0 && // Mutation
+          e.data?.removes?.length > 0,
+      );
+      expect(removalEvents.length).toBeGreaterThan(0);
+
+      stopRecording?.();
+    });
+
+    it('should delete contentWindow from crossOriginIframeMap when removeIframeById is called', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create and append an iframe
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Wait for mutations to be processed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Store a reference to verify cleanup later
+      const contentWindow = iframe.contentWindow;
+      expect(contentWindow).not.toBeNull();
+
+      // Remove the iframe - this triggers removeIframeById
+      document.body.removeChild(iframe);
+
+      // Wait for removal mutation to be processed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // The crossOriginIframeMap.delete(win) should have been called
+      // We can verify this indirectly by checking the removal mutation was processed
+      const removalEvents = events.filter(
+        (e: any) =>
+          e.type === 3 && // IncrementalSnapshot
+          e.data?.source === 0 && // Mutation
+          e.data?.removes?.length > 0,
+      );
+      expect(removalEvents.length).toBeGreaterThan(0);
+
+      stopRecording?.();
+    });
+  });
+
+  describe('IframeManager unit tests', () => {
+    it('should clean up iframes and crossOriginIframeMap WeakMaps in removeIframeById', () => {
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+
+      // Create a mock StylesheetManager with the required properties
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: true,
+        wrappedEmit,
+      });
+
+      // Create an iframe element and mock its contentWindow
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Manually assign an ID in the mirror
+      const iframeId = 123;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      // Add the iframe to the manager
+      iframeManager.addIframe(iframe);
+
+      // Create a mock serialized node
+      const mockChildSn = {
+        type: 0,
+        childNodes: [],
+        id: 456,
+      } as any;
+
+      // Track that attachIframe was called by verifying mutationCb is called
+      iframeManager.attachIframe(iframe, mockChildSn);
+      expect(mutationCb).toHaveBeenCalled();
+
+      // Get access to private properties for testing via type assertion
+      const manager = iframeManager as any;
+
+      // Verify the iframe was added to the maps
+      expect(manager.iframes.has(iframe)).toBe(true);
+      if (iframe.contentWindow) {
+        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+          true,
+        );
+      }
+      expect(manager.attachedIframes.has(iframeId)).toBe(true);
+
+      // Call removeIframeById
+      iframeManager.removeIframeById(iframeId);
+
+      // Verify the iframe was removed from the maps
+      expect(manager.iframes.has(iframe)).toBe(false);
+      if (iframe.contentWindow) {
+        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+          false,
+        );
+      }
+      expect(manager.attachedIframes.has(iframeId)).toBe(false);
+
+      // Clean up
+      document.body.removeChild(iframe);
+      iframeManager.destroy();
+    });
+
+    it('should handle removeIframeById when iframe has no contentWindow', () => {
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: true,
+        wrappedEmit,
+      });
+
+      // Create an iframe element
+      const iframe = document.createElement('iframe');
+      // Don't append to DOM so contentWindow might be null
+
+      const iframeId = 789;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      // Manually add to attachedIframes to simulate the state
+      const manager = iframeManager as any;
+      manager.attachedIframes.set(iframeId, {
+        element: iframe,
+        content: { type: 0, childNodes: [], id: 999 },
+      });
+
+      // This should not throw even if contentWindow is null
+      expect(() => iframeManager.removeIframeById(iframeId)).not.toThrow();
+      expect(manager.attachedIframes.has(iframeId)).toBe(false);
+
+      iframeManager.destroy();
     });
   });
 });

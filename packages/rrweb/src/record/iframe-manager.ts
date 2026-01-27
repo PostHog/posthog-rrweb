@@ -350,6 +350,12 @@ export class IframeManager {
       this.nestedIframeListeners.delete(win);
     }
 
+    // Clean up WeakMaps to allow GC of the iframe element
+    if (win) {
+      this.crossOriginIframeMap.delete(win);
+    }
+    this.iframes.delete(entry.element);
+
     this.attachedIframes.delete(iframeId);
   }
 
