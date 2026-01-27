@@ -391,211 +391,124 @@ describe('memory leak prevention', () => {
   });
 
   describe('IframeManager unit tests', () => {
-    it('should clean up iframes and crossOriginIframeMap WeakMaps in removeIframeById', () => {
-      const mirror = createMirror();
-      const mutationCb = vi.fn();
-      const wrappedEmit = vi.fn();
+    it.each([
+      {
+        scenario: 'with contentWindow',
+        shouldAppendToDOM: true,
+        shouldCallRemove: true,
+        expectedMapsCleanedUp: true,
+      },
+      {
+        scenario: 'without contentWindow',
+        shouldAppendToDOM: false,
+        shouldCallRemove: true,
+        expectedMapsCleanedUp: true,
+      },
+      {
+        scenario: 'when iframe is moved (not removed)',
+        shouldAppendToDOM: true,
+        shouldCallRemove: false,
+        expectedMapsCleanedUp: false,
+      },
+    ])(
+      'should handle cleanup correctly $scenario',
+      ({ shouldAppendToDOM, shouldCallRemove, expectedMapsCleanedUp }) => {
+        const mirror = createMirror();
+        const mutationCb = vi.fn();
+        const wrappedEmit = vi.fn();
 
-      // Create a mock StylesheetManager with the required properties
-      const mockStylesheetManager = {
-        styleMirror: {
-          generateId: vi.fn(() => 1),
-        },
-        adoptStyleSheets: vi.fn(),
-      } as any;
+        const mockStylesheetManager = {
+          styleMirror: {
+            generateId: vi.fn(() => 1),
+          },
+          adoptStyleSheets: vi.fn(),
+        } as any;
 
-      const iframeManager = new IframeManager({
-        mirror,
-        mutationCb,
-        stylesheetManager: mockStylesheetManager,
-        recordCrossOriginIframes: true,
-        wrappedEmit,
-      });
+        const iframeManager = new IframeManager({
+          mirror,
+          mutationCb,
+          stylesheetManager: mockStylesheetManager,
+          recordCrossOriginIframes: true,
+          wrappedEmit,
+        });
 
-      // Create an iframe element and mock its contentWindow
-      const iframe = document.createElement('iframe');
-      document.body.appendChild(iframe);
+        const iframe = document.createElement('iframe');
+        if (shouldAppendToDOM) {
+          document.body.appendChild(iframe);
+        }
 
-      // Manually assign an ID in the mirror
-      const iframeId = 123;
-      mirror.add(iframe, {
-        type: 2,
-        tagName: 'iframe',
-        attributes: {},
-        childNodes: [],
-        id: iframeId,
-      });
+        const iframeId = 123;
+        mirror.add(iframe, {
+          type: 2,
+          tagName: 'iframe',
+          attributes: {},
+          childNodes: [],
+          id: iframeId,
+        });
 
-      // Add the iframe to the manager
-      iframeManager.addIframe(iframe);
+        if (shouldAppendToDOM) {
+          iframeManager.addIframe(iframe);
 
-      // Create a mock serialized node
-      const mockChildSn = {
-        type: 0,
-        childNodes: [],
-        id: 456,
-      } as any;
+          const mockChildSn = {
+            type: 0,
+            childNodes: [],
+            id: 456,
+          } as any;
 
-      // Track that attachIframe was called by verifying mutationCb is called
-      iframeManager.attachIframe(iframe, mockChildSn);
-      expect(mutationCb).toHaveBeenCalled();
+          iframeManager.attachIframe(iframe, mockChildSn);
+          expect(mutationCb).toHaveBeenCalled();
+        } else {
+          // Manually set up attachedIframes for non-DOM case
+          const manager = iframeManager as any;
+          manager.attachedIframes.set(iframeId, {
+            element: iframe,
+            content: { type: 0, childNodes: [], id: 999 },
+          });
+        }
 
-      // Get access to private properties for testing via type assertion
-      const manager = iframeManager as any;
+        const manager = iframeManager as any;
 
-      // Verify the iframe was added to the maps
-      expect(manager.iframes.has(iframe)).toBe(true);
-      if (iframe.contentWindow) {
-        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
-          true,
-        );
-      }
-      expect(manager.attachedIframes.has(iframeId)).toBe(true);
+        // Verify initial state
+        if (shouldAppendToDOM) {
+          expect(manager.iframes.has(iframe)).toBe(true);
+          if (iframe.contentWindow) {
+            expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+              true,
+            );
+          }
+        }
+        expect(manager.attachedIframes.has(iframeId)).toBe(true);
 
-      // Call removeIframeById
-      iframeManager.removeIframeById(iframeId);
+        // Perform action
+        if (shouldCallRemove) {
+          expect(() => iframeManager.removeIframeById(iframeId)).not.toThrow();
+        }
 
-      // Verify the iframe was removed from the maps
-      expect(manager.iframes.has(iframe)).toBe(false);
-      if (iframe.contentWindow) {
-        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
-          false,
-        );
-      }
-      expect(manager.attachedIframes.has(iframeId)).toBe(false);
+        // Verify final state
+        if (expectedMapsCleanedUp) {
+          expect(manager.iframes.has(iframe)).toBe(false);
+          if (iframe.contentWindow) {
+            expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+              false,
+            );
+          }
+          expect(manager.attachedIframes.has(iframeId)).toBe(false);
+        } else {
+          // For moved iframes, maps should remain intact
+          expect(manager.iframes.has(iframe)).toBe(true);
+          if (iframe.contentWindow) {
+            expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+              true,
+            );
+          }
+        }
 
-      // Clean up
-      document.body.removeChild(iframe);
-      iframeManager.destroy();
-    });
-
-    it('should handle removeIframeById when iframe has no contentWindow', () => {
-      const mirror = createMirror();
-      const mutationCb = vi.fn();
-      const wrappedEmit = vi.fn();
-
-      const mockStylesheetManager = {
-        styleMirror: {
-          generateId: vi.fn(() => 1),
-        },
-        adoptStyleSheets: vi.fn(),
-      } as any;
-
-      const iframeManager = new IframeManager({
-        mirror,
-        mutationCb,
-        stylesheetManager: mockStylesheetManager,
-        recordCrossOriginIframes: true,
-        wrappedEmit,
-      });
-
-      // Create an iframe element
-      const iframe = document.createElement('iframe');
-      // Don't append to DOM so contentWindow might be null
-
-      const iframeId = 789;
-      mirror.add(iframe, {
-        type: 2,
-        tagName: 'iframe',
-        attributes: {},
-        childNodes: [],
-        id: iframeId,
-      });
-
-      // Manually add to attachedIframes to simulate the state
-      const manager = iframeManager as any;
-      manager.attachedIframes.set(iframeId, {
-        element: iframe,
-        content: { type: 0, childNodes: [], id: 999 },
-      });
-
-      // This should not throw even if contentWindow is null
-      expect(() => iframeManager.removeIframeById(iframeId)).not.toThrow();
-      expect(manager.attachedIframes.has(iframeId)).toBe(false);
-
-      iframeManager.destroy();
-    });
-
-    it('should NOT clean up WeakMaps when iframe is moved (not removed)', () => {
-      const mirror = createMirror();
-      const mutationCb = vi.fn();
-      const wrappedEmit = vi.fn();
-
-      const mockStylesheetManager = {
-        styleMirror: {
-          generateId: vi.fn(() => 1),
-        },
-        adoptStyleSheets: vi.fn(),
-      } as any;
-
-      const iframeManager = new IframeManager({
-        mirror,
-        mutationCb,
-        stylesheetManager: mockStylesheetManager,
-        recordCrossOriginIframes: true,
-        wrappedEmit,
-      });
-
-      // Create an iframe element
-      const iframe = document.createElement('iframe');
-      document.body.appendChild(iframe);
-
-      const iframeId = 123;
-      mirror.add(iframe, {
-        type: 2,
-        tagName: 'iframe',
-        attributes: {},
-        childNodes: [],
-        id: iframeId,
-      });
-
-      // Add the iframe to the manager
-      iframeManager.addIframe(iframe);
-
-      // Create a mock serialized node
-      const mockChildSn = {
-        type: 0,
-        childNodes: [],
-        id: 456,
-      } as any;
-
-      iframeManager.attachIframe(iframe, mockChildSn);
-
-      const manager = iframeManager as any;
-
-      // Verify the iframe was added to the maps
-      expect(manager.iframes.has(iframe)).toBe(true);
-      if (iframe.contentWindow) {
-        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
-          true,
-        );
-      }
-
-      // Simulate a move: iframe appears in both removes and adds
-      // This should NOT trigger cleanup
-      const removedId = iframeId;
-      const movedIframeStillExists = true;
-
-      // In a real move scenario, the iframe is still in attachedIframes
-      // and addIframe would be called again during serialization
-      // We're just verifying that removeIframeById with a moved iframe
-      // doesn't break things
-
-      // The key test: after a "move" operation where the iframe is re-added,
-      // the WeakMaps should still contain the iframe
-      // This is tested at the integration level in wrappedMutationEmit
-      // Here we just verify that if we DON'T call removeIframeById,
-      // the maps remain intact
-      expect(manager.iframes.has(iframe)).toBe(true);
-      if (iframe.contentWindow) {
-        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
-          true,
-        );
-      }
-
-      // Clean up
-      document.body.removeChild(iframe);
-      iframeManager.destroy();
-    });
+        // Clean up
+        if (shouldAppendToDOM) {
+          document.body.removeChild(iframe);
+        }
+        iframeManager.destroy();
+      },
+    );
   });
 });
