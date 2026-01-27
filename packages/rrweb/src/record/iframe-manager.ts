@@ -340,23 +340,31 @@ export class IframeManager {
 
   public removeIframeById(iframeId: number) {
     const entry = this.attachedIframes.get(iframeId);
-    if (!entry) return;
+    const iframe =
+      entry?.element ||
+      (this.mirror.getNode(iframeId) as HTMLIFrameElement | null);
 
-    // Clean up nested iframe listeners if they exist
-    const win = entry.element.contentWindow;
-    if (win && this.nestedIframeListeners.has(win)) {
-      const handler = this.nestedIframeListeners.get(win)!;
-      win.removeEventListener('message', handler);
-      this.nestedIframeListeners.delete(win);
+    if (iframe) {
+      const win = iframe.contentWindow;
+
+      // Clean up nested iframe listeners if they exist
+      if (win && this.nestedIframeListeners.has(win)) {
+        const handler = this.nestedIframeListeners.get(win)!;
+        win.removeEventListener('message', handler);
+        this.nestedIframeListeners.delete(win);
+      }
+
+      // Clean up WeakMaps to allow GC of the iframe element
+      if (win) {
+        this.crossOriginIframeMap.delete(win);
+      }
+      this.iframes.delete(iframe);
     }
 
-    // Clean up WeakMaps to allow GC of the iframe element
-    if (win) {
-      this.crossOriginIframeMap.delete(win);
+    // Always clean up attachedIframes if entry exists
+    if (entry) {
+      this.attachedIframes.delete(iframeId);
     }
-    this.iframes.delete(entry.element);
-
-    this.attachedIframes.delete(iframeId);
   }
 
   public reattachIframes() {
