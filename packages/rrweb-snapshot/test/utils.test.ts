@@ -3,6 +3,7 @@
  */
 import { describe, it, test, expect } from 'vitest';
 import {
+  createMirror,
   escapeImportStatement,
   extractFileExtension,
   fixSafariColons,
@@ -327,6 +328,107 @@ describe('utils', () => {
       ).toEqual(
         "@font-face { font-family: 'MockFont'; src: url('https://example.com/fonts/mockfont.woff2') format('woff2'); font-weight: normal; font-style: normal; }",
       );
+    });
+  });
+
+  describe('Mirror.removeNodeFromMap', () => {
+    const createMeta = (id: number): serializedNodeWithId => ({
+      type: NodeType.Element,
+      tagName: 'div',
+      attributes: {},
+      childNodes: [],
+      id,
+    });
+
+    it('removes regular child nodes from idNodeMap', () => {
+      const mirror = createMirror();
+
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      const grandchild = document.createTextNode('hello');
+
+      parent.appendChild(child);
+      child.appendChild(grandchild);
+
+      mirror.add(parent, createMeta(1));
+      mirror.add(child, createMeta(2));
+      mirror.add(grandchild, createMeta(3));
+
+      expect(mirror.has(1)).toBe(true);
+      expect(mirror.has(2)).toBe(true);
+      expect(mirror.has(3)).toBe(true);
+
+      mirror.removeNodeFromMap(parent);
+
+      expect(mirror.has(1)).toBe(false);
+      expect(mirror.has(2)).toBe(false);
+      expect(mirror.has(3)).toBe(false);
+    });
+
+    it('removes shadow DOM children from idNodeMap', () => {
+      const mirror = createMirror();
+
+      const host = document.createElement('div');
+      const shadowRoot = host.attachShadow({ mode: 'open' });
+      const shadowChild = document.createElement('span');
+      const shadowText = document.createTextNode('shadow content');
+
+      shadowRoot.appendChild(shadowChild);
+      shadowChild.appendChild(shadowText);
+
+      mirror.add(host, createMeta(1));
+      mirror.add(shadowRoot as unknown as Node, createMeta(2));
+      mirror.add(shadowChild, createMeta(3));
+      mirror.add(shadowText, createMeta(4));
+
+      expect(mirror.has(1)).toBe(true);
+      expect(mirror.has(2)).toBe(true);
+      expect(mirror.has(3)).toBe(true);
+      expect(mirror.has(4)).toBe(true);
+
+      mirror.removeNodeFromMap(host);
+
+      expect(mirror.has(1)).toBe(false);
+      expect(mirror.has(2)).toBe(false);
+      expect(mirror.has(3)).toBe(false);
+      expect(mirror.has(4)).toBe(false);
+    });
+
+    it('removes iframe contentDocument children from idNodeMap', () => {
+      const mirror = createMirror();
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument!;
+      const iframeBody = iframeDoc.body;
+      const iframeChild = iframeDoc.createElement('div');
+      const iframeText = iframeDoc.createTextNode('iframe content');
+
+      iframeBody.appendChild(iframeChild);
+      iframeChild.appendChild(iframeText);
+
+      mirror.add(iframe, createMeta(1));
+      mirror.add(iframeDoc as unknown as Node, createMeta(2));
+      mirror.add(iframeBody, createMeta(3));
+      mirror.add(iframeChild, createMeta(4));
+      mirror.add(iframeText, createMeta(5));
+
+      expect(mirror.has(1)).toBe(true);
+      expect(mirror.has(2)).toBe(true);
+      expect(mirror.has(3)).toBe(true);
+      expect(mirror.has(4)).toBe(true);
+      expect(mirror.has(5)).toBe(true);
+
+      mirror.removeNodeFromMap(iframe);
+
+      expect(mirror.has(1)).toBe(false);
+      expect(mirror.has(2)).toBe(false);
+      expect(mirror.has(3)).toBe(false);
+      expect(mirror.has(4)).toBe(false);
+      expect(mirror.has(5)).toBe(false);
+
+      document.body.removeChild(iframe);
     });
   });
 });
