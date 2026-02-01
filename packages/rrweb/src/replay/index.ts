@@ -603,6 +603,10 @@ export class Replayer {
     this.serviceSubscription = undefined;
     this.speedServiceSubscription = undefined;
 
+    // Stop the state machine services
+    this.service.stop();
+    this.speedService.stop();
+
     // Clear all pending timeouts
     this.timeouts.forEach((timeout) => clearTimeout(timeout));
     this.timeouts.clear();
