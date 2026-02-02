@@ -47,10 +47,22 @@ function pathToSelector(node: HTMLElement): string | '' {
 }
 
 /**
- * judge is object
+ * Check if a value is an array.
+ * This is safe with Proxy objects as Array.isArray checks an internal slot
+ * without triggering Proxy traps.
+ */
+function isArray(obj: unknown): obj is unknown[] {
+  return Array.isArray(obj);
+}
+
+/**
+ * Check if a value is a plain object (not an array, null, or other type).
+ * Uses a simple check that avoids Object.prototype.toString.call() which
+ * can trigger Symbol.toStringTag access on Proxy objects, causing errors
+ * with Proxies that throw on Symbol property access.
  */
 function isObject(obj: unknown): boolean {
-  return Object.prototype.toString.call(obj) === '[object Object]';
+  return typeof obj === 'object' && obj !== null && !isArray(obj);
 }
 
 /**
@@ -129,7 +141,7 @@ export function stringify(
           const eventValue = (value as unknown as Record<string, unknown>)[
             eventKey
           ];
-          if (Array.isArray(eventValue)) {
+          if (isArray(eventValue)) {
             eventResult[eventKey] = pathToSelector(
               (eventValue.length ? eventValue[0] : null) as HTMLElement,
             );
