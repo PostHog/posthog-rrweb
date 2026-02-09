@@ -23,6 +23,7 @@ export class IframeManager {
   private mutationCb: mutationCallBack;
   private wrappedEmit: (e: eventWithoutTime, isCheckout?: boolean) => void;
   private loadListener?: (iframeEl: HTMLIFrameElement) => unknown;
+  private removeListener?: (iframeEl: HTMLIFrameElement) => void;
   private stylesheetManager: StylesheetManager;
   private recordCrossOriginIframes: boolean;
   private messageHandler: (message: MessageEvent) => void;
@@ -69,6 +70,14 @@ export class IframeManager {
 
   public removeLoadListener() {
     this.loadListener = undefined;
+  }
+
+  public addRemoveListener(cb: (iframeEl: HTMLIFrameElement) => void) {
+    this.removeListener = cb;
+  }
+
+  public removeRemoveListener() {
+    this.removeListener = undefined;
   }
 
   private trackIframeContent(
@@ -344,6 +353,11 @@ export class IframeManager {
       entry?.element ||
       (this.mirror.getNode(iframeId) as HTMLIFrameElement | null);
 
+    // Notify removeListener before cleaning up IframeManager's own state
+    if (iframe) {
+      this.removeListener?.(iframe);
+    }
+
     if (iframe) {
       const win = iframe.contentWindow;
 
@@ -402,6 +416,8 @@ export class IframeManager {
       contentWindow.removeEventListener('message', handler);
     });
     this.nestedIframeListeners.clear();
+
+    this.removeListener = undefined;
 
     this.crossOriginIframeMirror.reset();
     this.crossOriginIframeStyleMirror.reset();

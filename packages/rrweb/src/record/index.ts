@@ -260,12 +260,28 @@ function record<T = eventWithTime>(
     }
   };
 
+  const iframeObserverCleanups = new Map<HTMLIFrameElement, listenerHandler>();
+
+  function cleanupDetachedIframeObservers() {
+    for (const [iframe, cleanup] of iframeObserverCleanups) {
+      try {
+        if (!iframe.contentDocument || !iframe.contentDocument.defaultView) {
+          cleanup();
+          iframeObserverCleanups.delete(iframe);
+        }
+      } catch {
+        // Cross-origin: contentDocument access throws
+        cleanup();
+        iframeObserverCleanups.delete(iframe);
+      }
+    }
+  }
+
   const wrappedMutationEmit = (m: mutationCallbackParam) => {
     // Clean up removed iframes from the attachedIframes Map to prevent memory leaks
     // Only clean up iframes that are actually being removed, not moved
     // (moved iframes appear in both removes and adds)
-    if (recordCrossOriginIframes && m.removes && m.removes.length > 0) {
-      // Only create the Set if there are adds to check against
+    if (m.removes && m.removes.length > 0) {
       const addedIds =
         m.adds.length > 0 ? new Set(m.adds.map((add) => add.node.id)) : null;
       m.removes.forEach(({ id }) => {
@@ -274,6 +290,8 @@ function record<T = eventWithTime>(
           iframeManager.removeIframeById(id);
         }
       });
+
+      cleanupDetachedIframeObservers();
     }
 
     wrappedEmit({
@@ -601,13 +619,25 @@ function record<T = eventWithTime>(
 
     const loadListener = (iframeEl: HTMLIFrameElement) => {
       try {
-        handlers.push(observe(iframeEl.contentDocument!));
+        // Clean up existing observers if iframe is reloading
+        iframeObserverCleanups.get(iframeEl)?.();
+        const cleanup = observe(iframeEl.contentDocument!);
+        iframeObserverCleanups.set(iframeEl, cleanup);
+        handlers.push(cleanup);
       } catch (error) {
         // TODO: handle internal error
         console.warn(error);
       }
     };
     iframeManager.addLoadListener(loadListener);
+
+    iframeManager.addRemoveListener((iframeEl) => {
+      const cleanup = iframeObserverCleanups.get(iframeEl);
+      if (cleanup) {
+        cleanup();
+        iframeObserverCleanups.delete(iframeEl);
+      }
+    });
 
     const init = () => {
       takeFullSnapshot();
@@ -645,8 +675,10 @@ function record<T = eventWithTime>(
     }
     return () => {
       handlers.forEach((h) => h());
+      iframeObserverCleanups.clear();
       processedNodeManager.destroy();
       iframeManager.removeLoadListener();
+      iframeManager.removeRemoveListener();
       iframeManager.destroy();
       mirror.reset();
       recording = false;

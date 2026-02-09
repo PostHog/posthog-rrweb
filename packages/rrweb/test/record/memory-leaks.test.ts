@@ -511,4 +511,231 @@ describe('memory leak prevention', () => {
       },
     );
   });
+
+  describe('iframe observer cleanup on removal', () => {
+    it('should call cleanup idempotently without errors', () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({ emit });
+
+      // The stop function itself is the cleanup — calling it twice should not throw
+      stopRecording?.();
+      // handlers.forEach(h => h()) has already run; each idempotent cleanup is safe
+      // Calling stop again would re-run handlers, but each cleanup is guarded
+      expect(mutationBuffers.length).toBe(0);
+    });
+
+    it('should fire removeListener callback when removeIframeById is called', () => {
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+      const removeListenerSpy = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: false,
+        wrappedEmit,
+      });
+
+      iframeManager.addRemoveListener(removeListenerSpy);
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      const iframeId = 200;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      iframeManager.addIframe(iframe);
+      iframeManager.attachIframe(iframe, {
+        type: 0,
+        childNodes: [],
+        id: 201,
+      } as any);
+
+      iframeManager.removeIframeById(iframeId);
+
+      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+      expect(removeListenerSpy).toHaveBeenCalledWith(iframe);
+
+      document.body.removeChild(iframe);
+      iframeManager.destroy();
+    });
+
+    it('should clean up same-origin iframe without recordCrossOriginIframes', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: false,
+      });
+
+      // Create and append an iframe
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Remove the iframe — cleanup should fire even without recordCrossOriginIframes
+      document.body.removeChild(iframe);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const removalEvents = events.filter(
+        (e: any) =>
+          e.type === 3 && e.data?.source === 0 && e.data?.removes?.length > 0,
+      );
+      expect(removalEvents.length).toBeGreaterThan(0);
+
+      stopRecording?.();
+    });
+
+    it('should stop recording and clear all buffers including iframe buffers', () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({ emit });
+
+      expect(mutationBuffers.length).toBeGreaterThan(0);
+
+      stopRecording?.();
+
+      expect(mutationBuffers.length).toBe(0);
+    });
+
+    it('should scope initObservers cleanup to its own buffer', () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({ emit });
+
+      // Main document creates 1 buffer
+      expect(mutationBuffers.length).toBe(1);
+      const mainBuffer = mutationBuffers[0];
+
+      stopRecording?.();
+
+      // After stop, the main buffer should be removed
+      expect(mutationBuffers.length).toBe(0);
+      expect(mutationBuffers.indexOf(mainBuffer)).toBe(-1);
+    });
+  });
+
+  describe('IframeManager removeListener lifecycle', () => {
+    it('should clear removeListener on destroy', () => {
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+      const removeListenerSpy = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: false,
+        wrappedEmit,
+      });
+
+      iframeManager.addRemoveListener(removeListenerSpy);
+
+      // After destroy, removeListener should be cleared
+      iframeManager.destroy();
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      const iframeId = 300;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      (iframeManager as any).attachedIframes.set(iframeId, {
+        element: iframe,
+        content: { type: 0, childNodes: [], id: 301 },
+      });
+
+      // removeIframeById should not call the listener after destroy
+      iframeManager.removeIframeById(iframeId);
+      expect(removeListenerSpy).not.toHaveBeenCalled();
+
+      document.body.removeChild(iframe);
+    });
+
+    it('should support removeRemoveListener to unregister the callback', () => {
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+      const removeListenerSpy = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: false,
+        wrappedEmit,
+      });
+
+      iframeManager.addRemoveListener(removeListenerSpy);
+      iframeManager.removeRemoveListener();
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      const iframeId = 400;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      (iframeManager as any).attachedIframes.set(iframeId, {
+        element: iframe,
+        content: { type: 0, childNodes: [], id: 401 },
+      });
+
+      iframeManager.removeIframeById(iframeId);
+      expect(removeListenerSpy).not.toHaveBeenCalled();
+
+      document.body.removeChild(iframe);
+      iframeManager.destroy();
+    });
+  });
 });

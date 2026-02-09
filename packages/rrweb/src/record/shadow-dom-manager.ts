@@ -6,6 +6,7 @@ import type {
 } from '@posthog/rrweb-types';
 import {
   initMutationObserver,
+  mutationBuffers,
   initScrollObserver,
   initAdoptedStyleSheetObserver,
 } from './observer';
@@ -53,7 +54,7 @@ export class ShadowDomManager {
     if (!isNativeShadowDom(shadowRoot)) return;
     if (this.shadowDoms.has(shadowRoot)) return;
     this.shadowDoms.add(shadowRoot);
-    const observer = initMutationObserver(
+    const { observer, buffer } = initMutationObserver(
       {
         ...this.bypassOptions,
         doc,
@@ -63,7 +64,15 @@ export class ShadowDomManager {
       },
       shadowRoot,
     );
-    this.restoreHandlers.push(() => observer.disconnect());
+    this.restoreHandlers.push(() => {
+      observer.disconnect();
+      buffer.destroy();
+      buffer.reset();
+      const idx = mutationBuffers.indexOf(buffer);
+      if (idx !== -1) {
+        mutationBuffers.splice(idx, 1);
+      }
+    });
     this.restoreHandlers.push(
       initScrollObserver({
         ...this.bypassOptions,
