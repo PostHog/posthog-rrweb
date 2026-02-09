@@ -390,6 +390,150 @@ describe('memory leak prevention', () => {
     });
   });
 
+  describe('sandboxed iframe cleanup (no allow-scripts)', () => {
+    it('should clean up sandboxed iframes even when attachIframe is never called', () => {
+      // This test verifies the fix for the memory leak with sandboxed iframes
+      // that don't have allow-scripts. In this case, rrweb cannot inject scripts
+      // into the iframe, so attachIframe/onIframeLoad never fires.
+      // The fix ensures addIframe() populates attachedIframes immediately,
+      // so removeIframeById() can find the element for cleanup.
+
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: true,
+        wrappedEmit,
+      });
+
+      // Create a sandboxed iframe (simulating sandbox="allow-same-origin" without allow-scripts)
+      const iframe = document.createElement('iframe');
+      // Note: JSDOM doesn't actually enforce sandbox, but this simulates the scenario
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-popups');
+      document.body.appendChild(iframe);
+
+      const iframeId = 123;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: { sandbox: 'allow-same-origin allow-popups' },
+        childNodes: [],
+        id: iframeId,
+      });
+
+      // Call addIframe (which happens when iframe is snapshotted)
+      // This should now populate attachedIframes immediately (with our fix)
+      iframeManager.addIframe(iframe);
+
+      const manager = iframeManager as any;
+
+      // Verify iframe was added to tracking maps
+      expect(manager.iframes.has(iframe)).toBe(true);
+      if (iframe.contentWindow) {
+        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+          true,
+        );
+      }
+
+      // CRITICAL: With the fix, attachedIframes should now have an entry
+      // even though attachIframe() was never called (because allow-scripts is missing)
+      expect(manager.attachedIframes.has(iframeId)).toBe(true);
+
+      // Now remove the iframe - this should successfully clean up
+      // even though attachIframe was never called
+      iframeManager.removeIframeById(iframeId);
+
+      // Verify all maps were cleaned up
+      expect(manager.iframes.has(iframe)).toBe(false);
+      if (iframe.contentWindow) {
+        expect(manager.crossOriginIframeMap.has(iframe.contentWindow)).toBe(
+          false,
+        );
+      }
+      expect(manager.attachedIframes.has(iframeId)).toBe(false);
+
+      // Clean up
+      document.body.removeChild(iframe);
+      iframeManager.destroy();
+    });
+
+    it('should update attachedIframes content when attachIframe is called after addIframe', () => {
+      // This test verifies that when attachIframe IS called (for non-sandboxed iframes),
+      // it properly updates the content that was initialized in addIframe
+
+      const mirror = createMirror();
+      const mutationCb = vi.fn();
+      const wrappedEmit = vi.fn();
+
+      const mockStylesheetManager = {
+        styleMirror: {
+          generateId: vi.fn(() => 1),
+        },
+        adoptStyleSheets: vi.fn(),
+      } as any;
+
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb,
+        stylesheetManager: mockStylesheetManager,
+        recordCrossOriginIframes: true,
+        wrappedEmit,
+      });
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      const iframeId = 456;
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: iframeId,
+      });
+
+      // Call addIframe first
+      iframeManager.addIframe(iframe);
+
+      const manager = iframeManager as any;
+
+      // attachedIframes should have entry with null content
+      expect(manager.attachedIframes.has(iframeId)).toBe(true);
+      expect(manager.attachedIframes.get(iframeId).element).toBe(iframe);
+      expect(manager.attachedIframes.get(iframeId).content).toBeNull();
+
+      // Now call attachIframe (simulating when iframe loads for non-sandboxed)
+      const mockChildSn = {
+        type: 0,
+        childNodes: [],
+        id: 789,
+      } as any;
+      iframeManager.attachIframe(iframe, mockChildSn);
+
+      // Content should now be updated
+      expect(manager.attachedIframes.get(iframeId).element).toBe(iframe);
+      expect(manager.attachedIframes.get(iframeId).content).toBe(mockChildSn);
+
+      // Cleanup should still work
+      iframeManager.removeIframeById(iframeId);
+      expect(manager.attachedIframes.has(iframeId)).toBe(false);
+
+      document.body.removeChild(iframe);
+      iframeManager.destroy();
+    });
+  });
+
   describe('IframeManager unit tests', () => {
     it.each([
       {

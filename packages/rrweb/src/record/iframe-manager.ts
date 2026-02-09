@@ -61,6 +61,19 @@ export class IframeManager {
     this.iframes.set(iframeEl, true);
     if (iframeEl.contentWindow)
       this.crossOriginIframeMap.set(iframeEl.contentWindow, iframeEl);
+
+    // Track the iframe in attachedIframes so removeIframeById can find it for cleanup.
+    // This is critical for sandboxed iframes (without allow-scripts) where attachIframe()
+    // never fires because rrweb can't inject scripts into the iframe.
+    // Without this, removeIframeById fails to clean crossOriginIframeMap causing memory leaks.
+    const iframeId = this.mirror.getId(iframeEl);
+    if (iframeId !== -1 && !this.attachedIframes.has(iframeId)) {
+      // Store with null content - attachIframe will update with real content if it fires
+      this.attachedIframes.set(iframeId, {
+        element: iframeEl,
+        content: null as unknown as serializedNodeWithId,
+      });
+    }
   }
 
   public addLoadListener(cb: (iframeEl: HTMLIFrameElement) => unknown) {
