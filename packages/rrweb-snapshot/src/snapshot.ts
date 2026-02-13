@@ -976,11 +976,6 @@ export const DEFAULT_MAX_DEPTH = 50;
 let _maxDepthWarned = false;
 let _maxDepthReached = false;
 
-export function resetMaxDepthState(): void {
-  _maxDepthWarned = false;
-  _maxDepthReached = false;
-}
-
 export function wasMaxDepthReached(): boolean {
   return _maxDepthReached;
 }
