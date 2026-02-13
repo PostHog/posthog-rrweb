@@ -7,6 +7,7 @@ import snapshot, {
   needMaskingText,
   classMatchesRegex,
   IGNORED_NODE,
+  DEFAULT_MAX_DEPTH,
   genId,
 } from './snapshot';
 import rebuild, {
@@ -31,5 +32,6 @@ export {
   needMaskingText,
   classMatchesRegex,
   IGNORED_NODE,
+  DEFAULT_MAX_DEPTH,
   genId,
 };

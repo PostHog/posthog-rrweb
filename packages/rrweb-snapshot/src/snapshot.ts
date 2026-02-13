@@ -971,6 +971,14 @@ function slimDOMExcluded(
   return false;
 }
 
+export const DEFAULT_MAX_DEPTH = 50;
+
+let _maxDepthWarned = false;
+
+export function resetMaxDepthWarning(): void {
+  _maxDepthWarned = false;
+}
+
 export function serializeNodeWithId(
   n: Node,
   options: {
@@ -1004,6 +1012,8 @@ export function serializeNodeWithId(
       node: serializedElementNodeWithId,
     ) => unknown;
     stylesheetLoadTimeout?: number;
+    depth?: number;
+    maxDepth?: number;
   },
 ): serializedNodeWithId | null {
   const {
@@ -1029,9 +1039,23 @@ export function serializeNodeWithId(
     stylesheetLoadTimeout = 5000,
     keepIframeSrcFn = () => false,
     newlyAddedElement = false,
+    depth = 0,
+    maxDepth = DEFAULT_MAX_DEPTH,
   } = options;
   let { needsMask } = options;
   let { preserveWhiteSpace = true } = options;
+
+  if (depth >= maxDepth) {
+    if (!_maxDepthWarned) {
+      _maxDepthWarned = true;
+      console.warn(
+        `[rrweb-snapshot] DOM tree depth exceeded max depth of ${maxDepth}. ` +
+          `Children beyond this depth will not be recorded. ` +
+          `This may indicate deeply nested DOM structures.`,
+      );
+    }
+    return null;
+  }
 
   if (!needsMask) {
     // perf: if needsMask = true, children won't also need to check
@@ -1139,6 +1163,8 @@ export function serializeNodeWithId(
       onStylesheetLoad,
       stylesheetLoadTimeout,
       keepIframeSrcFn,
+      depth: depth + 1,
+      maxDepth,
     };
 
     if (
@@ -1207,6 +1233,8 @@ export function serializeNodeWithId(
             onStylesheetLoad,
             stylesheetLoadTimeout,
             keepIframeSrcFn,
+            depth: depth + 1,
+            maxDepth,
           });
 
           if (serializedIframeNode) {
@@ -1259,6 +1287,8 @@ export function serializeNodeWithId(
             onStylesheetLoad,
             stylesheetLoadTimeout,
             keepIframeSrcFn,
+            depth,
+            maxDepth,
           });
 
           if (serializedLinkNode) {
@@ -1305,6 +1335,7 @@ function snapshot(
     ) => unknown;
     stylesheetLoadTimeout?: number;
     keepIframeSrcFn?: KeepIframeSrcFn;
+    maxDepth?: number;
   },
 ): serializedNodeWithId | null {
   const {
@@ -1328,6 +1359,7 @@ function snapshot(
     onStylesheetLoad,
     stylesheetLoadTimeout,
     keepIframeSrcFn = () => false,
+    maxDepth,
   } = options || {};
   const maskInputOptions: MaskInputOptions =
     maskAllInputs === true
@@ -1396,6 +1428,7 @@ function snapshot(
     stylesheetLoadTimeout,
     keepIframeSrcFn,
     newlyAddedElement: false,
+    maxDepth,
   });
 }
 

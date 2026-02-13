@@ -2,10 +2,12 @@
  * @vitest-environment jsdom
  */
 import { JSDOM } from 'jsdom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import snapshot, {
   _isBlockedElement,
+  DEFAULT_MAX_DEPTH,
+  resetMaxDepthWarning,
   serializeNodeWithId,
 } from '../src/snapshot';
 import { elementNode, serializedNodeWithId } from '../src/types';
@@ -376,5 +378,110 @@ describe('jsdom snapshot', () => {
     expect(sn).toMatchObject({
       type: 0,
     });
+  });
+});
+
+describe('maxDepth', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    resetMaxDepthWarning();
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  const buildNestedDOM = (depth: number): HTMLElement => {
+    const root = document.createElement('div');
+    root.setAttribute('data-depth', '0');
+    let current = root;
+    for (let i = 1; i < depth; i++) {
+      const child = document.createElement('div');
+      child.setAttribute('data-depth', String(i));
+      current.appendChild(child);
+      current = child;
+    }
+    return root;
+  };
+
+  const countNodes = (node: serializedNodeWithId): number => {
+    let count = 1;
+    if ('childNodes' in node) {
+      for (const child of (node as elementNode).childNodes) {
+        count += countNodes(child as serializedNodeWithId);
+      }
+    }
+    return count;
+  };
+
+  const serializeWithMaxDepth = (
+    node: Node,
+    maxDepth: number,
+  ): serializedNodeWithId | null => {
+    return serializeNodeWithId(node, {
+      doc: document,
+      mirror: new Mirror(),
+      blockClass: 'blockblock',
+      blockSelector: null,
+      maskTextClass: 'maskmask',
+      maskTextSelector: null,
+      skipChild: false,
+      inlineStylesheet: true,
+      maskTextFn: undefined,
+      maskInputFn: undefined,
+      slimDOMOptions: {},
+      maxDepth,
+    });
+  };
+
+  it('should serialize all nodes when depth is within limit', () => {
+    const root = buildNestedDOM(5);
+    const sn = serializeWithMaxDepth(root, 10);
+    expect(sn).not.toBeNull();
+    expect(countNodes(sn!)).toBe(5);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('should truncate nodes beyond maxDepth', () => {
+    const root = buildNestedDOM(10);
+    const sn = serializeWithMaxDepth(root, 5);
+    expect(sn).not.toBeNull();
+    expect(countNodes(sn!)).toBe(5);
+  });
+
+  it('should emit a console warning when maxDepth is exceeded', () => {
+    const root = buildNestedDOM(10);
+    serializeWithMaxDepth(root, 3);
+    expect(warnSpy).toHaveBeenCalledOnce();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('DOM tree depth exceeded max depth of 3'),
+    );
+  });
+
+  it('should only warn once across multiple serializations', () => {
+    const root1 = buildNestedDOM(10);
+    const root2 = buildNestedDOM(10);
+    serializeWithMaxDepth(root1, 3);
+    serializeWithMaxDepth(root2, 3);
+    expect(warnSpy).toHaveBeenCalledOnce();
+  });
+
+  it('should return null when depth equals maxDepth', () => {
+    const root = buildNestedDOM(1);
+    const sn = serializeWithMaxDepth(root, 0);
+    expect(sn).toBeNull();
+  });
+
+  it('should have DEFAULT_MAX_DEPTH of 50', () => {
+    expect(DEFAULT_MAX_DEPTH).toBe(50);
+  });
+
+  it('should use DEFAULT_MAX_DEPTH when maxDepth is not specified', () => {
+    const root = buildNestedDOM(5);
+    const sn = serializeNode(root);
+    expect(sn).not.toBeNull();
+    expect(countNodes(sn!)).toBe(5);
   });
 });
