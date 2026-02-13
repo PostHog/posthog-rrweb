@@ -17,6 +17,11 @@ export {
   type eventWithTime,
 } from '@posthog/rrweb-types';
 
+export {
+  wasMaxDepthReached,
+  resetMaxDepthState,
+} from '@posthog/rrweb-snapshot';
+
 // exports style.css from replay
 import './replay/styles/style.css';
 

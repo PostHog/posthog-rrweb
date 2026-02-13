@@ -9,6 +9,7 @@ import snapshot, {
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
   wasMaxDepthReached,
+  resetMaxDepthState,
   genId,
 } from './snapshot';
 import rebuild, {
@@ -35,5 +36,6 @@ export {
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
   wasMaxDepthReached,
+  resetMaxDepthState,
   genId,
 };
