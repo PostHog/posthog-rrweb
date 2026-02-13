@@ -980,6 +980,11 @@ export function wasMaxDepthReached(): boolean {
   return _maxDepthReached;
 }
 
+export function resetMaxDepthState(): void {
+  _maxDepthReached = false;
+  _maxDepthWarned = false;
+}
+
 export function serializeNodeWithId(
   n: Node,
   options: {

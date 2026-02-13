@@ -8,6 +8,7 @@ import snapshot, {
   _isBlockedElement,
   DEFAULT_MAX_DEPTH,
   wasMaxDepthReached,
+  resetMaxDepthState,
   serializeNodeWithId,
 } from '../src/snapshot';
 import { elementNode, serializedNodeWithId } from '../src/types';
@@ -385,6 +386,7 @@ describe('maxDepth', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
+    resetMaxDepthState();
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
@@ -439,8 +441,6 @@ describe('maxDepth', () => {
     expect(DEFAULT_MAX_DEPTH).toBe(50);
   });
 
-  // wasMaxDepthReached is module-level state that latches true permanently,
-  // so tests that assert false must run before any test that triggers it.
   it('should serialize all nodes when depth is within limit', () => {
     const root = buildNestedDOM(5);
     const sn = serializeWithMaxDepth(root, 10);
@@ -474,9 +474,17 @@ describe('maxDepth', () => {
     expect(sn).toBeNull();
   });
 
-  it('wasMaxDepthReached stays true once set', () => {
-    const root = buildNestedDOM(5);
-    serializeWithMaxDepth(root, 10);
+  it('resetMaxDepthState resets both reached and warned state', () => {
+    const root = buildNestedDOM(10);
+    serializeWithMaxDepth(root, 5);
     expect(wasMaxDepthReached()).toBe(true);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+
+    resetMaxDepthState();
+    expect(wasMaxDepthReached()).toBe(false);
+
+    warnSpy.mockClear();
+    serializeWithMaxDepth(root, 5);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
   });
 });
