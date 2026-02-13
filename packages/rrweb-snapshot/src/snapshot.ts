@@ -974,9 +974,15 @@ function slimDOMExcluded(
 export const DEFAULT_MAX_DEPTH = 50;
 
 let _maxDepthWarned = false;
+let _maxDepthReached = false;
 
-export function resetMaxDepthWarning(): void {
+export function resetMaxDepthState(): void {
   _maxDepthWarned = false;
+  _maxDepthReached = false;
+}
+
+export function wasMaxDepthReached(): boolean {
+  return _maxDepthReached;
 }
 
 export function serializeNodeWithId(
@@ -1014,6 +1020,7 @@ export function serializeNodeWithId(
     stylesheetLoadTimeout?: number;
     depth?: number;
     maxDepth?: number;
+    onMaxDepthReached?: () => void;
   },
 ): serializedNodeWithId | null {
   const {
@@ -1046,6 +1053,7 @@ export function serializeNodeWithId(
   let { preserveWhiteSpace = true } = options;
 
   if (depth >= maxDepth) {
+    _maxDepthReached = true;
     if (!_maxDepthWarned) {
       _maxDepthWarned = true;
       console.warn(

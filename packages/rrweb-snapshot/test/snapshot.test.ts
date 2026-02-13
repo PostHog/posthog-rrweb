@@ -7,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import snapshot, {
   _isBlockedElement,
   DEFAULT_MAX_DEPTH,
-  resetMaxDepthWarning,
+  resetMaxDepthState,
+  wasMaxDepthReached,
   serializeNodeWithId,
 } from '../src/snapshot';
 import { elementNode, serializedNodeWithId } from '../src/types';
@@ -385,7 +386,7 @@ describe('maxDepth', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    resetMaxDepthWarning();
+    resetMaxDepthState();
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
@@ -442,6 +443,7 @@ describe('maxDepth', () => {
     expect(sn).not.toBeNull();
     expect(countNodes(sn!)).toBe(5);
     expect(warnSpy).not.toHaveBeenCalled();
+    expect(wasMaxDepthReached()).toBe(false);
   });
 
   it('should truncate nodes beyond maxDepth', () => {
@@ -449,6 +451,7 @@ describe('maxDepth', () => {
     const sn = serializeWithMaxDepth(root, 5);
     expect(sn).not.toBeNull();
     expect(countNodes(sn!)).toBe(5);
+    expect(wasMaxDepthReached()).toBe(true);
   });
 
   it('should emit a console warning when maxDepth is exceeded', () => {
@@ -483,5 +486,13 @@ describe('maxDepth', () => {
     const sn = serializeNode(root);
     expect(sn).not.toBeNull();
     expect(countNodes(sn!)).toBe(5);
+  });
+
+  it('should reset wasMaxDepthReached after resetMaxDepthState', () => {
+    const root = buildNestedDOM(10);
+    serializeWithMaxDepth(root, 3);
+    expect(wasMaxDepthReached()).toBe(true);
+    resetMaxDepthState();
+    expect(wasMaxDepthReached()).toBe(false);
   });
 });

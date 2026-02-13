@@ -8,6 +8,8 @@ import snapshot, {
   classMatchesRegex,
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
+  resetMaxDepthState,
+  wasMaxDepthReached,
   genId,
 } from './snapshot';
 import rebuild, {
@@ -33,5 +35,7 @@ export {
   classMatchesRegex,
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
+  resetMaxDepthState,
+  wasMaxDepthReached,
   genId,
 };
