@@ -84,6 +84,7 @@ worker.onmessage = async function (e) {
     });
     lastBlobMap.set(id, base64);
   } else {
+    e.data.bitmap.close();
     return worker.postMessage({ id: e.data.id });
   }
 };
