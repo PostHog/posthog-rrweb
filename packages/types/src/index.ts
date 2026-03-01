@@ -492,10 +492,14 @@ export type canvasMutationParam =
       id: number;
       type: CanvasContext;
       commands: canvasMutationCommand[];
+      displayWidth?: number;
+      displayHeight?: number;
     }
   | ({
       id: number;
       type: CanvasContext;
+      displayWidth?: number;
+      displayHeight?: number;
     } & canvasMutationCommand);
 
 export type canvasMutationWithType = {
