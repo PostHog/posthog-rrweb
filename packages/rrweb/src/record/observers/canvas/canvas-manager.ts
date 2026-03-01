@@ -126,6 +126,10 @@ export class CanvasManager {
       dataURLOptions: DataURLOptions;
     },
   ) {
+    if (!('OffscreenCanvas' in win)) {
+      return;
+    }
+
     const canvasContextReset = initCanvasContextObserver(
       win,
       blockClass,
