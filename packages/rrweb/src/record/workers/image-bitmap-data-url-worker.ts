@@ -46,6 +46,9 @@ async function getTransparentBlobFor(
 // `as any` because: https://github.com/Microsoft/TypeScript/issues/20595
 const worker: ImageBitmapDataURLResponseWorker = self;
 
+let reusableCanvas: OffscreenCanvas | null = null;
+let reusableCtx: OffscreenCanvasRenderingContext2D | null = null;
+
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 worker.onmessage = async function (e) {
   if ('OffscreenCanvas' in globalThis) {
@@ -57,12 +60,19 @@ worker.onmessage = async function (e) {
       dataURLOptions,
     );
 
-    const offscreen = new OffscreenCanvas(width, height);
-    const ctx = offscreen.getContext('2d')!;
+    if (
+      !reusableCanvas ||
+      reusableCanvas.width !== width ||
+      reusableCanvas.height !== height
+    ) {
+      reusableCanvas = new OffscreenCanvas(width, height);
+      reusableCtx = reusableCanvas.getContext('2d')!;
+    }
 
-    ctx.drawImage(bitmap, 0, 0);
+    reusableCtx!.clearRect(0, 0, width, height);
+    reusableCtx!.drawImage(bitmap, 0, 0);
     bitmap.close();
-    const blob = await offscreen.convertToBlob(dataURLOptions); // takes a while
+    const blob = await reusableCanvas.convertToBlob(dataURLOptions); // takes a while
     const type = blob.type;
     const arrayBuffer = await blob.arrayBuffer();
     const base64 = encode(arrayBuffer); // cpu intensive
