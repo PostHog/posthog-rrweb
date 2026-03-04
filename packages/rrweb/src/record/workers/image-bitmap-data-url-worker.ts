@@ -5,8 +5,18 @@ import type {
   ImageBitmapDataURLWorkerResponse,
 } from '@posthog/rrweb-types';
 
-const lastBlobMap: Map<number, string> = new Map();
+const lastFingerprintMap: Map<number, string> = new Map();
 const transparentBlobMap: Map<string, string> = new Map();
+
+function fnv1aHash(buffer: ArrayBuffer): string {
+  const view = new Uint8Array(buffer);
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < view.length; i++) {
+    hash ^= view[i];
+    hash = (hash * 0x01000193) | 0;
+  }
+  return (hash >>> 0).toString(16);
+}
 
 export interface ImageBitmapDataURLRequestWorker {
   postMessage: (
@@ -75,24 +85,26 @@ worker.onmessage = async function (e) {
     const blob = await reusableCanvas.convertToBlob(dataURLOptions); // takes a while
     const type = blob.type;
     const arrayBuffer = await blob.arrayBuffer();
-    const base64 = encode(arrayBuffer); // cpu intensive
+    const fingerprint = fnv1aHash(arrayBuffer);
 
     // on first try we should check if canvas is transparent,
     // no need to save it's contents in that case
-    if (!lastBlobMap.has(id) && (await transparentBase64) === base64) {
-      lastBlobMap.set(id, base64);
-      return worker.postMessage({ id });
+    if (!lastFingerprintMap.has(id)) {
+      const base64 = encode(arrayBuffer);
+      if ((await transparentBase64) === base64) {
+        lastFingerprintMap.set(id, fingerprint);
+        return worker.postMessage({ id });
+      }
+      lastFingerprintMap.set(id, fingerprint);
+      worker.postMessage({ id, type, base64, width, height });
+      return;
     }
 
-    if (lastBlobMap.get(id) === base64) return worker.postMessage({ id }); // unchanged
-    worker.postMessage({
-      id,
-      type,
-      base64,
-      width,
-      height,
-    });
-    lastBlobMap.set(id, base64);
+    if (lastFingerprintMap.get(id) === fingerprint)
+      return worker.postMessage({ id }); // unchanged
+    const base64 = encode(arrayBuffer);
+    worker.postMessage({ id, type, base64, width, height });
+    lastFingerprintMap.set(id, fingerprint);
   } else {
     e.data.bitmap.close();
     return worker.postMessage({ id: e.data.id });
