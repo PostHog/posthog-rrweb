@@ -598,6 +598,47 @@ function initStyleSheetObserver(
     };
   }
 
+  // Queue for insertRule calls that arrive before the MutationObserver has
+  // added the ownerNode to the mirror (race condition with CSS-in-JS libraries
+  // like Emotion that call insertRule synchronously after creating <style>).
+  const pendingInsertRules = new Map<
+    Node,
+    Array<{ rule: string; index: number | undefined }>
+  >();
+  let pendingRetryTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function schedulePendingRetry() {
+    if (pendingRetryTimer !== null) return;
+    pendingRetryTimer = setTimeout(() => {
+      pendingRetryTimer = null;
+      flushPendingRules();
+    }, 0);
+  }
+
+  function flushPendingRules() {
+    pendingInsertRules.forEach((adds, ownerNode) => {
+      const id = mirror.getId(ownerNode);
+      if (id === -1) {
+        // Node never made it into the mirror (e.g. removed before MO fired)
+        return;
+      }
+      const meta = mirror.getMeta(ownerNode);
+      if (
+        meta &&
+        'attributes' in meta &&
+        (meta as { attributes?: { _cssText?: string } }).attributes?._cssText
+      ) {
+        // MutationObserver already serialized the full sheet as _cssText
+        return;
+      }
+      styleSheetRuleCb({
+        id,
+        adds: adds.map(({ rule, index }) => ({ rule, index })),
+      });
+    });
+    pendingInsertRules.clear();
+  }
+
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const insertRule = win.CSSStyleSheet.prototype.insertRule;
   win.CSSStyleSheet.prototype.insertRule = new Proxy(insertRule, {
@@ -621,6 +662,20 @@ function initStyleSheetObserver(
             styleId,
             adds: [{ rule, index }],
           });
+        } else if (
+          thisArg.ownerNode &&
+          (thisArg.ownerNode as Element).isConnected
+        ) {
+          // Node not yet in mirror but attached to DOM — queue for retry
+          // after MutationObserver has had a chance to process it.
+          const ownerNode = thisArg.ownerNode as Node;
+          let queued = pendingInsertRules.get(ownerNode);
+          if (!queued) {
+            queued = [];
+            pendingInsertRules.set(ownerNode, queued);
+          }
+          queued.push({ rule, index });
+          schedulePendingRetry();
         }
         return target.apply(thisArg, argumentsList);
       },
@@ -856,6 +911,11 @@ function initStyleSheetObserver(
       type.prototype.insertRule = unmodifiedFunctions[typeKey].insertRule;
       type.prototype.deleteRule = unmodifiedFunctions[typeKey].deleteRule;
     });
+    if (pendingRetryTimer !== null) {
+      clearTimeout(pendingRetryTimer);
+      pendingRetryTimer = null;
+    }
+    pendingInsertRules.clear();
   });
 }
 
