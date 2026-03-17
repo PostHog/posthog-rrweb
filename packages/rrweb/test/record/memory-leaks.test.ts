@@ -511,4 +511,159 @@ describe('memory leak prevention', () => {
       },
     );
   });
+
+  describe('iframe observer cleanup', () => {
+    it('should disconnect iframe observers when iframe is removed', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create and append an iframe
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Wait for iframe to be observed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Check that mutation buffers were created for the iframe
+      const buffersBeforeRemoval = mutationBuffers.length;
+      expect(buffersBeforeRemoval).toBeGreaterThan(1); // main document + iframe
+
+      // Remove the iframe
+      document.body.removeChild(iframe);
+
+      // Wait for cleanup to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Verify that the iframe's buffer was removed from the global array
+      const buffersAfterRemoval = mutationBuffers.length;
+      expect(buffersAfterRemoval).toBe(buffersBeforeRemoval - 1);
+
+      stopRecording?.();
+    });
+
+    it('should not remove observers when iframe is moved', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create containers and iframe
+      const container1 = document.createElement('div');
+      const container2 = document.createElement('div');
+      document.body.appendChild(container1);
+      document.body.appendChild(container2);
+
+      const iframe = document.createElement('iframe');
+      container1.appendChild(iframe);
+
+      // Wait for iframe to be observed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const buffersBeforeMove = mutationBuffers.length;
+      expect(buffersBeforeMove).toBeGreaterThan(1); // At least main doc + iframe
+
+      // Move the iframe (appears in both removes and adds)
+      // This should NOT trigger cleanup since the iframe ID appears in both removes and adds
+      container2.appendChild(iframe);
+
+      // Wait for mutation to be processed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Verify buffers were NOT removed (should stay the same or increase if re-observed,
+      // but not decrease which would indicate cleanup happened)
+      const buffersAfterMove = mutationBuffers.length;
+      expect(buffersAfterMove).toBeGreaterThanOrEqual(buffersBeforeMove);
+
+      // Cleanup
+      iframe.remove();
+      container1.remove();
+      container2.remove();
+      stopRecording?.();
+    });
+
+    it('should handle multiple iframes being removed', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create multiple iframes
+      const iframe1 = document.createElement('iframe');
+      const iframe2 = document.createElement('iframe');
+      const iframe3 = document.createElement('iframe');
+      document.body.appendChild(iframe1);
+      document.body.appendChild(iframe2);
+      document.body.appendChild(iframe3);
+
+      // Wait for all iframes to be observed
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const buffersWithIframes = mutationBuffers.length;
+      expect(buffersWithIframes).toBeGreaterThanOrEqual(4); // main + 3 iframes
+
+      // Remove iframe1
+      document.body.removeChild(iframe1);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(mutationBuffers.length).toBe(buffersWithIframes - 1);
+
+      // Remove iframe2
+      document.body.removeChild(iframe2);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(mutationBuffers.length).toBe(buffersWithIframes - 2);
+
+      // Remove iframe3
+      document.body.removeChild(iframe3);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(mutationBuffers.length).toBe(buffersWithIframes - 3);
+
+      stopRecording?.();
+    });
+
+    it('should cleanup observers via safety net when iframe becomes inaccessible', async () => {
+      const emit = (event: eventWithTime) => {
+        events.push(event);
+      };
+
+      const stopRecording = record({
+        emit,
+        recordCrossOriginIframes: true,
+      });
+
+      // Create an iframe
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      // Wait for iframe to be observed
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const buffersBeforeRemoval = mutationBuffers.length;
+      expect(buffersBeforeRemoval).toBeGreaterThan(1);
+
+      // Remove the iframe from DOM
+      document.body.removeChild(iframe);
+
+      // Wait for cleanup to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Verify that the buffer was removed (either by primary cleanup or safety net)
+      const buffersAfterRemoval = mutationBuffers.length;
+      expect(buffersAfterRemoval).toBeLessThan(buffersBeforeRemoval);
+
+      stopRecording?.();
+    });
+  });
 });

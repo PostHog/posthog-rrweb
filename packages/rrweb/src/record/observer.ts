@@ -81,7 +81,7 @@ function getEventTarget(event: Event | NonStandardEvent): EventTarget | null {
 export function initMutationObserver(
   options: MutationBufferParam,
   rootEl: Node,
-): MutationObserver {
+): { observer: MutationObserver; buffer: MutationBuffer } {
   const mutationBuffer = new MutationBuffer();
   mutationBuffers.push(mutationBuffer);
   // see mutation.ts for details
@@ -99,7 +99,7 @@ export function initMutationObserver(
     childList: true,
     subtree: true,
   });
-  return observer;
+  return { observer, buffer: mutationBuffer };
 }
 
 function initMoveObserver({
@@ -1311,8 +1311,11 @@ export function initObservers(
 
   mergeHooks(o, hooks);
   let mutationObserver: MutationObserver | undefined;
+  let mutationBuffer: MutationBuffer | undefined;
   if (o.recordDOM) {
-    mutationObserver = initMutationObserver(o, o.doc);
+    const result = initMutationObserver(o, o.doc);
+    mutationObserver = result.observer;
+    mutationBuffer = result.buffer;
   }
   const mousemoveHandler = initMoveObserver(o);
   const mouseInteractionHandler = initMouseInteractionObserver(o);
@@ -1353,8 +1356,16 @@ export function initObservers(
   }
 
   return callbackWrapper(() => {
-    mutationBuffers.forEach((b) => b.destroy());
-    mutationBuffers.forEach((b) => b.reset());
+    // Clean up this observer's mutation buffer
+    if (mutationBuffer) {
+      mutationBuffer.destroy();
+      mutationBuffer.reset();
+      // Remove only this buffer from the global array
+      const index = mutationBuffers.indexOf(mutationBuffer);
+      if (index !== -1) {
+        mutationBuffers.splice(index, 1);
+      }
+    }
     mutationObserver?.disconnect();
     mousemoveHandler();
     mouseInteractionHandler();
@@ -1369,9 +1380,6 @@ export function initObservers(
     selectionObserver();
     customElementObserver();
     pluginHandlers.forEach((h) => h());
-
-    // Clear the mutation buffers array to prevent memory leaks across recording sessions
-    mutationBuffers.length = 0;
   });
 }
 
