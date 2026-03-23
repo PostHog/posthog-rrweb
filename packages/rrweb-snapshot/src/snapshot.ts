@@ -911,9 +911,9 @@ function slimDOMExcluded(
             /^msapplication-tile(image|color)$/,
           ) ||
             lowerIfExists(sn.attributes.name) === 'application-name' ||
-            lowerIfExists(sn.attributes.rel) === 'icon' ||
-            lowerIfExists(sn.attributes.rel) === 'apple-touch-icon' ||
-            lowerIfExists(sn.attributes.rel) === 'shortcut icon')))
+            ['icon', 'apple-touch-icon', 'shortcut icon'].includes(
+              lowerIfExists(sn.attributes.rel),
+            ))))
     ) {
       return true;
     } else if (sn.tagName === 'meta') {
@@ -931,9 +931,9 @@ function slimDOMExcluded(
         return true;
       } else if (
         slimDOMOptions.headMetaRobots &&
-        (lowerIfExists(sn.attributes.name) === 'robots' ||
-          lowerIfExists(sn.attributes.name) === 'googlebot' ||
-          lowerIfExists(sn.attributes.name) === 'bingbot')
+        ['robots', 'googlebot', 'bingbot'].includes(
+          lowerIfExists(sn.attributes.name),
+        )
       ) {
         return true;
       } else if (
@@ -945,24 +945,24 @@ function slimDOMExcluded(
         return true;
       } else if (
         slimDOMOptions.headMetaAuthorship &&
-        (lowerIfExists(sn.attributes.name) === 'author' ||
-          lowerIfExists(sn.attributes.name) === 'generator' ||
-          lowerIfExists(sn.attributes.name) === 'framework' ||
-          lowerIfExists(sn.attributes.name) === 'publisher' ||
-          lowerIfExists(sn.attributes.name) === 'progid' ||
+        (['author', 'generator', 'framework', 'publisher', 'progid'].includes(
+          lowerIfExists(sn.attributes.name),
+        ) ||
           lowerIfExists(sn.attributes.property).match(/^article:/) ||
           lowerIfExists(sn.attributes.property).match(/^product:/))
       ) {
         return true;
       } else if (
         slimDOMOptions.headMetaVerification &&
-        (lowerIfExists(sn.attributes.name) === 'google-site-verification' ||
-          lowerIfExists(sn.attributes.name) === 'yandex-verification' ||
-          lowerIfExists(sn.attributes.name) === 'csrf-token' ||
-          lowerIfExists(sn.attributes.name) === 'p:domain_verify' ||
-          lowerIfExists(sn.attributes.name) === 'verify-v1' ||
-          lowerIfExists(sn.attributes.name) === 'verification' ||
-          lowerIfExists(sn.attributes.name) === 'shopify-checkout-api-token')
+        [
+          'google-site-verification',
+          'yandex-verification',
+          'csrf-token',
+          'p:domain_verify',
+          'verify-v1',
+          'verification',
+          'shopify-checkout-api-token',
+        ].includes(lowerIfExists(sn.attributes.name))
       ) {
         return true;
       }
@@ -1314,6 +1314,30 @@ export function serializeNodeWithId(
   return serializedNode;
 }
 
+export function slimDOMDefaults(
+  slimDOM: 'all' | boolean | SlimDOMOptions,
+): SlimDOMOptions {
+  if (slimDOM === true || slimDOM === 'all') {
+    return {
+      script: true,
+      comment: true,
+      headFavicon: true,
+      headWhitespace: true,
+      headMetaSocial: true,
+      headMetaRobots: true,
+      headMetaHttpEquiv: true,
+      headMetaVerification: true,
+      headMetaAuthorship: slimDOM === 'all',
+      headMetaDescKeywords: slimDOM === 'all',
+      headTitleMutations: slimDOM === 'all',
+    };
+  }
+  if (slimDOM === false) {
+    return {};
+  }
+  return slimDOM;
+}
+
 function snapshot(
   n: Document,
   options?: {
@@ -1394,24 +1418,7 @@ function snapshot(
           password: true,
         }
       : maskAllInputs;
-  const slimDOMOptions: SlimDOMOptions =
-    slimDOM === true || slimDOM === 'all'
-      ? // if true: set of sensible options that should not throw away any information
-        {
-          script: true,
-          comment: true,
-          headFavicon: true,
-          headWhitespace: true,
-          headMetaDescKeywords: slimDOM === 'all', // destructive
-          headMetaSocial: true,
-          headMetaRobots: true,
-          headMetaHttpEquiv: true,
-          headMetaAuthorship: true,
-          headMetaVerification: true,
-        }
-      : slimDOM === false
-      ? {}
-      : slimDOM;
+  const slimDOMOptions: SlimDOMOptions = slimDOMDefaults(slimDOM);
   return serializeNodeWithId(n, {
     doc: n,
     mirror,
