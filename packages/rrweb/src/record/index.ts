@@ -694,7 +694,7 @@ function record<T = eventWithTime>(
             msg.includes('from accessing a cross-origin frame') &&
             msg.includes('Blocked a frame with origin');
           if (!isCrossOriginFrameError) {
-            console.warn(error);
+            throw error;
           }
         }
       });
