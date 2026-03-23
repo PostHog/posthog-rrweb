@@ -685,7 +685,19 @@ function record<T = eventWithTime>(
       );
     }
     return () => {
-      handlers.forEach((h) => h());
+      handlers.forEach((h) => {
+        try {
+          h();
+        } catch (error) {
+          const msg = String(error);
+          const isCrossOriginFrameError =
+            msg.includes('from accessing a cross-origin frame') &&
+            msg.includes('Blocked a frame with origin');
+          if (!isCrossOriginFrameError) {
+            console.warn(error);
+          }
+        }
+      });
       processedNodeManager.destroy();
       iframeManager.removeLoadListener();
       iframeManager.destroy();
