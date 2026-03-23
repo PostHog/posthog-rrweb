@@ -685,7 +685,24 @@ function record<T = eventWithTime>(
       );
     }
     return () => {
-      handlers.forEach((h) => h());
+      handlers.forEach((h) => {
+        try {
+          h();
+        } catch (error) {
+          // https://github.com/rrweb-io/rrweb/pull/1695
+          // If an iframe is initially same-origin and observed, but later its
+          // location changes to a cross-origin URL (e.g. via document.location
+          // or a redirect), executing the handler will throw a
+          // "cannot access cross-origin frame" error.
+          const msg = String(error);
+          const isCrossOriginFrameError =
+            msg.includes('from accessing a cross-origin frame') &&
+            msg.includes('Blocked a frame with origin');
+          if (!isCrossOriginFrameError) {
+            throw error;
+          }
+        }
+      });
       processedNodeManager.destroy();
       iframeManager.removeLoadListener();
       iframeManager.destroy();
