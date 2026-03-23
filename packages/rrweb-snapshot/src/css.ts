@@ -30,7 +30,10 @@ const pseudoClassPlugin: AcceptedPlugin = {
         fixed.push(rule);
         rule.selectors.forEach(function (selector) {
           if (selector.includes(':hover')) {
-            rule.selector += ',\n' + selector.replace(/:hover/g, '.\\:hover');
+            const newSelector = selector.replace(/(?<!\\):hover/g, '.\\:hover');
+            if (newSelector !== selector) {
+              rule.selector += ',\n' + newSelector;
+            }
           }
         });
       },

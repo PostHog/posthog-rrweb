@@ -87,6 +87,19 @@ li[attr="weirdly("] a.\\:hover {background-color: red;}`);
 li[attr="weirder\\"("] a.\\:hover {background-color: red;}`);
     });
 
+    it('preserves escaped \\:hover in class names while transforming real :hover pseudo-class', () => {
+      const cssText = '.escaped\\:hover\\:classname:hover { color: red; }';
+      expect(parse(pseudoClassPlugin, cssText)).toEqual(
+        `.escaped\\:hover\\:classname:hover,
+.escaped\\:hover\\:classname.\\:hover { color: red; }`,
+      );
+    });
+
+    it('leaves selectors unchanged when they only contain escaped \\:hover', () => {
+      const cssText = '.escaped\\:hover\\:classname { color: white; }';
+      expect(parse(pseudoClassPlugin, cssText)).toEqual(cssText);
+    });
+
     it('ignores comma in string', () => {
       const cssText = 'li[attr="has,comma"] a:hover {background: red;}';
       expect(parse(pseudoClassPlugin, cssText)).toEqual(
