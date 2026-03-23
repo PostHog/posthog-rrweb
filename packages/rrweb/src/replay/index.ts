@@ -2030,7 +2030,7 @@ export class Replayer {
         if (Array.isArray(nestedIndex)) {
           const { positions, index } = getPositionsAndIndex(nestedIndex);
           const nestedRule = getNestedRule(styleSheet.cssRules, positions);
-          nestedRule.insertRule(rule, index);
+          nestedRule?.insertRule(rule, index);
         } else {
           const index =
             nestedIndex === undefined
@@ -2055,7 +2055,7 @@ export class Replayer {
         if (Array.isArray(nestedIndex)) {
           const { positions, index } = getPositionsAndIndex(nestedIndex);
           const nestedRule = getNestedRule(styleSheet.cssRules, positions);
-          nestedRule.deleteRule(index || 0);
+          nestedRule?.deleteRule(index || 0);
         } else {
           styleSheet?.deleteRule(nestedIndex);
         }
