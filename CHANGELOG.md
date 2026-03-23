@@ -1,3 +1,8 @@
+## 0.0.48 - 2026-03-23
+
+- add release instruction on readme (#144)
+- fix: apply tailwind hover css (#143)
+
 ## 0.0.47 - 2026-03-17
 
 - fix iframe observer leak (#142)
