@@ -41,7 +41,7 @@ jobs:
         run: PUPPETEER_HEADLESS=true xvfb-run --server-args="-screen 0 1920x1080x24" pnpm test
 
       - name: Check bundle sizes
-        uses: preactjs/compressed-size-action@v2
+        uses: preactjs/compressed-size-action@946a292cd35bd1088e0d7eb92b69d1a8d5b5d76a # v2
         with:
          install-script: "pnpm install --frozen-lockfile"
          build-script: "build:all"
