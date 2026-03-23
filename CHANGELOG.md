@@ -1,3 +1,8 @@
+## 0.0.49 - 2026-03-23
+
+- fix: handle cross-origin iframe errors during stop handler cleanup (#145)
+- ci: pin pnpm/action-setup to full commit SHA (#146)
+
 ## 0.0.48 - 2026-03-23
 
 - add release instruction on readme (#144)
