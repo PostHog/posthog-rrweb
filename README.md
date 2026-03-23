@@ -27,6 +27,10 @@ then you need to open a person fork and contribute from there
 4. `pnpm test` to run the tests
 5. `pnpm test:update` to update snapshots if necessary
 
+### Releasing
+
+Add a `bump patch`, `bump minor`, or `bump major` label to your PR **before merging**. The version bump and npm publish are automated on merge.
+
 # FAQ
 
 - does this mean you're planning on stopping using RRWEB?
