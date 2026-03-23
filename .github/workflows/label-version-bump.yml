@@ -99,14 +99,23 @@ jobs:
             # needs to be able to bypass the branch protection
             - name: Commit bump
               if: steps.bump-type.outputs.bump-type != 'null'
-              uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
+              uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
               with:
-                  message: "chore: Bump version to ${{ env.NEW_VERSION }}"
-                  github_token: ${{ steps.app-token.outputs.token }}
-                  commit: --no-verify
-                  push: --no-verify
-                  tag: ${{ env.NEW_VERSION }}
-                  tag_push: --no-verify
+                commit_message: "chore: Bump version to ${{ env.NEW_VERSION }}"
+                repo: ${{ github.repository }}
+                branch: ${{ github.event.pull_request.base.ref }}
               env:
-                NEW_VERSION: ${{ env.NEW_VERSION }}
+                GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+            - name: Create version tag
+              if: steps.bump-type.outputs.bump-type != 'null'
+              env:
+                GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                BRANCH: ${{ github.event.pull_request.base.ref }}
+              run: |
+                SHA=$(gh api "repos/${{ github.repository }}/git/ref/heads/$BRANCH" --jq '.object.sha')
+                gh api "repos/${{ github.repository }}/git/refs" \
+                  --method POST \
+                  -f ref="refs/tags/${{ env.NEW_VERSION }}" \
+                  -f sha="$SHA"
 
