@@ -1,3 +1,12 @@
+## 0.0.50 - 2026-03-24
+
+- fix: prevent object reference mutation breaking remote CSS replay (#154)
+- fix: allow clearing adopted stylesheets with empty strings (#153)
+- fix: improve nested CSS rule handling (#152)
+- refactor: extract slimDOMDefaults into shared function (#151)
+- fix: guard WebGLRenderingContext access for iOS compatibility (#150)
+- fix: mask textarea innerText mutations (#148)
+
 ## 0.0.49 - 2026-03-23
 
 - fix: handle cross-origin iframe errors during stop handler cleanup (#145)
