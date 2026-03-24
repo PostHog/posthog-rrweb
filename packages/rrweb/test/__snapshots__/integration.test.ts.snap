@@ -9700,6 +9700,24 @@ exports[`record integration tests > should not record input values if dynamicall
   {
     \\"type\\": 3,
     \\"data\\": {
+      \\"source\\": 5,
+      \\"text\\": \\"**********************************************\\",
+      \\"isChecked\\": false,
+      \\"id\\": 22
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
+      \\"source\\": 5,
+      \\"text\\": \\"*************************************************\\",
+      \\"isChecked\\": false,
+      \\"id\\": 21
+    }
+  },
+  {
+    \\"type\\": 3,
+    \\"data\\": {
       \\"source\\": 0,
       \\"texts\\": [],
       \\"attributes\\": [
@@ -9735,24 +9753,6 @@ exports[`record integration tests > should not record input values if dynamicall
       ],
       \\"removes\\": [],
       \\"adds\\": []
-    }
-  },
-  {
-    \\"type\\": 3,
-    \\"data\\": {
-      \\"source\\": 5,
-      \\"text\\": \\"**********************************************\\",
-      \\"isChecked\\": false,
-      \\"id\\": 22
-    }
-  },
-  {
-    \\"type\\": 3,
-    \\"data\\": {
-      \\"source\\": 5,
-      \\"text\\": \\"*************************************************\\",
-      \\"isChecked\\": false,
-      \\"id\\": 21
     }
   }
 ]"

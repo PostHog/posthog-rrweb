@@ -660,6 +660,8 @@ describe('record integration tests', function (this: ISuite) {
       ta.value = 'textarea attribute mutation should also be masked';
     });
 
+    await waitForRAF(page);
+
     await page.evaluate(() => {
       const el = document.querySelector('input');
       el.setAttribute(
