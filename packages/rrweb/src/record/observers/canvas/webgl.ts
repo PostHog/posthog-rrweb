@@ -98,17 +98,19 @@ export default function initCanvasWebGLMutationObserver(
 ): listenerHandler {
   const handlers: listenerHandler[] = [];
 
-  handlers.push(
-    ...patchGLPrototype(
-      win.WebGLRenderingContext.prototype,
-      CanvasContext.WebGL,
-      cb,
-      blockClass,
-      blockSelector,
-      win,
-      dataURLOptions,
-    ),
-  );
+  if (typeof win.WebGLRenderingContext !== 'undefined') {
+    handlers.push(
+      ...patchGLPrototype(
+        win.WebGLRenderingContext.prototype,
+        CanvasContext.WebGL,
+        cb,
+        blockClass,
+        blockSelector,
+        win,
+        dataURLOptions,
+      ),
+    );
+  }
 
   if (typeof win.WebGL2RenderingContext !== 'undefined') {
     handlers.push(
