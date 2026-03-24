@@ -427,15 +427,15 @@ export function hasShadowRoot<T extends Node | RRNode>(
 export function getNestedRule(
   rules: CSSRuleList,
   position: number[],
-): CSSGroupingRule {
-  const rule = rules[position[0]] as CSSGroupingRule;
+): CSSGroupingRule | null {
+  const rule = rules?.[position[0]] as CSSGroupingRule | null;
+  if (!rule) {
+    return null;
+  }
   if (position.length === 1) {
     return rule;
   } else {
-    return getNestedRule(
-      (rule.cssRules[position[1]] as CSSGroupingRule).cssRules,
-      position.slice(2),
-    );
+    return getNestedRule(rule.cssRules, position.slice(1));
   }
 }
 
