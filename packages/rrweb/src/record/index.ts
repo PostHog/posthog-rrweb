@@ -669,16 +669,12 @@ function record<T = eventWithTime>(
         try {
           h();
         } catch (error) {
-          // https://github.com/rrweb-io/rrweb/pull/1695
-          // If an iframe is initially same-origin and observed, but later its
-          // location changes to a cross-origin URL (e.g. via document.location
-          // or a redirect), executing the handler will throw a
-          // "cannot access cross-origin frame" error.
-          const msg = String(error);
-          const isCrossOriginFrameError =
-            msg.includes('from accessing a cross-origin frame') &&
-            msg.includes('Blocked a frame with origin');
-          if (!isCrossOriginFrameError) {
+          if (error instanceof DOMException && error.name === 'SecurityError') {
+            // https://github.com/rrweb-io/rrweb/pull/1695
+            // If an iframe is initially same-origin and observed, but later its
+            // location changes to a cross-origin URL (e.g. via document.location
+            // or a redirect), executing the handler will throw a SecurityError.
+          } else {
             throw error;
           }
         }
