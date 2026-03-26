@@ -1,3 +1,7 @@
+## 0.0.51 - 2026-03-26
+
+- fix: catch all SecurityError variants in stop handler cleanup (#156)
+
 ## 0.0.50 - 2026-03-24
 
 - fix: prevent object reference mutation breaking remote CSS replay (#154)
