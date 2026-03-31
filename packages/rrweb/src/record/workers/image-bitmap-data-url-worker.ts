@@ -64,47 +64,52 @@ worker.onmessage = async function (e) {
   if ('OffscreenCanvas' in globalThis) {
     const { id, bitmap, width, height, dataURLOptions } = e.data;
 
-    const transparentBase64 = getTransparentBlobFor(
-      width,
-      height,
-      dataURLOptions,
-    );
+    try {
+      const transparentBase64 = getTransparentBlobFor(
+        width,
+        height,
+        dataURLOptions,
+      );
 
-    if (
-      !reusableCanvas ||
-      reusableCanvas.width !== width ||
-      reusableCanvas.height !== height
-    ) {
-      reusableCanvas = new OffscreenCanvas(width, height);
-      reusableCtx = reusableCanvas.getContext('2d')!;
-    }
-
-    reusableCtx!.clearRect(0, 0, width, height);
-    reusableCtx!.drawImage(bitmap, 0, 0);
-    bitmap.close();
-    const blob = await reusableCanvas.convertToBlob(dataURLOptions); // takes a while
-    const type = blob.type;
-    const arrayBuffer = await blob.arrayBuffer();
-    const fingerprint = fnv1aHash(arrayBuffer);
-
-    // on first try we should check if canvas is transparent,
-    // no need to save it's contents in that case
-    if (!lastFingerprintMap.has(id)) {
-      const base64 = encode(arrayBuffer);
-      if ((await transparentBase64) === base64) {
-        lastFingerprintMap.set(id, fingerprint);
-        return worker.postMessage({ id });
+      if (
+        !reusableCanvas ||
+        reusableCanvas.width !== width ||
+        reusableCanvas.height !== height
+      ) {
+        reusableCanvas = new OffscreenCanvas(width, height);
+        reusableCtx = reusableCanvas.getContext('2d')!;
       }
-      lastFingerprintMap.set(id, fingerprint);
-      worker.postMessage({ id, type, base64, width, height });
-      return;
-    }
 
-    if (lastFingerprintMap.get(id) === fingerprint)
-      return worker.postMessage({ id }); // unchanged
-    const base64 = encode(arrayBuffer);
-    worker.postMessage({ id, type, base64, width, height });
-    lastFingerprintMap.set(id, fingerprint);
+      reusableCtx!.clearRect(0, 0, width, height);
+      reusableCtx!.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      const blob = await reusableCanvas.convertToBlob(dataURLOptions); // takes a while
+      const type = blob.type;
+      const arrayBuffer = await blob.arrayBuffer();
+      const fingerprint = fnv1aHash(arrayBuffer);
+
+      // on first try we should check if canvas is transparent,
+      // no need to save it's contents in that case
+      if (!lastFingerprintMap.has(id)) {
+        const base64 = encode(arrayBuffer);
+        if ((await transparentBase64) === base64) {
+          lastFingerprintMap.set(id, fingerprint);
+          return worker.postMessage({ id });
+        }
+        lastFingerprintMap.set(id, fingerprint);
+        worker.postMessage({ id, type, base64, width, height });
+        return;
+      }
+
+      if (lastFingerprintMap.get(id) === fingerprint)
+        return worker.postMessage({ id }); // unchanged
+      const base64 = encode(arrayBuffer);
+      worker.postMessage({ id, type, base64, width, height });
+      lastFingerprintMap.set(id, fingerprint);
+    } catch {
+      // Always respond so the main thread clears snapshotInProgressMap
+      worker.postMessage({ id });
+    }
   } else {
     e.data.bitmap.close();
     return worker.postMessage({ id: e.data.id });
