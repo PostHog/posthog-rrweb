@@ -67,7 +67,6 @@ export class ShadowDomManager {
     this.restoreHandlers.push(() => {
       observer.disconnect();
       buffer.destroy();
-      buffer.reset();
       const index = mutationBuffers.indexOf(buffer);
       if (index !== -1) {
         mutationBuffers.splice(index, 1);
