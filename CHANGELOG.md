@@ -1,3 +1,7 @@
+## 0.0.52 - 2026-04-01
+
+- fix(rrweb): recover from errors in canvas FPS snapshot pipeline (#160)
+
 ## 0.0.51 - 2026-03-26
 
 - fix: catch all SecurityError variants in stop handler cleanup (#156)
