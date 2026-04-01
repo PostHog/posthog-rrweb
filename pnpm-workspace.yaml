@@ -1,3 +1,13 @@
 packages:
   - packages/*
   - packages/plugins/*
+
+# Supply chain security: reject any package version published less than 7 days ago
+# 10080 minutes = 7 days
+minimumReleaseAge: 10080
+
+# Block exotic (non-registry) sub-dependencies
+blockExoticSubdeps: true
+
+# Ensure no package downgrades sneak in
+trustPolicy: no-downgrade
