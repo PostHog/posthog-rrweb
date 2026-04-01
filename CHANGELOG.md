@@ -1,3 +1,8 @@
+## 0.0.53 - 2026-04-01
+
+- fix(rrweb): break infinite recursion between ShadowDomManager and MutationBuffer reset (#162)
+- chore: enforce 7-day minimum release age for supply chain security (#161)
+
 ## 0.0.52 - 2026-04-01
 
 - fix(rrweb): recover from errors in canvas FPS snapshot pipeline (#160)

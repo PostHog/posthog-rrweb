@@ -1,6 +1,6 @@
 {
     "name": "@posthog/rrweb",
-    "version": "0.0.52",
+    "version": "0.0.53",
     "description": "record and replay the web",
     "scripts": {
         "prepare": "npm run prepack",
