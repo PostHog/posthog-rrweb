@@ -1,3 +1,12 @@
+## 0.0.54 - 2026-04-02
+
+- fix: handle SecurityError in IframeManager destroy and removeIframeById (#163)
+- fix: remove postcss from rrweb-record bundle (#164)
+- Sign commits during release (#149)
+- fix: clear mutation buffer on iframe pagehide to prevent recording corruption (#157)
+- fix: skip unchanged setAttribute calls to prevent replay flicker (#158)
+- fix: prevent iframe leak in untainted prototype and avoid unnecessary iframe creation (#159)
+
 ## 0.0.53 - 2026-04-01
 
 - fix(rrweb): break infinite recursion between ShadowDomManager and MutationBuffer reset (#162)
