@@ -13,6 +13,7 @@ const baseConfig = config(
 export default defineConfig((configEnv) =>
   mergeConfig(baseConfig(configEnv), {
     build: {
+      emptyOutDir: false,
       rollupOptions: {
         external: [/@posthog\//],
       },
