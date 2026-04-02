@@ -29,6 +29,22 @@ export function on(
   return () => target.removeEventListener(type, fn, options);
 }
 
+// https://github.com/rrweb-io/rrweb/pull/1695
+// If an iframe is initially same-origin and observed, but later its
+// location changes to a cross-origin URL (e.g. via document.location
+// or a redirect), accessing properties on its contentWindow throws a
+// SecurityError. This applies to cleanup calls like removeEventListener
+// as well as the handler callbacks returned by `on()` above.
+export function callSafely(fn: () => void): void {
+  try {
+    fn();
+  } catch (error) {
+    if (!(error instanceof DOMException && error.name === 'SecurityError')) {
+      throw error;
+    }
+  }
+}
+
 // https://github.com/rrweb-io/rrweb/pull/407
 const DEPARTED_MIRROR_ACCESS_WARNING =
   'Please stop import mirror directly. Instead of that,' +
