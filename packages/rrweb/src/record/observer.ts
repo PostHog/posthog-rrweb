@@ -4,7 +4,7 @@ import {
   Mirror,
   getInputType,
   toLowerCase,
-} from '@posthog/rrweb-snapshot';
+} from '@posthog/rrweb-snapshot/record';
 import type { FontFaceSet } from 'css-font-loading-module';
 import {
   throttle,

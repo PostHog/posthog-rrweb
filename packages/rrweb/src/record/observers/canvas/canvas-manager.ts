@@ -1,4 +1,4 @@
-import type { ICanvas, Mirror } from '@posthog/rrweb-snapshot';
+import type { ICanvas, Mirror } from '@posthog/rrweb-snapshot/record';
 import type {
   blockClass,
   canvasManagerMutationCallback,

@@ -1,12 +1,21 @@
 import config from '../../vite.config.default';
+import { defineConfig, mergeConfig } from 'vite';
 
-export default config(
+const baseConfig = config(
   {
-    // rrweb: 'src/index.ts',
     'rrweb-record': 'src/entries/record.ts',
     'rrweb-replay': 'src/entries/replay.ts',
   },
   'rrweb',
-  // { outputDir: 'dist/alt' },
   { outputDir: 'dist' },
+);
+
+export default defineConfig((configEnv) =>
+  mergeConfig(baseConfig(configEnv), {
+    build: {
+      rollupOptions: {
+        external: [/@posthog\//],
+      },
+    },
+  }),
 );
