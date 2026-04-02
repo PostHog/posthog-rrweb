@@ -1,5 +1,5 @@
-import type { Mirror } from '@posthog/rrweb-snapshot';
-import { genId } from '@posthog/rrweb-snapshot';
+import type { Mirror } from '@posthog/rrweb-snapshot/record';
+import { genId } from '@posthog/rrweb-snapshot/record';
 import type { CrossOriginIframeMessageEvent } from '../types';
 import CrossOriginIframeMirror from './cross-origin-iframe-mirror';
 import { EventType, NodeType, IncrementalSource } from '@posthog/rrweb-types';

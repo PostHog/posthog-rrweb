@@ -1,4 +1,4 @@
-import { stringifyRule } from '@posthog/rrweb-snapshot';
+import { stringifyRule } from '@posthog/rrweb-snapshot/record';
 import type {
   elementNode,
   serializedNodeWithId,

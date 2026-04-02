@@ -90,7 +90,7 @@ export default defineConfig({
   plugins: [
     dts({
       insertTypesEntry: true,
-      rollupTypes: true,
+      rollupTypes: false,
       afterBuild: (emittedFiles) => {
         const files = Array.from(emittedFiles.keys());
         files.forEach((file) => {
