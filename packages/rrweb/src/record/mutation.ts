@@ -10,7 +10,7 @@ import {
   isNativeShadowDom,
   getInputType,
   toLowerCase,
-} from '@posthog/rrweb-snapshot/record';
+} from '@posthog/rrweb-snapshot';
 import type { observerParam, MutationBufferParam } from '../types';
 import type {
   mutationRecord,

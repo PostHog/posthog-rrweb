@@ -20,7 +20,7 @@ export {
 export {
   wasMaxDepthReached,
   resetMaxDepthState,
-} from '@posthog/rrweb-snapshot/record';
+} from '@posthog/rrweb-snapshot';
 
 // exports style.css from replay
 import './replay/styles/style.css';
