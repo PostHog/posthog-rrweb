@@ -7,6 +7,7 @@ import {
 import { initObservers, mutationBuffers } from './observer';
 import {
   on,
+  callSafely,
   getWindowWidth,
   getWindowHeight,
   getWindowScroll,
@@ -665,20 +666,7 @@ function record<T = eventWithTime>(
       );
     }
     return () => {
-      handlers.forEach((h) => {
-        try {
-          h();
-        } catch (error) {
-          if (error instanceof DOMException && error.name === 'SecurityError') {
-            // https://github.com/rrweb-io/rrweb/pull/1695
-            // If an iframe is initially same-origin and observed, but later its
-            // location changes to a cross-origin URL (e.g. via document.location
-            // or a redirect), executing the handler will throw a SecurityError.
-          } else {
-            throw error;
-          }
-        }
-      });
+      handlers.forEach((h) => callSafely(h));
       processedNodeManager.destroy();
       iframeManager.removeLoadListener();
       iframeManager.destroy();

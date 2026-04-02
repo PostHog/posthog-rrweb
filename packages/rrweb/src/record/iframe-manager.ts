@@ -1,6 +1,7 @@
 import type { Mirror } from '@posthog/rrweb-snapshot';
 import { genId } from '@posthog/rrweb-snapshot';
 import type { CrossOriginIframeMessageEvent } from '../types';
+import { callSafely } from '../utils';
 import CrossOriginIframeMirror from './cross-origin-iframe-mirror';
 import { EventType, NodeType, IncrementalSource } from '@posthog/rrweb-types';
 import type {
@@ -350,15 +351,7 @@ export class IframeManager {
       // Clean up nested iframe listeners if they exist
       if (win && this.nestedIframeListeners.has(win)) {
         const handler = this.nestedIframeListeners.get(win)!;
-        try {
-          win.removeEventListener('message', handler);
-        } catch (error) {
-          if (
-            !(error instanceof DOMException && error.name === 'SecurityError')
-          ) {
-            throw error;
-          }
-        }
+        callSafely(() => win.removeEventListener('message', handler));
         this.nestedIframeListeners.delete(win);
       }
 
@@ -407,15 +400,7 @@ export class IframeManager {
 
     // Clean up nested iframe listeners
     this.nestedIframeListeners.forEach((handler, contentWindow) => {
-      try {
-        contentWindow.removeEventListener('message', handler);
-      } catch (error) {
-        if (
-          !(error instanceof DOMException && error.name === 'SecurityError')
-        ) {
-          throw error;
-        }
-      }
+      callSafely(() => contentWindow.removeEventListener('message', handler));
     });
     this.nestedIframeListeners.clear();
 
