@@ -350,7 +350,15 @@ export class IframeManager {
       // Clean up nested iframe listeners if they exist
       if (win && this.nestedIframeListeners.has(win)) {
         const handler = this.nestedIframeListeners.get(win)!;
-        win.removeEventListener('message', handler);
+        try {
+          win.removeEventListener('message', handler);
+        } catch (error) {
+          if (
+            !(error instanceof DOMException && error.name === 'SecurityError')
+          ) {
+            throw error;
+          }
+        }
         this.nestedIframeListeners.delete(win);
       }
 
@@ -399,7 +407,15 @@ export class IframeManager {
 
     // Clean up nested iframe listeners
     this.nestedIframeListeners.forEach((handler, contentWindow) => {
-      contentWindow.removeEventListener('message', handler);
+      try {
+        contentWindow.removeEventListener('message', handler);
+      } catch (error) {
+        if (
+          !(error instanceof DOMException && error.name === 'SecurityError')
+        ) {
+          throw error;
+        }
+      }
     });
     this.nestedIframeListeners.clear();
 

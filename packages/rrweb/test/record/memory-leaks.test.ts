@@ -512,6 +512,119 @@ describe('memory leak prevention', () => {
     );
   });
 
+  describe('IframeManager cross-origin SecurityError handling', () => {
+    function createIframeManager() {
+      const mirror = createMirror();
+      const iframeManager = new IframeManager({
+        mirror,
+        mutationCb: vi.fn(),
+        stylesheetManager: {
+          styleMirror: { generateId: vi.fn(() => 1) },
+          adoptStyleSheets: vi.fn(),
+        } as any,
+        recordCrossOriginIframes: true,
+        wrappedEmit: vi.fn(),
+      });
+      return { iframeManager, mirror };
+    }
+
+    function makeCrossOriginWindow(): Window {
+      const handler: ProxyHandler<any> = {
+        get(_target, prop) {
+          if (prop === 'removeEventListener') {
+            const err = new DOMException(
+              "Failed to read a named property 'removeEventListener' from 'Window': Blocked a frame with origin",
+              'SecurityError',
+            );
+            throw err;
+          }
+          return undefined;
+        },
+      };
+      return new Proxy({}, handler) as unknown as Window;
+    }
+
+    it.each([
+      { method: 'destroy' as const },
+      { method: 'removeIframeById' as const },
+    ])(
+      '$method should not throw when contentWindow.removeEventListener throws SecurityError',
+      ({ method }) => {
+        const { iframeManager, mirror } = createIframeManager();
+        const manager = iframeManager as any;
+        const crossOriginWin = makeCrossOriginWindow();
+
+        manager.nestedIframeListeners.set(crossOriginWin, vi.fn());
+
+        if (method === 'destroy') {
+          expect(() => iframeManager.destroy()).not.toThrow();
+        } else {
+          const iframe = document.createElement('iframe');
+          document.body.appendChild(iframe);
+          const iframeId = 42;
+          mirror.add(iframe, {
+            type: 2,
+            tagName: 'iframe',
+            attributes: {},
+            childNodes: [],
+            id: iframeId,
+          });
+          Object.defineProperty(iframe, 'contentWindow', {
+            get: () => crossOriginWin,
+          });
+          manager.nestedIframeListeners.set(crossOriginWin, vi.fn());
+          expect(() => iframeManager.removeIframeById(iframeId)).not.toThrow();
+          document.body.removeChild(iframe);
+        }
+      },
+    );
+
+    it.each([
+      { method: 'destroy' as const },
+      { method: 'removeIframeById' as const },
+    ])(
+      '$method should still throw non-SecurityError exceptions',
+      ({ method }) => {
+        const { iframeManager, mirror } = createIframeManager();
+        const manager = iframeManager as any;
+
+        const badWin = new Proxy({} as any, {
+          get(_target, prop) {
+            if (prop === 'removeEventListener') {
+              throw new TypeError('some other error');
+            }
+            return undefined;
+          },
+        }) as unknown as Window;
+
+        manager.nestedIframeListeners.set(badWin, vi.fn());
+
+        if (method === 'destroy') {
+          expect(() => iframeManager.destroy()).toThrow(TypeError);
+        } else {
+          const iframe = document.createElement('iframe');
+          document.body.appendChild(iframe);
+          const iframeId = 43;
+          mirror.add(iframe, {
+            type: 2,
+            tagName: 'iframe',
+            attributes: {},
+            childNodes: [],
+            id: iframeId,
+          });
+          Object.defineProperty(iframe, 'contentWindow', {
+            get: () => badWin,
+          });
+          manager.nestedIframeListeners.set(badWin, vi.fn());
+          expect(() => iframeManager.removeIframeById(iframeId)).toThrow(
+            TypeError,
+          );
+          document.body.removeChild(iframe);
+        }
+      },
+    );
+  });
+
   describe('iframe observer cleanup', () => {
     it('should disconnect iframe observers when iframe is removed', async () => {
       const emit = (event: eventWithTime) => {
