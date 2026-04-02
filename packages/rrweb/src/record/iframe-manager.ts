@@ -23,6 +23,7 @@ export class IframeManager {
   private mutationCb: mutationCallBack;
   private wrappedEmit: (e: eventWithoutTime, isCheckout?: boolean) => void;
   private loadListener?: (iframeEl: HTMLIFrameElement) => unknown;
+  private pageHideListener?: (iframeEl: HTMLIFrameElement) => unknown;
   private stylesheetManager: StylesheetManager;
   private recordCrossOriginIframes: boolean;
   private messageHandler: (message: MessageEvent) => void;
@@ -65,6 +66,10 @@ export class IframeManager {
 
   public addLoadListener(cb: (iframeEl: HTMLIFrameElement) => unknown) {
     this.loadListener = cb;
+  }
+
+  public addPageHideListener(cb: (iframeEl: HTMLIFrameElement) => unknown) {
+    this.pageHideListener = cb;
   }
 
   public removeLoadListener() {
@@ -110,6 +115,12 @@ export class IframeManager {
       this.nestedIframeListeners.set(win, nestedHandler);
       win.addEventListener('message', nestedHandler);
     }
+
+    iframeEl.contentWindow?.addEventListener('pagehide', () => {
+      this.pageHideListener?.(iframeEl);
+      this.mirror.removeNodeFromMap(iframeEl.contentDocument!);
+      this.crossOriginIframeMap.delete(iframeEl.contentWindow!);
+    });
 
     this.loadListener?.(iframeEl);
 

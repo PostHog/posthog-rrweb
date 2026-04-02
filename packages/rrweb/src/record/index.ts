@@ -4,7 +4,11 @@ import {
   slimDOMDefaults,
   createMirror,
 } from '@posthog/rrweb-snapshot';
-import { initObservers, mutationBuffers } from './observer';
+import {
+  initObservers,
+  mutationBuffers,
+  findAndRemoveIframeBuffer,
+} from './observer';
 import {
   on,
   getWindowWidth,
@@ -632,6 +636,16 @@ function record<T = eventWithTime>(
       }
     };
     iframeManager.addLoadListener(loadListener);
+
+    iframeManager.addPageHideListener((iframeEl) => {
+      const iframeId = mirror.getId(iframeEl);
+      const cleanup = iframeObserverCleanups.get(iframeId);
+      if (cleanup) {
+        cleanup();
+        iframeObserverCleanups.delete(iframeId);
+      }
+      findAndRemoveIframeBuffer(iframeEl);
+    });
 
     const init = () => {
       takeFullSnapshot();
