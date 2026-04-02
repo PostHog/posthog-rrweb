@@ -6,11 +6,9 @@ import snapshot, {
   cleanupSnapshot,
   needMaskingText,
   classMatchesRegex,
-  slimDOMDefaults,
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
   wasMaxDepthReached,
-  resetMaxDepthState,
   genId,
 } from './snapshot';
 export * from './types';
@@ -25,10 +23,8 @@ export {
   cleanupSnapshot,
   needMaskingText,
   classMatchesRegex,
-  slimDOMDefaults,
   IGNORED_NODE,
   DEFAULT_MAX_DEPTH,
   wasMaxDepthReached,
-  resetMaxDepthState,
   genId,
 };

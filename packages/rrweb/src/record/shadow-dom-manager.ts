@@ -11,8 +11,8 @@ import {
   mutationBuffers,
 } from './observer';
 import { inDom } from '../utils';
-import type { Mirror } from '@posthog/rrweb-snapshot/record';
-import { isNativeShadowDom } from '@posthog/rrweb-snapshot/record';
+import type { Mirror } from '@posthog/rrweb-snapshot';
+import { isNativeShadowDom } from '@posthog/rrweb-snapshot';
 import dom, { patch } from '@posthog/rrweb-utils';
 
 type BypassOptions = Omit<

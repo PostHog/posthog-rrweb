@@ -3,7 +3,7 @@ import {
   type MaskInputOptions,
   slimDOMDefaults,
   createMirror,
-} from '@posthog/rrweb-snapshot/record';
+} from '@posthog/rrweb-snapshot';
 import {
   initObservers,
   mutationBuffers,
