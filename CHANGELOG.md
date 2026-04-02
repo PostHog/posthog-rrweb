@@ -1,3 +1,7 @@
+## 0.0.55 - 2026-04-02
+
+- revert "fix: remove postcss from rrweb-record bundle" (#165)
+
 ## 0.0.54 - 2026-04-02
 
 - fix: handle SecurityError in IframeManager destroy and removeIframeById (#163)
