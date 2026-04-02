@@ -50,7 +50,7 @@ jobs:
          build-script: "build:all"
          compression: "none"
          pattern: "**/dist/*.{js,cjs,mjs,css}"
-         strip-hash: "-[A-Za-z0-9_]{8}\\."
+         strip-hash: "-[A-Za-z0-9_]{8}(?=\\.)"
 
       - name: Upload diff images to GitHub
         uses: actions/upload-artifact@v4
