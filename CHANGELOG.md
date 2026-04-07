@@ -1,3 +1,7 @@
+## 0.0.56 - 2026-04-07
+
+- fix: remove postcss from @posthog/rrweb-record bundle (#166)
+
 ## 0.0.55 - 2026-04-02
 
 - revert "fix: remove postcss from rrweb-record bundle" (#165)
