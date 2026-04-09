@@ -119,8 +119,12 @@ export class IframeManager {
 
     iframeEl.contentWindow?.addEventListener('pagehide', () => {
       this.pageHideListener?.(iframeEl);
-      this.mirror.removeNodeFromMap(iframeEl.contentDocument!);
-      this.crossOriginIframeMap.delete(iframeEl.contentWindow!);
+      if (iframeEl.contentDocument) {
+        this.mirror.removeNodeFromMap(iframeEl.contentDocument);
+      }
+      if (iframeEl.contentWindow) {
+        this.crossOriginIframeMap.delete(iframeEl.contentWindow);
+      }
     });
 
     this.loadListener?.(iframeEl);
