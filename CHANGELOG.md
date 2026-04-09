@@ -1,3 +1,7 @@
+## 0.0.57 - 2026-04-09
+
+- fix(record): null check on pagehide (#167)
+
 ## 0.0.56 - 2026-04-07
 
 - fix: remove postcss from @posthog/rrweb-record bundle (#166)
