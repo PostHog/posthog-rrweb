@@ -642,4 +642,50 @@ ul li.specified c.\\:hover img {
       expect(doc.childNodes[1]?.childNodes[1]?.nodeName).toBe('BODY');
     });
   });
+
+  describe('custom element registration', function () {
+    function buildCustomElement(tagName: string) {
+      return buildNodeWithSN(
+        {
+          id: 1,
+          tagName,
+          type: NodeType.Element,
+          attributes: {},
+          childNodes: [],
+          isCustom: true,
+        },
+        {
+          doc: document,
+          mirror,
+          hackCss: false,
+          cache,
+        },
+      );
+    }
+
+    it.each([
+      ['webview'],
+      ['font-face'],
+      ['annotation-xml'],
+      ['missing-glyph'],
+      ['nohyphen'],
+    ])('does not throw and does not register when tagName is %p', (tagName) => {
+      expect(() => buildCustomElement(tagName)).not.toThrow();
+      expect(window.customElements.get(tagName)).toBeUndefined();
+    });
+
+    it('creates a plain element for invalid custom element names', () => {
+      const node = buildCustomElement('webview') as HTMLElement;
+      expect(node).toBeInstanceOf(window.HTMLElement);
+      expect(node.tagName.toLowerCase()).toBe('webview');
+    });
+
+    it('registers a valid custom element name exactly once', () => {
+      const firstNode = buildCustomElement('my-widget-one') as HTMLElement;
+      const secondNode = buildCustomElement('my-widget-one') as HTMLElement;
+      expect(firstNode).toBeInstanceOf(window.HTMLElement);
+      expect(secondNode).toBeInstanceOf(window.HTMLElement);
+      expect(window.customElements.get('my-widget-one')).toBeDefined();
+    });
+  });
 });

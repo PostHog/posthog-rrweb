@@ -89,6 +89,25 @@ export function createCache(): BuildCache {
   };
 }
 
+const reservedCustomElementNames = new Set([
+  'annotation-xml',
+  'color-profile',
+  'font-face',
+  'font-face-src',
+  'font-face-uri',
+  'font-face-format',
+  'font-face-name',
+  'missing-glyph',
+]);
+
+const validCustomElementName = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
+
+function isValidCustomElementName(name: string): boolean {
+  if (typeof name !== 'string' || name.length === 0) return false;
+  if (reservedCustomElementNames.has(name)) return false;
+  return validCustomElementName.test(name);
+}
+
 function safeDocNode(
   n: textNode,
   options: {
@@ -141,13 +160,17 @@ function buildNode(
           n.isCustom &&
           // If the browser supports custom elements
           doc.defaultView?.customElements &&
+          isValidCustomElementName(n.tagName) &&
           // If the custom element hasn't been defined yet
           !doc.defaultView.customElements.get(n.tagName)
-        )
-          doc.defaultView.customElements.define(
-            n.tagName,
-            class extends doc.defaultView.HTMLElement {},
-          );
+        ) {
+          try {
+            doc.defaultView.customElements.define(
+              n.tagName,
+              class extends doc.defaultView.HTMLElement {},
+            );
+          } catch {}
+        }
         node = doc.createElement(tagName);
       }
       /**
