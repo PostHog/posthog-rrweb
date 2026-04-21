@@ -669,14 +669,20 @@ ul li.specified c.\\:hover img {
       ['annotation-xml'],
       ['missing-glyph'],
       ['nohyphen'],
-    ])('does not throw and does not register when tagName is %p', (tagName) => {
-      expect(() => buildCustomElement(tagName)).not.toThrow();
-      expect(window.customElements.get(tagName)).toBeUndefined();
-    });
+    ])(
+      'does not throw, returns a usable HTMLElement, and does not register when tagName is %p',
+      (tagName) => {
+        let node: Node | null | undefined;
+        expect(() => {
+          node = buildCustomElement(tagName);
+        }).not.toThrow();
+        expect(node).toBeInstanceOf(window.HTMLElement);
+        expect(window.customElements.get(tagName)).toBeUndefined();
+      },
+    );
 
-    it('creates a plain element for invalid custom element names', () => {
+    it('keeps the original tagName for invalid custom element names', () => {
       const node = buildCustomElement('webview') as HTMLElement;
-      expect(node).toBeInstanceOf(window.HTMLElement);
       expect(node.tagName.toLowerCase()).toBe('webview');
     });
 

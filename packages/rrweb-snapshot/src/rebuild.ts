@@ -100,13 +100,15 @@ const reservedCustomElementNames = new Set([
   'missing-glyph',
 ]);
 
-const validCustomElementName = /^[a-z][a-z0-9._-]*-[a-z0-9._-]*$/;
-
-function isValidCustomElementName(name: string): boolean {
+function isPlausibleCustomElementName(name: string): boolean {
   if (typeof name !== 'string' || name.length === 0) return false;
   if (reservedCustomElementNames.has(name)) return false;
-  return validCustomElementName.test(name);
+  if (!name.includes('-')) return false;
+  const first = name.charCodeAt(0);
+  return first >= 0x61 && first <= 0x7a;
 }
+
+const warnedCustomElementNames = new Set<string>();
 
 function safeDocNode(
   n: textNode,
@@ -160,7 +162,7 @@ function buildNode(
           n.isCustom &&
           // If the browser supports custom elements
           doc.defaultView?.customElements &&
-          isValidCustomElementName(n.tagName) &&
+          isPlausibleCustomElementName(n.tagName) &&
           // If the custom element hasn't been defined yet
           !doc.defaultView.customElements.get(n.tagName)
         ) {
@@ -169,7 +171,16 @@ function buildNode(
               n.tagName,
               class extends doc.defaultView.HTMLElement {},
             );
-          } catch {}
+          } catch (error) {
+            if (!warnedCustomElementNames.has(n.tagName)) {
+              warnedCustomElementNames.add(n.tagName);
+              console.warn(
+                'rrweb: failed to register custom element',
+                n.tagName,
+                error,
+              );
+            }
+          }
         }
         node = doc.createElement(tagName);
       }
