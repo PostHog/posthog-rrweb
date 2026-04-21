@@ -1,6 +1,6 @@
 {
     "name": "@posthog/rrweb-types",
-    "version": "0.0.57",
+    "version": "0.0.58",
     "scripts": {
         "dev": "vite build --watch",
         "build": "pnpm turbo run prepublish",

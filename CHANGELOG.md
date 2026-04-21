@@ -1,3 +1,8 @@
+## 0.0.58 - 2026-04-21
+
+- chore: release 0.0.58 (#170)
+- fix: guard rrweb rebuild against invalid custom element names (#168)
+
 ## 0.0.57 - 2026-04-09
 
 - fix(record): null check on pagehide (#167)
