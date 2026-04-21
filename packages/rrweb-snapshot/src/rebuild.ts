@@ -501,7 +501,15 @@ export function buildNodeWithSN(
         // this should maybe be fixed in the recorder, but for now we
         // can fix it on playback since it will throw otherwise
         // DocumentType nodes must be inserted before the root element
-        // If there's already a root element, insert before it
+        // If there's already a root element, insert before it.
+        // A document is only allowed one DocumentType child, so if one
+        // already exists (e.g. the initial doctype on an iframe document
+        // in Firefox, or one injected by the BackCompat `doc.write` path
+        // above) we must remove it first to avoid a HierarchyRequestError.
+        const existingDoctype = (node as Document).doctype;
+        if (existingDoctype) {
+          node.removeChild(existingDoctype);
+        }
         if (node.firstChild && node.firstChild.nodeType === 1) {
           // 1 = Element node type
           node.insertBefore(childNode, node.firstChild);
