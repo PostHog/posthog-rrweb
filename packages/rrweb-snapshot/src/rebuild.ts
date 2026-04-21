@@ -89,6 +89,27 @@ export function createCache(): BuildCache {
   };
 }
 
+const reservedCustomElementNames = new Set([
+  'annotation-xml',
+  'color-profile',
+  'font-face',
+  'font-face-src',
+  'font-face-uri',
+  'font-face-format',
+  'font-face-name',
+  'missing-glyph',
+]);
+
+function isPlausibleCustomElementName(name: string): boolean {
+  if (typeof name !== 'string' || name.length === 0) return false;
+  if (reservedCustomElementNames.has(name)) return false;
+  if (!name.includes('-')) return false;
+  const first = name.charCodeAt(0);
+  return first >= 0x61 && first <= 0x7a;
+}
+
+const warnedCustomElementNames = new Set<string>();
+
 function safeDocNode(
   n: textNode,
   options: {
@@ -141,13 +162,26 @@ function buildNode(
           n.isCustom &&
           // If the browser supports custom elements
           doc.defaultView?.customElements &&
+          isPlausibleCustomElementName(n.tagName) &&
           // If the custom element hasn't been defined yet
           !doc.defaultView.customElements.get(n.tagName)
-        )
-          doc.defaultView.customElements.define(
-            n.tagName,
-            class extends doc.defaultView.HTMLElement {},
-          );
+        ) {
+          try {
+            doc.defaultView.customElements.define(
+              n.tagName,
+              class extends doc.defaultView.HTMLElement {},
+            );
+          } catch (error) {
+            if (!warnedCustomElementNames.has(n.tagName)) {
+              warnedCustomElementNames.add(n.tagName);
+              console.warn(
+                'rrweb: failed to register custom element',
+                n.tagName,
+                error,
+              );
+            }
+          }
+        }
         node = doc.createElement(tagName);
       }
       /**
