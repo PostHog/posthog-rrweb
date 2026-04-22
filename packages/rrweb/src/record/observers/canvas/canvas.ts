@@ -14,8 +14,8 @@ type GPUCanvasConfigurationLike = {
 };
 
 type WebGPUCanvasContextLike = {
+  canvas?: unknown;
   configure?: (configuration: GPUCanvasConfigurationLike) => void;
-  __rrwebWebGPUConfigurePatched?: boolean;
 };
 
 function getNormalizedContextName(contextType: string) {
@@ -39,40 +39,76 @@ function getRequiredWebGPUTextureUsage() {
   return textureUsage.COPY_SRC | textureUsage.RENDER_ATTACHMENT;
 }
 
-function patchWebGPUConfigureForSnapshotting(context: unknown) {
-  if (!context || typeof context !== 'object') {
-    return;
+function getCanvasFromWebGPUContext(
+  context: WebGPUCanvasContextLike,
+): ICanvas | HTMLCanvasElement | null {
+  const { canvas } = context;
+
+  if (!canvas || typeof canvas !== 'object' || !('nodeType' in canvas)) {
+    return null;
   }
 
-  const webgpuContext = context as WebGPUCanvasContextLike;
-  if (
-    webgpuContext.__rrwebWebGPUConfigurePatched ||
-    typeof webgpuContext.configure !== 'function'
-  ) {
-    return;
-  }
+  return canvas as ICanvas | HTMLCanvasElement;
+}
 
-  const originalConfigure = webgpuContext.configure;
-  webgpuContext.configure = function (
-    this: WebGPUCanvasContextLike,
-    configuration: GPUCanvasConfigurationLike,
-  ) {
-    const requiredUsage = getRequiredWebGPUTextureUsage();
-    if (requiredUsage === null || !configuration) {
-      return originalConfigure.call(this, configuration);
+function initCanvasWebGPUContextObserver(
+  win: IWindow,
+  blockClass: blockClass,
+  blockSelector: string | null,
+): listenerHandler | undefined {
+  const GPUCanvasContext = (
+    win as IWindow & {
+      GPUCanvasContext?: {
+        prototype?: WebGPUCanvasContextLike;
+      };
     }
+  ).GPUCanvasContext;
 
-    return originalConfigure.call(this, {
-      ...configuration,
-      // WebGPU does not implicitly keep RENDER_ATTACHMENT when usage is set,
-      // so include both flags needed for drawing and snapshot reads.
-      usage:
-        typeof configuration.usage === 'number'
-          ? configuration.usage | requiredUsage
-          : requiredUsage,
-    });
-  };
-  webgpuContext.__rrwebWebGPUConfigurePatched = true;
+  if (
+    !GPUCanvasContext?.prototype ||
+    typeof GPUCanvasContext.prototype.configure !== 'function'
+  ) {
+    return;
+  }
+
+  return patch(
+    GPUCanvasContext.prototype,
+    'configure',
+    function (
+      original: (
+        this: WebGPUCanvasContextLike,
+        configuration: GPUCanvasConfigurationLike,
+      ) => void,
+    ) {
+      return function (
+        this: WebGPUCanvasContextLike,
+        configuration: GPUCanvasConfigurationLike,
+      ) {
+        const canvas = getCanvasFromWebGPUContext(this);
+
+        if (!canvas || isBlocked(canvas, blockClass, blockSelector, true)) {
+          return original.call(this, configuration);
+        }
+
+        if (!('__context' in canvas)) (canvas as ICanvas).__context = 'webgpu';
+
+        const requiredUsage = getRequiredWebGPUTextureUsage();
+        if (requiredUsage === null || !configuration) {
+          return original.call(this, configuration);
+        }
+
+        return original.call(this, {
+          ...configuration,
+          // WebGPU does not implicitly keep RENDER_ATTACHMENT when usage is set,
+          // so include both flags needed for drawing and snapshot reads.
+          usage:
+            typeof configuration.usage === 'number'
+              ? configuration.usage | requiredUsage
+              : requiredUsage,
+        });
+      };
+    },
+  );
 }
 
 export default function initCanvasContextObserver(
@@ -83,6 +119,17 @@ export default function initCanvasContextObserver(
 ): listenerHandler {
   const handlers: listenerHandler[] = [];
   try {
+    if (setPreserveDrawingBufferToTrue) {
+      const restoreWebGPUConfigureHandler = initCanvasWebGPUContextObserver(
+        win,
+        blockClass,
+        blockSelector,
+      );
+      if (restoreWebGPUConfigureHandler) {
+        handlers.push(restoreWebGPUConfigureHandler);
+      }
+    }
+
     const restoreHandler = patch(
       win.HTMLCanvasElement.prototype,
       'getContext',
@@ -119,17 +166,7 @@ export default function initCanvasContextObserver(
             }
           }
 
-          const context = original.apply(this, [contextType, ...args]);
-
-          if (
-            !isBlocked(this, blockClass, blockSelector, true) &&
-            setPreserveDrawingBufferToTrue &&
-            ctxName === 'webgpu'
-          ) {
-            patchWebGPUConfigureForSnapshotting(context);
-          }
-
-          return context;
+          return original.apply(this, [contextType, ...args]);
         };
       },
     );

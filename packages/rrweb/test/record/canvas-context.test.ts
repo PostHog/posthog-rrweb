@@ -5,6 +5,8 @@ class FakeCanvasElement {
   public nodeType = 1;
   public ELEMENT_NODE = 1;
   public classList = { contains: () => false };
+  public __lastWebGPUConfigure?: { usage?: number };
+  public __webgpuContext?: FakeGPUCanvasContext;
 
   closest() {
     return null;
@@ -14,8 +16,24 @@ class FakeCanvasElement {
     return false;
   }
 
-  getContext(_contextType: string, ..._args: unknown[]) {
+  getContext(contextType: string, ..._args: unknown[]) {
+    if (contextType === 'webgpu') {
+      if (!this.__webgpuContext) {
+        this.__webgpuContext = new FakeGPUCanvasContext(this);
+      }
+
+      return this.__webgpuContext as unknown as RenderingContext;
+    }
+
     return null;
+  }
+}
+
+class FakeGPUCanvasContext {
+  constructor(public canvas: FakeCanvasElement) {}
+
+  configure(configuration: { usage?: number }) {
+    this.canvas.__lastWebGPUConfigure = configuration;
   }
 }
 
@@ -61,21 +79,11 @@ describe('initCanvasContextObserver', () => {
   });
 
   it('adds the snapshot-safe usage flags when webgpu contexts are configured', () => {
-    const configure = vi.fn();
-    const fakeWebGPUContext = { configure };
     const win = {
       HTMLCanvasElement: FakeCanvasElement,
+      GPUCanvasContext: FakeGPUCanvasContext,
     };
-
-    const getContextSpy = vi
-      .spyOn(FakeCanvasElement.prototype, 'getContext')
-      .mockImplementation(((contextType: string) => {
-        if (contextType === 'webgpu') {
-          return fakeWebGPUContext as unknown as RenderingContext;
-        }
-
-        return null;
-      }) as HTMLCanvasElement['getContext']);
+    const getContextSpy = vi.spyOn(FakeCanvasElement.prototype, 'getContext');
 
     const restore = initCanvasContextObserver(
       win as unknown as Parameters<typeof initCanvasContextObserver>[0],
@@ -85,7 +93,7 @@ describe('initCanvasContextObserver', () => {
     );
 
     const canvas = new FakeCanvasElement();
-    const context = canvas.getContext('webgpu') as typeof fakeWebGPUContext;
+    const context = canvas.getContext('webgpu') as FakeGPUCanvasContext;
     const textureUsage = (
       globalThis as typeof globalThis & {
         GPUTextureUsage?: {
@@ -104,7 +112,48 @@ describe('initCanvasContextObserver', () => {
       (canvas as FakeCanvasElement & { __context?: string }).__context,
     ).toBe('webgpu');
     expect(getContextSpy).toHaveBeenCalledWith('webgpu');
-    expect(configure).toHaveBeenCalledWith({
+    expect(canvas.__lastWebGPUConfigure).toEqual({
+      usage:
+        textureUsage.TEXTURE_BINDING |
+        textureUsage.COPY_SRC |
+        textureUsage.RENDER_ATTACHMENT,
+    });
+
+    restore();
+  });
+
+  it('patches webgpu contexts created before the observer starts', () => {
+    const win = {
+      HTMLCanvasElement: FakeCanvasElement,
+      GPUCanvasContext: FakeGPUCanvasContext,
+    };
+    const canvas = new FakeCanvasElement();
+    const context = canvas.getContext('webgpu') as FakeGPUCanvasContext;
+    const textureUsage = (
+      globalThis as typeof globalThis & {
+        GPUTextureUsage?: {
+          COPY_SRC: number;
+          RENDER_ATTACHMENT: number;
+          TEXTURE_BINDING: number;
+        };
+      }
+    ).GPUTextureUsage!;
+
+    const restore = initCanvasContextObserver(
+      win as unknown as Parameters<typeof initCanvasContextObserver>[0],
+      'rr-block',
+      null,
+      true,
+    );
+
+    context.configure({
+      usage: textureUsage.TEXTURE_BINDING,
+    });
+
+    expect(
+      (canvas as FakeCanvasElement & { __context?: string }).__context,
+    ).toBe('webgpu');
+    expect(canvas.__lastWebGPUConfigure).toEqual({
       usage:
         textureUsage.TEXTURE_BINDING |
         textureUsage.COPY_SRC |
