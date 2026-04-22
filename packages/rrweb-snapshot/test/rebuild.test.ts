@@ -641,6 +641,71 @@ ul li.specified c.\\:hover img {
       expect(doc.childNodes[1]?.childNodes[0]?.nodeName).toBe('HEAD');
       expect(doc.childNodes[1]?.childNodes[1]?.nodeName).toBe('BODY');
     });
+
+    it('should not throw HierarchyRequestError when target document already has a DocumentType', function () {
+      // Simulates the Firefox iframe scenario (and the BackCompat `doc.write`
+      // path in rebuild.ts) where the target document already carries a
+      // DocumentType before the serialized snapshot is rebuilt. Appending a
+      // second DocumentType would otherwise throw:
+      //   HierarchyRequestError: Node.appendChild: Cannot have more than one
+      //   DocumentType child of a Document
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      const targetDoc = iframe.contentDocument!;
+      targetDoc.open();
+      targetDoc.write(
+        '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "">',
+      );
+      targetDoc.close();
+      // Sanity check: the target document starts with a pre-existing doctype.
+      expect(targetDoc.doctype).not.toBeNull();
+      expect(targetDoc.doctype?.publicId).toBe(
+        '-//W3C//DTD HTML 4.0 Transitional//EN',
+      );
+
+      expect(() =>
+        buildNodeWithSN(
+          {
+            id: 1,
+            type: NodeType.Document,
+            childNodes: [
+              {
+                id: 2,
+                type: NodeType.DocumentType,
+                name: 'html',
+                publicId: '-//W3C//DTD HTML 4.01//EN',
+                systemId: 'http://www.w3.org/TR/html4/strict.dtd',
+              },
+              {
+                id: 3,
+                tagName: 'html',
+                type: NodeType.Element,
+                attributes: {},
+                childNodes: [],
+              },
+            ],
+          },
+          {
+            doc: targetDoc,
+            mirror,
+            hackCss: false,
+            cache,
+          },
+        ),
+      ).not.toThrow();
+
+      // The serialized doctype should have replaced the pre-existing one,
+      // and the document should still contain exactly one DocumentType child.
+      const doctypes = Array.from(targetDoc.childNodes).filter(
+        (child) => child.nodeType === Node.DOCUMENT_TYPE_NODE,
+      );
+      expect(doctypes).toHaveLength(1);
+      expect((doctypes[0] as DocumentType).publicId).toBe(
+        '-//W3C//DTD HTML 4.01//EN',
+      );
+
+      document.body.removeChild(iframe);
+    });
   });
 
   describe('custom element registration', function () {
