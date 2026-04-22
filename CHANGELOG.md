@@ -1,3 +1,7 @@
+## 0.0.59 - 2026-04-22
+
+- fix(rebuild): tolerate existing doctype to avoid HierarchyRequestError (#169)
+
 ## 0.0.58 - 2026-04-21
 
 - chore: release 0.0.58 (#170)
