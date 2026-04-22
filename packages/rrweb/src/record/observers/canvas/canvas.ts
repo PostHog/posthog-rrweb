@@ -7,8 +7,72 @@ import type {
 import { isBlocked } from '../../../utils';
 import { patch } from '@posthog/rrweb-utils';
 
+const WEBGL_CONTEXT_NAMES = ['webgl', 'webgl2'];
+
+type GPUCanvasConfigurationLike = {
+  usage?: number;
+};
+
+type WebGPUCanvasContextLike = {
+  configure?: (configuration: GPUCanvasConfigurationLike) => void;
+  __rrwebWebGPUConfigurePatched?: boolean;
+};
+
 function getNormalizedContextName(contextType: string) {
   return contextType === 'experimental-webgl' ? 'webgl' : contextType;
+}
+
+function getRequiredWebGPUTextureUsage() {
+  const textureUsage = (
+    globalThis as typeof globalThis & {
+      GPUTextureUsage?: {
+        COPY_SRC: number;
+        RENDER_ATTACHMENT: number;
+      };
+    }
+  ).GPUTextureUsage;
+
+  if (!textureUsage) {
+    return null;
+  }
+
+  return textureUsage.COPY_SRC | textureUsage.RENDER_ATTACHMENT;
+}
+
+function patchWebGPUConfigureForSnapshotting(context: unknown) {
+  if (!context || typeof context !== 'object') {
+    return;
+  }
+
+  const webgpuContext = context as WebGPUCanvasContextLike;
+  if (
+    webgpuContext.__rrwebWebGPUConfigurePatched ||
+    typeof webgpuContext.configure !== 'function'
+  ) {
+    return;
+  }
+
+  const originalConfigure = webgpuContext.configure;
+  webgpuContext.configure = function (
+    this: WebGPUCanvasContextLike,
+    configuration: GPUCanvasConfigurationLike,
+  ) {
+    const requiredUsage = getRequiredWebGPUTextureUsage();
+    if (requiredUsage === null || !configuration) {
+      return originalConfigure.call(this, configuration);
+    }
+
+    return originalConfigure.call(this, {
+      ...configuration,
+      // WebGPU does not implicitly keep RENDER_ATTACHMENT when usage is set,
+      // so include both flags needed for drawing and snapshot reads.
+      usage:
+        typeof configuration.usage === 'number'
+          ? configuration.usage | requiredUsage
+          : requiredUsage,
+    });
+  };
+  webgpuContext.__rrwebWebGPUConfigurePatched = true;
 }
 
 export default function initCanvasContextObserver(
@@ -34,13 +98,13 @@ export default function initCanvasContextObserver(
           contextType: string,
           ...args: Array<unknown>
         ) {
+          const ctxName = getNormalizedContextName(contextType);
           if (!isBlocked(this, blockClass, blockSelector, true)) {
-            const ctxName = getNormalizedContextName(contextType);
             if (!('__context' in this)) (this as ICanvas).__context = ctxName;
 
             if (
               setPreserveDrawingBufferToTrue &&
-              ['webgl', 'webgl2'].includes(ctxName)
+              WEBGL_CONTEXT_NAMES.includes(ctxName)
             ) {
               if (args[0] && typeof args[0] === 'object') {
                 const contextAttributes = args[0] as WebGLContextAttributes;
@@ -54,7 +118,18 @@ export default function initCanvasContextObserver(
               }
             }
           }
-          return original.apply(this, [contextType, ...args]);
+
+          const context = original.apply(this, [contextType, ...args]);
+
+          if (
+            !isBlocked(this, blockClass, blockSelector, true) &&
+            setPreserveDrawingBufferToTrue &&
+            ctxName === 'webgpu'
+          ) {
+            patchWebGPUConfigureForSnapshotting(context);
+          }
+
+          return context;
         };
       },
     );
