@@ -7,8 +7,125 @@ import type {
 import { isBlocked } from '../../../utils';
 import { patch } from '@posthog/rrweb-utils';
 
+const WEBGL_CONTEXT_NAMES = ['webgl', 'webgl2'];
+
+type GPUCanvasConfigurationLike = {
+  usage?: number;
+};
+
+type GPUTextureUsageLike = {
+  COPY_SRC: number;
+  RENDER_ATTACHMENT: number;
+};
+
+type WebGPUCanvasLike = {
+  nodeType?: number;
+  __context?: string;
+};
+
+type WebGPUCanvasContextLike = {
+  canvas?: unknown;
+  configure?: (configuration: GPUCanvasConfigurationLike) => void;
+};
+
 function getNormalizedContextName(contextType: string) {
   return contextType === 'experimental-webgl' ? 'webgl' : contextType;
+}
+
+function getRequiredWebGPUTextureUsage(win: IWindow) {
+  const textureUsage = (
+    win as IWindow & { GPUTextureUsage?: GPUTextureUsageLike }
+  ).GPUTextureUsage;
+
+  if (!textureUsage) {
+    return null;
+  }
+
+  return textureUsage.COPY_SRC | textureUsage.RENDER_ATTACHMENT;
+}
+
+function getCanvasFromWebGPUContext(
+  context: WebGPUCanvasContextLike,
+): WebGPUCanvasLike | null {
+  const { canvas } = context;
+
+  if (!canvas || typeof canvas !== 'object') {
+    return null;
+  }
+
+  return canvas as WebGPUCanvasLike;
+}
+
+function isCanvasNode(
+  canvas: WebGPUCanvasLike,
+): canvas is ICanvas | HTMLCanvasElement {
+  return 'nodeType' in canvas;
+}
+
+function initCanvasWebGPUContextObserver(
+  win: IWindow,
+  blockClass: blockClass,
+  blockSelector: string | null,
+): listenerHandler | undefined {
+  const GPUCanvasContext = (
+    win as IWindow & {
+      GPUCanvasContext?: {
+        prototype?: WebGPUCanvasContextLike;
+      };
+    }
+  ).GPUCanvasContext;
+
+  if (
+    !GPUCanvasContext?.prototype ||
+    typeof GPUCanvasContext.prototype.configure !== 'function'
+  ) {
+    return;
+  }
+
+  return patch(
+    GPUCanvasContext.prototype,
+    'configure',
+    function (
+      original: (
+        this: WebGPUCanvasContextLike,
+        configuration: GPUCanvasConfigurationLike,
+      ) => void,
+    ) {
+      return function (
+        this: WebGPUCanvasContextLike,
+        configuration: GPUCanvasConfigurationLike,
+      ) {
+        const canvas = getCanvasFromWebGPUContext(this);
+
+        if (
+          !canvas ||
+          (isCanvasNode(canvas) &&
+            isBlocked(canvas, blockClass, blockSelector, true))
+        ) {
+          return original.call(this, configuration);
+        }
+
+        if (isCanvasNode(canvas) && !('__context' in canvas)) {
+          (canvas as ICanvas).__context = 'webgpu';
+        }
+
+        const requiredUsage = getRequiredWebGPUTextureUsage(win);
+        if (requiredUsage === null || !configuration) {
+          return original.call(this, configuration);
+        }
+
+        return original.call(this, {
+          ...configuration,
+          // WebGPU does not implicitly keep RENDER_ATTACHMENT when usage is set,
+          // so include both flags needed for drawing and snapshot reads.
+          usage:
+            typeof configuration.usage === 'number'
+              ? configuration.usage | requiredUsage
+              : requiredUsage,
+        });
+      };
+    },
+  );
 }
 
 export default function initCanvasContextObserver(
@@ -19,6 +136,17 @@ export default function initCanvasContextObserver(
 ): listenerHandler {
   const handlers: listenerHandler[] = [];
   try {
+    if (setPreserveDrawingBufferToTrue) {
+      const restoreWebGPUConfigureHandler = initCanvasWebGPUContextObserver(
+        win,
+        blockClass,
+        blockSelector,
+      );
+      if (restoreWebGPUConfigureHandler) {
+        handlers.push(restoreWebGPUConfigureHandler);
+      }
+    }
+
     const restoreHandler = patch(
       win.HTMLCanvasElement.prototype,
       'getContext',
@@ -34,13 +162,13 @@ export default function initCanvasContextObserver(
           contextType: string,
           ...args: Array<unknown>
         ) {
+          const ctxName = getNormalizedContextName(contextType);
           if (!isBlocked(this, blockClass, blockSelector, true)) {
-            const ctxName = getNormalizedContextName(contextType);
             if (!('__context' in this)) (this as ICanvas).__context = ctxName;
 
             if (
               setPreserveDrawingBufferToTrue &&
-              ['webgl', 'webgl2'].includes(ctxName)
+              WEBGL_CONTEXT_NAMES.includes(ctxName)
             ) {
               if (args[0] && typeof args[0] === 'object') {
                 const contextAttributes = args[0] as WebGLContextAttributes;
@@ -54,6 +182,7 @@ export default function initCanvasContextObserver(
               }
             }
           }
+
           return original.apply(this, [contextType, ...args]);
         };
       },
