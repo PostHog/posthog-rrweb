@@ -13,6 +13,16 @@ type GPUCanvasConfigurationLike = {
   usage?: number;
 };
 
+type GPUTextureUsageLike = {
+  COPY_SRC: number;
+  RENDER_ATTACHMENT: number;
+};
+
+type WebGPUCanvasLike = {
+  nodeType?: number;
+  __context?: string;
+};
+
 type WebGPUCanvasContextLike = {
   canvas?: unknown;
   configure?: (configuration: GPUCanvasConfigurationLike) => void;
@@ -22,14 +32,9 @@ function getNormalizedContextName(contextType: string) {
   return contextType === 'experimental-webgl' ? 'webgl' : contextType;
 }
 
-function getRequiredWebGPUTextureUsage() {
+function getRequiredWebGPUTextureUsage(win: IWindow) {
   const textureUsage = (
-    globalThis as typeof globalThis & {
-      GPUTextureUsage?: {
-        COPY_SRC: number;
-        RENDER_ATTACHMENT: number;
-      };
-    }
+    win as IWindow & { GPUTextureUsage?: GPUTextureUsageLike }
   ).GPUTextureUsage;
 
   if (!textureUsage) {
@@ -41,14 +46,20 @@ function getRequiredWebGPUTextureUsage() {
 
 function getCanvasFromWebGPUContext(
   context: WebGPUCanvasContextLike,
-): ICanvas | HTMLCanvasElement | null {
+): WebGPUCanvasLike | null {
   const { canvas } = context;
 
-  if (!canvas || typeof canvas !== 'object' || !('nodeType' in canvas)) {
+  if (!canvas || typeof canvas !== 'object') {
     return null;
   }
 
-  return canvas as ICanvas | HTMLCanvasElement;
+  return canvas as WebGPUCanvasLike;
+}
+
+function isCanvasNode(
+  canvas: WebGPUCanvasLike,
+): canvas is ICanvas | HTMLCanvasElement {
+  return 'nodeType' in canvas;
 }
 
 function initCanvasWebGPUContextObserver(
@@ -86,13 +97,19 @@ function initCanvasWebGPUContextObserver(
       ) {
         const canvas = getCanvasFromWebGPUContext(this);
 
-        if (!canvas || isBlocked(canvas, blockClass, blockSelector, true)) {
+        if (
+          !canvas ||
+          (isCanvasNode(canvas) &&
+            isBlocked(canvas, blockClass, blockSelector, true))
+        ) {
           return original.call(this, configuration);
         }
 
-        if (!('__context' in canvas)) (canvas as ICanvas).__context = 'webgpu';
+        if (isCanvasNode(canvas) && !('__context' in canvas)) {
+          (canvas as ICanvas).__context = 'webgpu';
+        }
 
-        const requiredUsage = getRequiredWebGPUTextureUsage();
+        const requiredUsage = getRequiredWebGPUTextureUsage(win);
         if (requiredUsage === null || !configuration) {
           return original.call(this, configuration);
         }

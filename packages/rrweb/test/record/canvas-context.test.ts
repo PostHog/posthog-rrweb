@@ -29,13 +29,27 @@ class FakeCanvasElement {
   }
 }
 
+class FakeOffscreenCanvas {
+  public __lastWebGPUConfigure?: { usage?: number };
+}
+
 class FakeGPUCanvasContext {
-  constructor(public canvas: FakeCanvasElement) {}
+  constructor(public canvas: FakeCanvasElement | FakeOffscreenCanvas) {}
 
   configure(configuration: { usage?: number }) {
     this.canvas.__lastWebGPUConfigure = configuration;
   }
 }
+
+const createFakeWindow = () => ({
+  HTMLCanvasElement: FakeCanvasElement,
+  GPUCanvasContext: FakeGPUCanvasContext,
+  GPUTextureUsage: {
+    COPY_SRC: 0x100,
+    TEXTURE_BINDING: 0x400,
+    RENDER_ATTACHMENT: 0x1000,
+  },
+});
 
 describe('initCanvasContextObserver', () => {
   const originalGPUTextureUsage = (
@@ -79,10 +93,7 @@ describe('initCanvasContextObserver', () => {
   });
 
   it('adds the snapshot-safe usage flags when webgpu contexts are configured', () => {
-    const win = {
-      HTMLCanvasElement: FakeCanvasElement,
-      GPUCanvasContext: FakeGPUCanvasContext,
-    };
+    const win = createFakeWindow();
     const getContextSpy = vi.spyOn(FakeCanvasElement.prototype, 'getContext');
 
     const restore = initCanvasContextObserver(
@@ -94,15 +105,7 @@ describe('initCanvasContextObserver', () => {
 
     const canvas = new FakeCanvasElement();
     const context = canvas.getContext('webgpu') as FakeGPUCanvasContext;
-    const textureUsage = (
-      globalThis as typeof globalThis & {
-        GPUTextureUsage?: {
-          COPY_SRC: number;
-          RENDER_ATTACHMENT: number;
-          TEXTURE_BINDING: number;
-        };
-      }
-    ).GPUTextureUsage!;
+    const { GPUTextureUsage: textureUsage } = win;
 
     context.configure({
       usage: textureUsage.TEXTURE_BINDING,
@@ -123,21 +126,10 @@ describe('initCanvasContextObserver', () => {
   });
 
   it('patches webgpu contexts created before the observer starts', () => {
-    const win = {
-      HTMLCanvasElement: FakeCanvasElement,
-      GPUCanvasContext: FakeGPUCanvasContext,
-    };
+    const win = createFakeWindow();
     const canvas = new FakeCanvasElement();
     const context = canvas.getContext('webgpu') as FakeGPUCanvasContext;
-    const textureUsage = (
-      globalThis as typeof globalThis & {
-        GPUTextureUsage?: {
-          COPY_SRC: number;
-          RENDER_ATTACHMENT: number;
-          TEXTURE_BINDING: number;
-        };
-      }
-    ).GPUTextureUsage!;
+    const { GPUTextureUsage: textureUsage } = win;
 
     const restore = initCanvasContextObserver(
       win as unknown as Parameters<typeof initCanvasContextObserver>[0],
@@ -153,6 +145,33 @@ describe('initCanvasContextObserver', () => {
     expect(
       (canvas as FakeCanvasElement & { __context?: string }).__context,
     ).toBe('webgpu');
+    expect(canvas.__lastWebGPUConfigure).toEqual({
+      usage:
+        textureUsage.TEXTURE_BINDING |
+        textureUsage.COPY_SRC |
+        textureUsage.RENDER_ATTACHMENT,
+    });
+
+    restore();
+  });
+
+  it('patches webgpu contexts backed by offscreen canvases', () => {
+    const win = createFakeWindow();
+    const canvas = new FakeOffscreenCanvas();
+    const context = new FakeGPUCanvasContext(canvas);
+    const { GPUTextureUsage: textureUsage } = win;
+
+    const restore = initCanvasContextObserver(
+      win as unknown as Parameters<typeof initCanvasContextObserver>[0],
+      'rr-block',
+      null,
+      true,
+    );
+
+    context.configure({
+      usage: textureUsage.TEXTURE_BINDING,
+    });
+
     expect(canvas.__lastWebGPUConfigure).toEqual({
       usage:
         textureUsage.TEXTURE_BINDING |
