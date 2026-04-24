@@ -114,18 +114,20 @@ export class IframeManager {
     ) {
       const nestedHandler = this.handleMessage.bind(this);
       this.nestedIframeListeners.set(win, nestedHandler);
-      win.addEventListener('message', nestedHandler);
+      callSafely(() => win.addEventListener('message', nestedHandler));
     }
 
-    iframeEl.contentWindow?.addEventListener('pagehide', () => {
-      this.pageHideListener?.(iframeEl);
-      if (iframeEl.contentDocument) {
-        this.mirror.removeNodeFromMap(iframeEl.contentDocument);
-      }
-      if (iframeEl.contentWindow) {
-        this.crossOriginIframeMap.delete(iframeEl.contentWindow);
-      }
-    });
+    callSafely(() =>
+      iframeEl.contentWindow?.addEventListener('pagehide', () => {
+        this.pageHideListener?.(iframeEl);
+        if (iframeEl.contentDocument) {
+          this.mirror.removeNodeFromMap(iframeEl.contentDocument);
+        }
+        if (iframeEl.contentWindow) {
+          this.crossOriginIframeMap.delete(iframeEl.contentWindow);
+        }
+      }),
+    );
 
     this.loadListener?.(iframeEl);
 
