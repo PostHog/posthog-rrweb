@@ -113,8 +113,10 @@ export class IframeManager {
       !this.nestedIframeListeners.has(win)
     ) {
       const nestedHandler = this.handleMessage.bind(this);
-      this.nestedIframeListeners.set(win, nestedHandler);
-      callSafely(() => win.addEventListener('message', nestedHandler));
+      callSafely(() => {
+        win.addEventListener('message', nestedHandler);
+        this.nestedIframeListeners.set(win, nestedHandler);
+      });
     }
 
     callSafely(() =>
