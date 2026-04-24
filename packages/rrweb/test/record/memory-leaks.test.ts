@@ -623,6 +623,49 @@ describe('memory leak prevention', () => {
         }
       },
     );
+
+    it('attachIframe should not throw and should still invoke loadListener when contentWindow.addEventListener throws SecurityError', () => {
+      const { iframeManager, mirror } = createIframeManager();
+      const loadListener = vi.fn();
+      iframeManager.addLoadListener(loadListener);
+
+      const win = new Proxy(
+        {},
+        {
+          get(_target, prop) {
+            if (prop === 'addEventListener') {
+              throw new DOMException(
+                "Failed to read a named property 'addEventListener' from 'Window': Blocked a frame with origin",
+                'SecurityError',
+              );
+            }
+            return undefined;
+          },
+        },
+      ) as unknown as Window;
+
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      Object.defineProperty(iframe, 'contentWindow', { get: () => win });
+      mirror.add(iframe, {
+        type: 2,
+        tagName: 'iframe',
+        attributes: {},
+        childNodes: [],
+        id: 101,
+      });
+
+      expect(() =>
+        iframeManager.attachIframe(iframe, {
+          type: 0,
+          childNodes: [],
+          id: 201,
+        } as any),
+      ).not.toThrow();
+      expect(loadListener).toHaveBeenCalledWith(iframe);
+
+      document.body.removeChild(iframe);
+    });
   });
 
   describe('iframe observer cleanup', () => {
