@@ -1,6 +1,6 @@
 {
     "name": "@posthog/rrweb-record",
-    "version": "0.0.59",
+    "version": "0.0.60",
     "publishConfig": {
         "access": "public"
     },

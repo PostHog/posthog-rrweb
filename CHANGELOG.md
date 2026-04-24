@@ -1,3 +1,8 @@
+## 0.0.60 - 2026-04-24
+
+- fix: handle SecurityError in IframeManager.attachIframe (#172)
+- [codex] Support WebGPU canvas snapshots in rrweb (#171)
+
 ## 0.0.59 - 2026-04-22
 
 - fix(rebuild): tolerate existing doctype to avoid HierarchyRequestError (#169)
