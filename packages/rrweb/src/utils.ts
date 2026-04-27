@@ -551,15 +551,27 @@ export function getRootShadowHost(n: Node): Node {
   return rootShadowHost;
 }
 
+// In Firefox, reading `ownerDocument` on a node whose document has navigated
+// cross-origin throws "Permission denied to access property 'ownerDocument'"
+// (a SecurityError variant). Treat any such throw as "not in DOM" so the
+// surrounding observer callback can continue.
+function safeOwnerDocument(n: Node): Document | null {
+  try {
+    return n.ownerDocument;
+  } catch {
+    return null;
+  }
+}
+
 export function shadowHostInDom(n: Node): boolean {
-  const doc = n.ownerDocument;
+  const doc = safeOwnerDocument(n);
   if (!doc) return false;
   const shadowHost = getRootShadowHost(n);
   return dom.contains(doc, shadowHost);
 }
 
 export function inDom(n: Node): boolean {
-  const doc = n.ownerDocument;
+  const doc = safeOwnerDocument(n);
   if (!doc) return false;
   return dom.contains(doc, n) || shadowHostInDom(n);
 }
