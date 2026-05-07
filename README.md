@@ -1,8 +1,9 @@
+this code is now inlined into the [posthog-js repo](https://github.com/PostHog/posthog-js/tree/main/packages/rrweb)
+
 # PostHog's copy of RRWeb
 
 this is open because we believe in open source,
-and we want to be able to contribute back to upstream rrweb and refer back to this when we do.
-this code is now inlined into the [posthog-js repo](https://github.com/PostHog/posthog-js/tree/main/packages/rrweb).
+and we want to be able to contribute back to upstream rrweb and refer back to this when we do
 
 # but please don't use it yourself
 
