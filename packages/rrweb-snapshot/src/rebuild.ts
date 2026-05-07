@@ -401,6 +401,11 @@ function buildNode(
         return null;
       }
 
+      /*
+        https://developer.mozilla.org/en-US/docs/Web/API/Document/createCDATASection
+        expected: DOMException: Failed to execute 'createCDATASection' on 'Document': This operation is not supported for HTML documents.
+        "createTextNode() can often be used in its place"
+      */
       return doc.createCDATASection(n.textContent);
     case NodeType.Comment:
       return doc.createComment(n.textContent);

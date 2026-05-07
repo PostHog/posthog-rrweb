@@ -426,6 +426,51 @@ iframe.contentDocument.querySelector('center').clientHeight
     );
     expect(snapshotResult).toMatchSnapshot();
   });
+
+  it('correctly records CDATA section in SVG', async () => {
+    const page: puppeteer.Page = await browser.newPage();
+    await page.goto('about:blank', {
+      waitUntil: 'load',
+    });
+    await page.evaluate(`
+const defsSvg = (new window.DOMParser()).parseFromString(
+'<svg xmlns="http://www.w3.org/2000/svg" version="1.1"><style><![CDATA[.Icon > span{ color: red; }]]></style></svg>', 'image/svg+xml');
+      document.body.appendChild(defsSvg.documentElement);
+`);
+    await waitForRAF(page); // a small wait
+    const cdataType = await page.evaluate(
+      `document.querySelector('svg style').childNodes[0].nodeType`,
+    );
+    assert(cdataType === 4);
+    const snapshotResult = JSON.stringify(
+      await page.evaluate(`${code};
+        const snapshotResult = rrwebSnapshot.snapshot(document);
+        snapshotResult
+    `),
+      null,
+      2,
+    );
+    const fname = `./__snapshots__/cdata.svg.snap.json`;
+    expect(snapshotResult).toMatchFileSnapshot(fname);
+
+    await waitForRAF(page);
+    const rebuildHtml = (await page.evaluate(`
+        const x = new XMLSerializer();
+        const node = rrwebSnapshot.rebuild(JSON.parse('${snapshotResult.replace(
+          /\n/g,
+          '',
+        )}'), { doc: document })
+        let out = x.serializeToString(node);
+        if (document.querySelector('html').getAttribute('xmlns') !== 'http://www.w3.org/1999/xhtml') {
+          // this is just an artefact of serializeToString
+          out = out.replace(' xmlns=\"http://www.w3.org/1999/xhtml\"', '');
+        }
+        out;  // return
+`)) as string;
+
+    const fhname = `./__snapshots__/cdata.svg.snap.html`;
+    expect(rebuildHtml.replace(/></g, '>\n<')).toMatchFileSnapshot(fhname);
+  });
 });
 
 describe('base64 image compression tests', function (this: ISuite) {
