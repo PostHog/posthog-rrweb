@@ -142,5 +142,26 @@ describe('Utilities for other modules', () => {
       expect(shadowHostInDom(a.childNodes[0])).toBeTruthy();
       expect(inDom(a.childNodes[0])).toBeTruthy();
     });
+
+    it('should not throw when ownerDocument access throws SecurityError', () => {
+      // Reproduces the Firefox "Permission denied to access property
+      // 'ownerDocument'" thrown when a node's owning document has navigated
+      // cross-origin. inDom/shadowHostInDom must treat this as "not in DOM"
+      // rather than re-throwing and aborting the surrounding observer.
+      const node = Object.create(Node.prototype) as Node;
+      Object.defineProperty(node, 'ownerDocument', {
+        get() {
+          throw new DOMException(
+            "Permission denied to access property 'ownerDocument'",
+            'SecurityError',
+          );
+        },
+      });
+
+      expect(() => inDom(node)).not.toThrow();
+      expect(inDom(node)).toBeFalsy();
+      expect(() => shadowHostInDom(node)).not.toThrow();
+      expect(shadowHostInDom(node)).toBeFalsy();
+    });
   });
 });

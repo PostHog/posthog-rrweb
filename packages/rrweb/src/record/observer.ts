@@ -883,10 +883,23 @@ export function initAdoptedStyleSheetObserver(
   // The host is a ShadowRoot.
   else hostId = mirror.getId(dom.host(host as ShadowRoot));
 
-  const patchTarget =
-    host.nodeName === '#document'
-      ? (host as Document).defaultView?.Document
-      : host.ownerDocument?.defaultView?.ShadowRoot;
+  // Reading `ownerDocument` on a ShadowRoot whose owning document has navigated
+  // cross-origin can throw a SecurityError in Firefox; bail out cleanly so the
+  // caller is not aborted.
+  let patchTarget: typeof Document | typeof ShadowRoot | undefined;
+  try {
+    patchTarget =
+      host.nodeName === '#document'
+        ? (host as Document).defaultView?.Document
+        : host.ownerDocument?.defaultView?.ShadowRoot;
+  } catch (error) {
+    if (!(error instanceof DOMException && error.name === 'SecurityError')) {
+      throw error;
+    }
+    return () => {
+      //
+    };
+  }
   const originalPropertyDescriptor = patchTarget?.prototype
     ? Object.getOwnPropertyDescriptor(
         patchTarget?.prototype,
