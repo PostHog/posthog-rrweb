@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import record from '../../src/record';
-import { mutationBuffers } from '../../src/record/observer';
+import {
+  findAndRemoveIframeBuffer,
+  mutationBuffers,
+} from '../../src/record/observer';
 import { IframeManager } from '../../src/record/iframe-manager';
 import type { eventWithTime } from '@posthog/rrweb-types';
 import { createMirror } from '@posthog/rrweb-snapshot';
@@ -787,6 +790,32 @@ describe('memory leak prevention', () => {
       expect(mutationBuffers.length).toBe(buffersWithIframes - 3);
 
       stopRecording?.();
+    });
+
+    it('findAndRemoveIframeBuffer should tolerate undefined slots in mutationBuffers', () => {
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+
+      const matchingBuffer = {
+        bufferBelongsToIframe: vi.fn(() => true),
+        reset: vi.fn(),
+      };
+      const nonMatchingBuffer = {
+        bufferBelongsToIframe: vi.fn(() => false),
+        reset: vi.fn(),
+      };
+
+      mutationBuffers.length = 0;
+      mutationBuffers.push(nonMatchingBuffer as any);
+      mutationBuffers.push(undefined as any);
+      mutationBuffers.push(matchingBuffer as any);
+
+      expect(() => findAndRemoveIframeBuffer(iframe)).not.toThrow();
+      expect(matchingBuffer.reset).toHaveBeenCalledTimes(1);
+      expect(mutationBuffers).toEqual([nonMatchingBuffer, undefined]);
+
+      mutationBuffers.length = 0;
+      document.body.removeChild(iframe);
     });
 
     it('should cleanup observers via safety net when iframe becomes inaccessible', async () => {
